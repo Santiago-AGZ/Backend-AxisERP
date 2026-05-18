@@ -18,5 +18,5 @@ public interface CategoryRepositoryPort {
 
     List<Category> findAllOrderedByName();
 
-    void deleteById(UUID id);
+    List<Category> findAllActiveOrderedByName();
 }

@@ -19,6 +19,15 @@ public class Category {
     private UUID id;
     private String name;
     private String description;
+    private CategoryStatus status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    public enum CategoryStatus {
+        ACTIVA, INACTIVA
+    }
+
+    public boolean isActive() {
+        return this.status == CategoryStatus.ACTIVA;
+    }
 }

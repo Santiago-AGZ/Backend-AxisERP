@@ -6,8 +6,8 @@ import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -19,7 +19,7 @@ import com.axiserp.catalog.application.dto.request.CreateCategoryRequest;
 import com.axiserp.catalog.application.dto.request.UpdateCategoryRequest;
 import com.axiserp.catalog.application.dto.response.CategoryResponse;
 import com.axiserp.catalog.ports.input.CreateCategoryUseCase;
-import com.axiserp.catalog.ports.input.DeleteCategoryUseCase;
+import com.axiserp.catalog.ports.input.DeactivateCategoryUseCase;
 import com.axiserp.catalog.ports.input.GetCategoryUseCase;
 import com.axiserp.catalog.ports.input.ListCategoriesUseCase;
 import com.axiserp.catalog.ports.input.UpdateCategoryUseCase;
@@ -36,7 +36,7 @@ public class CategoryController {
     private final GetCategoryUseCase getCategoryUseCase;
     private final ListCategoriesUseCase listCategoriesUseCase;
     private final UpdateCategoryUseCase updateCategoryUseCase;
-    private final DeleteCategoryUseCase deleteCategoryUseCase;
+    private final DeactivateCategoryUseCase deactivateCategoryUseCase;
 
     @PreAuthorize("hasAnyRole('ADMIN', 'INVENTARIO')")
     @PostMapping
@@ -68,10 +68,9 @@ public class CategoryController {
         return ResponseEntity.ok(updateCategoryUseCase.update(id, request));
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'INVENTARIO')")
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCategory(@PathVariable UUID id) {
-        deleteCategoryUseCase.delete(id);
-        return ResponseEntity.noContent().build();
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/{id}/desactivar")
+    public ResponseEntity<CategoryResponse> deactivateCategory(@PathVariable UUID id) {
+        return ResponseEntity.ok(deactivateCategoryUseCase.deactivate(id));
     }
 }
