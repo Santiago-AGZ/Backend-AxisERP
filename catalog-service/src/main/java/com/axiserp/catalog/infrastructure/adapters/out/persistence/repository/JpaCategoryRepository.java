@@ -15,4 +15,6 @@ public interface JpaCategoryRepository extends JpaRepository<CategoryEntity, UUI
     boolean existsByName(String name);
 
     List<CategoryEntity> findAllByOrderByNameAsc();
+
+    List<CategoryEntity> findByStatusOrderByStatusAscNameAsc(CategoryEntity.CategoryStatus status);
 }

@@ -15,88 +15,84 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.axiserp.catalog.application.dto.request.UpdateCategoryRequest;
 import com.axiserp.catalog.application.dto.response.CategoryResponse;
 import com.axiserp.catalog.domain.exception.CategoryNotFoundException;
-import com.axiserp.catalog.domain.exception.DuplicateCategoryException;
 import com.axiserp.catalog.domain.model.Category;
 import com.axiserp.catalog.domain.model.Category.CategoryStatus;
 import com.axiserp.catalog.ports.output.CategoryRepositoryPort;
+import com.axiserp.catalog.ports.output.ProductRepositoryPort;
 
 @ExtendWith(MockitoExtension.class)
-class UpdateCategoryUseCaseImplTest {
+class DeactivateCategoryUseCaseImplTest {
 
     @Mock
     private CategoryRepositoryPort categoryRepositoryPort;
 
+    @Mock
+    private ProductRepositoryPort productRepositoryPort;
+
     @InjectMocks
-    private UpdateCategoryUseCaseImpl updateCategoryUseCase;
+    private DeactivateCategoryUseCaseImpl deactivateCategoryUseCase;
 
     private UUID categoryId;
 
     @Test
-    @DisplayName("Should update category successfully")
-    void update_success() {
+    @DisplayName("Should deactivate category successfully")
+    void deactivate_success() {
         categoryId = UUID.randomUUID();
         Category existing = Category.builder()
                 .id(categoryId)
-                .name("Old Name")
-                .description("Old description")
+                .name("Test Category")
+                .description("Test description")
                 .status(CategoryStatus.ACTIVA)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
 
-        Category saved = Category.builder()
+        Category deactivated = Category.builder()
                 .id(categoryId)
-                .name("New Name")
-                .description("New description")
-                .status(CategoryStatus.ACTIVA)
+                .name("Test Category")
+                .description("Test description")
+                .status(CategoryStatus.INACTIVA)
                 .createdAt(existing.getCreatedAt())
                 .updatedAt(LocalDateTime.now())
                 .build();
 
-        UpdateCategoryRequest request = new UpdateCategoryRequest("New Name", "New description");
-
         when(categoryRepositoryPort.findById(categoryId)).thenReturn(Optional.of(existing));
-        when(categoryRepositoryPort.save(any(Category.class))).thenReturn(saved);
+        when(categoryRepositoryPort.save(any(Category.class))).thenReturn(deactivated);
 
-        CategoryResponse response = updateCategoryUseCase.update(categoryId, request);
+        CategoryResponse response = deactivateCategoryUseCase.deactivate(categoryId);
 
         assertNotNull(response);
-        assertEquals("New Name", response.getName());
-        assertEquals("New description", response.getDescription());
-        assertEquals("ACTIVA", response.getStatus());
+        assertEquals("INACTIVA", response.getStatus());
+        verify(categoryRepositoryPort).save(any(Category.class));
     }
 
     @Test
     @DisplayName("Should throw CategoryNotFoundException when not found")
-    void update_notFound() {
+    void deactivate_notFound() {
         categoryId = UUID.randomUUID();
         when(categoryRepositoryPort.findById(categoryId)).thenReturn(Optional.empty());
 
-        assertThrows(CategoryNotFoundException.class,
-                () -> updateCategoryUseCase.update(categoryId, new UpdateCategoryRequest()));
+        assertThrows(CategoryNotFoundException.class, () -> deactivateCategoryUseCase.deactivate(categoryId));
+        verify(categoryRepositoryPort, never()).save(any());
     }
 
     @Test
-    @DisplayName("Should throw DuplicateCategoryException when new name exists")
-    void update_duplicateName() {
+    @DisplayName("Should throw IllegalStateException when already deactivated")
+    void deactivate_alreadyInactive() {
         categoryId = UUID.randomUUID();
         Category existing = Category.builder()
                 .id(categoryId)
-                .name("Old Name")
-                .description("Old description")
-                .status(CategoryStatus.ACTIVA)
+                .name("Test Category")
+                .status(CategoryStatus.INACTIVA)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
 
         when(categoryRepositoryPort.findById(categoryId)).thenReturn(Optional.of(existing));
-        when(categoryRepositoryPort.existsByName("Existing Name")).thenReturn(true);
 
-        UpdateCategoryRequest request = new UpdateCategoryRequest("Existing Name", null);
-
-        assertThrows(DuplicateCategoryException.class, () -> updateCategoryUseCase.update(categoryId, request));
+        assertThrows(IllegalStateException.class, () -> deactivateCategoryUseCase.deactivate(categoryId));
+        verify(categoryRepositoryPort, never()).save(any());
     }
 }

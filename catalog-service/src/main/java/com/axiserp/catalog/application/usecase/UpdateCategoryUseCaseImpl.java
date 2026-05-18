@@ -51,6 +51,7 @@ public class UpdateCategoryUseCaseImpl implements UpdateCategoryUseCase {
                 .id(category.getId())
                 .name(category.getName())
                 .description(category.getDescription())
+                .status(category.getStatus().name())
                 .createdAt(category.getCreatedAt())
                 .updatedAt(category.getUpdatedAt())
                 .build();

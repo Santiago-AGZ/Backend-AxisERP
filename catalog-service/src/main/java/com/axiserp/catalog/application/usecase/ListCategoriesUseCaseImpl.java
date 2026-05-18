@@ -21,7 +21,7 @@ public class ListCategoriesUseCaseImpl implements ListCategoriesUseCase {
     @Override
     @Transactional(readOnly = true)
     public List<CategoryResponse> listAll() {
-        return categoryRepositoryPort.findAllOrderedByName().stream()
+        return categoryRepositoryPort.findAllActiveOrderedByName().stream()
                 .map(this::toResponse)
                 .toList();
     }
@@ -31,6 +31,7 @@ public class ListCategoriesUseCaseImpl implements ListCategoriesUseCase {
                 .id(category.getId())
                 .name(category.getName())
                 .description(category.getDescription())
+                .status(category.getStatus().name())
                 .createdAt(category.getCreatedAt())
                 .updatedAt(category.getUpdatedAt())
                 .build();

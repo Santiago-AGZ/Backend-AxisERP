@@ -50,8 +50,12 @@ public class CategoryRepositoryAdapter implements CategoryRepositoryPort {
     }
 
     @Override
-    public void deleteById(UUID id) {
-        jpaCategoryRepository.deleteById(id);
+    public List<Category> findAllActiveOrderedByName() {
+        return jpaCategoryRepository.findByStatusOrderByStatusAscNameAsc(
+                        com.axiserp.catalog.infrastructure.adapters.out.persistence.entity.CategoryEntity.CategoryStatus.ACTIVA)
+                .stream()
+                .map(this::toDomain)
+                .toList();
     }
 
     private Category toDomain(CategoryEntity entity) {
@@ -59,6 +63,7 @@ public class CategoryRepositoryAdapter implements CategoryRepositoryPort {
                 .id(entity.getId())
                 .name(entity.getName())
                 .description(entity.getDescription())
+                .status(Category.CategoryStatus.valueOf(entity.getStatus().name()))
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .build();
@@ -69,6 +74,7 @@ public class CategoryRepositoryAdapter implements CategoryRepositoryPort {
                 .id(domain.getId())
                 .name(domain.getName())
                 .description(domain.getDescription())
+                .status(CategoryEntity.CategoryStatus.valueOf(domain.getStatus().name()))
                 .createdAt(domain.getCreatedAt())
                 .updatedAt(domain.getUpdatedAt())
                 .build();
