@@ -1,0 +1,47 @@
+# ============================================================================
+# AxisERP Platform - Root .gitignore
+# ============================================================================
+
+# === Java / Maven ===
+**/target/
+**/*.class
+**/*.jar
+**/*.war
+**/*.ear
+**/HELP.md
+
+# === IDE ===
+**/.idea/
+**/*.iml
+**/*.iws
+**/*.ipr
+**/.classpath
+**/.project
+**/.settings/
+**/.factorypath
+**/.springBeans
+**/.sts4-cache
+**/.apt_generated
+
+# === VS Code ===
+.vscode/
+
+# === OS ===
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# === Opencode / AI tools ===
+**/.agents/
+**/skills-lock.json
+**/.junie/
+
+# === Removed submodule ===
+Frontend-AxisERP/
+
+# === Environment / Secrets ===
+**/.env
+**/.env.local
+**/.env.*.local
+**/*.pem
+**/*.key
