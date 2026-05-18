@@ -35,14 +35,8 @@
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
@@ -61,10 +55,7 @@
           "request": {
             "method": "GET",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
+              { "key": "Authorization", "value": "Bearer {{token}}" }
             ],
             "url": {
               "raw": "{{baseUrl}}/api/v1/productos/{{productId}}",
@@ -79,46 +70,19 @@
           "request": {
             "method": "GET",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
+              { "key": "Authorization", "value": "Bearer {{token}}" }
             ],
             "url": {
               "raw": "{{baseUrl}}/api/v1/productos?search=&codigo=&categoryId=&includeInactive=false&page=0&size=20",
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "productos"],
               "query": [
-                {
-                  "key": "search",
-                  "value": "",
-                  "description": "Search by name or code"
-                },
-                {
-                  "key": "codigo",
-                  "value": "",
-                  "description": "Filter by exact code"
-                },
-                {
-                  "key": "categoryId",
-                  "value": "",
-                  "description": "Filter by category"
-                },
-                {
-                  "key": "includeInactive",
-                  "value": "false",
-                  "description": "Include deactivated products"
-                },
-                {
-                  "key": "page",
-                  "value": "0",
-                  "description": "Page number"
-                },
-                {
-                  "key": "size",
-                  "value": "20",
-                  "description": "Page size"
-                }
+                { "key": "search", "value": "", "description": "Search by name or code" },
+                { "key": "codigo", "value": "", "description": "Filter by exact code" },
+                { "key": "categoryId", "value": "", "description": "Filter by category" },
+                { "key": "includeInactive", "value": "false", "description": "Include deactivated products" },
+                { "key": "page", "value": "0", "description": "Page number" },
+                { "key": "size", "value": "20", "description": "Page size" }
               ]
             }
           },
@@ -129,14 +93,8 @@
           "request": {
             "method": "PUT",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
@@ -155,10 +113,7 @@
           "request": {
             "method": "PATCH",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
+              { "key": "Authorization", "value": "Bearer {{token}}" }
             ],
             "url": {
               "raw": "{{baseUrl}}/api/v1/productos/{{productId}}/desactivar",
@@ -178,14 +133,8 @@
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
@@ -204,10 +153,7 @@
           "request": {
             "method": "GET",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
+              { "key": "Authorization", "value": "Bearer {{token}}" }
             ],
             "url": {
               "raw": "{{baseUrl}}/api/v1/categorias",
@@ -222,10 +168,7 @@
           "request": {
             "method": "GET",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
+              { "key": "Authorization", "value": "Bearer {{token}}" }
             ],
             "url": {
               "raw": "{{baseUrl}}/api/v1/categorias/{{categoryId}}",
@@ -240,14 +183,8 @@
           "request": {
             "method": "PUT",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
@@ -262,19 +199,16 @@
           "response": []
         },
         {
-          "name": "Delete Category",
+          "name": "Deactivate Category",
           "request": {
-            "method": "DELETE",
+            "method": "PATCH",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
+              { "key": "Authorization", "value": "Bearer {{token}}" }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/categorias/{{categoryId}}",
+              "raw": "{{baseUrl}}/api/v1/categorias/{{categoryId}}/desactivar",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "categorias", "{{categoryId}}"]
+              "path": ["api", "v1", "categorias", "{{categoryId}}", "desactivar"]
             }
           },
           "response": []
