@@ -20,6 +20,9 @@ public interface JpaProductRepository extends JpaRepository<ProductEntity, UUID>
 
     int countByCategoryId(UUID categoryId);
 
+    @Query("SELECT COUNT(p) FROM ProductEntity p WHERE p.categoryId = :categoryId AND p.status = 'ACTIVO'")
+    int countActiveByCategoryId(@Param("categoryId") UUID categoryId);
+
     @Query("SELECT p FROM ProductEntity p WHERE "
             + "(:search IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :search, '%'))) AND "
             + "(:codigo IS NULL OR p.codigo = :codigo) AND "
