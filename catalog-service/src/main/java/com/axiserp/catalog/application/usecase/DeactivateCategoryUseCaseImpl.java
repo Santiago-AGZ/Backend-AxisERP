@@ -37,10 +37,15 @@ public class DeactivateCategoryUseCaseImpl implements DeactivateCategoryUseCase 
             throw new IllegalStateException("La categoria ya esta desactivada");
         }
 
+        int activeProductCount = productRepositoryPort.countActiveByCategoryId(id);
+        if (activeProductCount > 0) {
+            throw new CategoryHasProductsException(activeProductCount);
+        }
+
         Category deactivated = CategoryFactory.deactivate(existing);
         Category saved = categoryRepositoryPort.save(deactivated);
 
-        log.info("category_deactivated id={} name={}", saved.getId(), saved.getName());
+        log.info("category_deactivated id={} name={} activeProducts={}", saved.getId(), saved.getName(), activeProductCount);
 
         return toResponse(saved);
     }

@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.axiserp.catalog.application.dto.response.CategoryResponse;
+import com.axiserp.catalog.domain.exception.CategoryHasProductsException;
 import com.axiserp.catalog.domain.exception.CategoryNotFoundException;
 import com.axiserp.catalog.domain.model.Category;
 import com.axiserp.catalog.domain.model.Category.CategoryStatus;
@@ -59,6 +60,7 @@ class DeactivateCategoryUseCaseImplTest {
                 .build();
 
         when(categoryRepositoryPort.findById(categoryId)).thenReturn(Optional.of(existing));
+        when(productRepositoryPort.countActiveByCategoryId(categoryId)).thenReturn(0);
         when(categoryRepositoryPort.save(any(Category.class))).thenReturn(deactivated);
 
         CategoryResponse response = deactivateCategoryUseCase.deactivate(categoryId);
@@ -66,6 +68,28 @@ class DeactivateCategoryUseCaseImplTest {
         assertNotNull(response);
         assertEquals("INACTIVA", response.getStatus());
         verify(categoryRepositoryPort).save(any(Category.class));
+    }
+
+    @Test
+    @DisplayName("Should throw CategoryHasProductsException when has active products")
+    void deactivate_hasActiveProducts() {
+        categoryId = UUID.randomUUID();
+        Category existing = Category.builder()
+                .id(categoryId)
+                .name("Test Category")
+                .description("Test description")
+                .status(CategoryStatus.ACTIVA)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+
+        when(categoryRepositoryPort.findById(categoryId)).thenReturn(Optional.of(existing));
+        when(productRepositoryPort.countActiveByCategoryId(categoryId)).thenReturn(3);
+
+        CategoryHasProductsException exception = assertThrows(CategoryHasProductsException.class, () -> deactivateCategoryUseCase.deactivate(categoryId));
+
+        assertTrue(exception.getMessage().contains("3 producto(s) activo(s)"));
+        verify(categoryRepositoryPort, never()).save(any());
     }
 
     @Test

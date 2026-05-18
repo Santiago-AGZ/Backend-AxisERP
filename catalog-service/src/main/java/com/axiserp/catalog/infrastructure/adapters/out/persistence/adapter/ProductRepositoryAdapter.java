@@ -58,6 +58,11 @@ public class ProductRepositoryAdapter implements ProductRepositoryPort {
         return jpaProductRepository.countByCategoryId(categoryId);
     }
 
+    @Override
+    public int countActiveByCategoryId(UUID categoryId) {
+        return jpaProductRepository.countActiveByCategoryId(categoryId);
+    }
+
     private Product toDomain(ProductEntity entity) {
         return Product.builder()
                 .id(entity.getId())
