@@ -1,0 +1,19 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="auth-login-env" type="Application" factoryName="Application">
+    <envs>
+      <env name="JWT_SECRET" value="af672e80e69de2ec944b017fa993dafb9fb4758ef28244e9afb982ddfd7e2757ae320ead2bda98c3614508bfe99b201212aa2ed3751531f80f97d952002f4e1f" />
+      <env name="SPRING_DATASOURCE_PASSWORD" value="npg_WOfnPT7gE2eI" />
+      <env name="SPRING_DATASOURCE_URL" value="jdbc:postgresql://ep-mute-smoke-aptq6ys9-pooler.c-7.us-east-1.aws.neon.tech:5432/neondb?sslmode=require&amp;channel_binding=require" />
+      <env name="SPRING_DATASOURCE_USERNAME" value="neondb_owner" />
+      <env name="SPRING_MAIL_HOST" value="smtp.gmail.com" />
+      <env name="SPRING_MAIL_PASSWORD" value="izln xxai antw nwxm" />
+      <env name="SPRING_MAIL_PORT" value="587" />
+      <env name="SPRING_MAIL_USERNAME" value="axiserp.notificaciones@gmail.com" />
+    </envs>
+    <option name="MAIN_CLASS_NAME" value="com.axiserp.auth.AuthServiceApplication" />
+    <module name="auth-service" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
