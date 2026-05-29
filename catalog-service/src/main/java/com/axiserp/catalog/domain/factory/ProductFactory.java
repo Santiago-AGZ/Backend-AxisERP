@@ -56,4 +56,19 @@ public final class ProductFactory {
                 .updatedAt(LocalDateTime.now())
                 .build();
     }
+
+    public static Product softDelete(Product existing) {
+        return Product.builder()
+                .id(existing.getId())
+                .name(existing.getName())
+                .codigo(existing.getCodigo())
+                .categoryId(existing.getCategoryId())
+                .purchasePrice(existing.getPurchasePrice())
+                .salePrice(existing.getSalePrice())
+                .status(ProductStatus.ELIMINADO)
+                .createdBy(existing.getCreatedBy())
+                .createdAt(existing.getCreatedAt())
+                .updatedAt(LocalDateTime.now())
+                .build();
+    }
 }

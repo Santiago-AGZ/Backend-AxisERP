@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.axiserp.catalog.application.dto.request.CreateCategoryRequest;
 import com.axiserp.catalog.application.dto.response.CategoryResponse;
+import com.axiserp.catalog.domain.exception.CategoryNotFoundException;
 import com.axiserp.catalog.domain.exception.DuplicateCategoryException;
 import com.axiserp.catalog.domain.factory.CategoryFactory;
 import com.axiserp.catalog.domain.model.Category;
@@ -30,10 +31,15 @@ public class CreateCategoryUseCaseImpl implements CreateCategoryUseCase {
             throw new DuplicateCategoryException();
         }
 
-        Category category = CategoryFactory.createNew(request.getName(), request.getDescription());
+        if (request.getParentId() != null) {
+            categoryRepositoryPort.findById(request.getParentId())
+                    .orElseThrow(() -> new CategoryNotFoundException("Categoria padre no encontrada"));
+        }
+
+        Category category = CategoryFactory.createNew(request.getName(), request.getDescription(), request.getParentId());
         Category saved = categoryRepositoryPort.save(category);
 
-        log.info("category_created id={} name={}", saved.getId(), saved.getName());
+        log.info("category_created id={} name={} parentId={}", saved.getId(), saved.getName(), saved.getParentId());
 
         return toResponse(saved);
     }
@@ -43,6 +49,7 @@ public class CreateCategoryUseCaseImpl implements CreateCategoryUseCase {
                 .id(category.getId())
                 .name(category.getName())
                 .description(category.getDescription())
+                .parentId(category.getParentId())
                 .status(category.getStatus().name())
                 .createdAt(category.getCreatedAt())
                 .updatedAt(category.getUpdatedAt())

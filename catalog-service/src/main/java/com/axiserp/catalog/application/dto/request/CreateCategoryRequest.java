@@ -1,5 +1,7 @@
 package com.axiserp.catalog.application.dto.request;
 
+import java.util.UUID;
+
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,4 +16,6 @@ public class CreateCategoryRequest {
     private String name;
 
     private String description;
+
+    private UUID parentId;
 }

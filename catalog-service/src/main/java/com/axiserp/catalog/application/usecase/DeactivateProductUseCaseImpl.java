@@ -33,17 +33,17 @@ public class DeactivateProductUseCaseImpl implements DeactivateProductUseCase {
         Product existing = productRepositoryPort.findById(id)
                 .orElseThrow(ProductNotFoundException::new);
 
-        if (!existing.isActive()) {
-            throw new IllegalStateException("El producto ya esta desactivado");
+        if (existing.isDeleted()) {
+            throw new IllegalStateException("El producto ya esta eliminado");
         }
 
-        Product deactivated = ProductFactory.deactivate(existing);
-        Product saved = productRepositoryPort.save(deactivated);
+        Product deleted = ProductFactory.softDelete(existing);
+        Product saved = productRepositoryPort.save(deleted);
 
         Category category = categoryRepositoryPort.findById(saved.getCategoryId())
                 .orElseThrow(() -> new IllegalStateException("Categoria no encontrada"));
 
-        log.info("product_deactivated id={} codigo={}", saved.getId(), saved.getCodigo());
+        log.info("product_deleted id={} codigo={}", saved.getId(), saved.getCodigo());
 
         return toResponse(saved, category);
     }

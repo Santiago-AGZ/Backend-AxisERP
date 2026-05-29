@@ -38,6 +38,9 @@ public class CategoryEntity {
     @Column(length = 500)
     private String description;
 
+    @Column(name = "parent_id")
+    private UUID parentId;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private CategoryStatus status;
@@ -63,6 +66,6 @@ public class CategoryEntity {
     }
 
     public enum CategoryStatus {
-        ACTIVA, INACTIVA
+        ACTIVA, INACTIVA, ELIMINADA
     }
 }
