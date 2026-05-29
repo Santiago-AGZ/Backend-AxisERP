@@ -10,6 +10,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import org.springframework.security.access.AccessDeniedException;
 import com.axiserp.catalog.domain.exception.CategoryHasProductsException;
 import com.axiserp.catalog.domain.exception.CategoryNotFoundException;
 import com.axiserp.catalog.domain.exception.DuplicateCategoryException;
@@ -100,6 +101,16 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
 
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Map<String, Object>> handleAccessDenied(AccessDeniedException ex) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("error", "Forbidden");
+        body.put("message", "No tiene permisos para realizar esta operacion");
+        body.put("status", 403);
+        body.put("timestamp", Instant.now().toString());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
+    }
+
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<Map<String, Object>> handleIllegalState(IllegalStateException ex) {
         Map<String, Object> body = new LinkedHashMap<>();
@@ -112,9 +123,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneric(Exception ex) {
+        org.slf4j.LoggerFactory.getLogger(GlobalExceptionHandler.class)
+            .error("Unhandled exception: {}", ex.getMessage(), ex);
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("error", "Internal Server Error");
-        body.put("message", "Error interno del servidor");
+        body.put("message", ex.getMessage() != null ? ex.getMessage() : "Error interno del servidor");
         body.put("status", 500);
         body.put("timestamp", Instant.now().toString());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);

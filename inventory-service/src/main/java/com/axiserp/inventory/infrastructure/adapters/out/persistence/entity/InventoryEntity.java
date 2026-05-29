@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "inventories")
+@Table(name = "inventory")
 @Getter
 @Setter
 @Builder
@@ -40,11 +40,17 @@ public class InventoryEntity {
     @Column(name = "min_stock", nullable = false)
     private int minStock;
 
-    @Column(name = "max_stock", nullable = false)
-    private int maxStock;
+    @Column(name = "max_stock")
+    private Integer maxStock;
+
+    @Column(name = "reserved_stock", nullable = false)
+    private int reservedStock;
 
     @Version
     private Long version;
+
+    @Column(name = "created_by")
+    private UUID createdBy;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
