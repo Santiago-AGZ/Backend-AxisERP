@@ -56,7 +56,7 @@ class UpdateCategoryUseCaseImplTest {
                 .updatedAt(LocalDateTime.now())
                 .build();
 
-        UpdateCategoryRequest request = new UpdateCategoryRequest("New Name", "New description");
+        UpdateCategoryRequest request = new UpdateCategoryRequest("New Name", "New description", null);
 
         when(categoryRepositoryPort.findById(categoryId)).thenReturn(Optional.of(existing));
         when(categoryRepositoryPort.save(any(Category.class))).thenReturn(saved);
@@ -95,7 +95,7 @@ class UpdateCategoryUseCaseImplTest {
         when(categoryRepositoryPort.findById(categoryId)).thenReturn(Optional.of(existing));
         when(categoryRepositoryPort.existsByName("Existing Name")).thenReturn(true);
 
-        UpdateCategoryRequest request = new UpdateCategoryRequest("Existing Name", null);
+        UpdateCategoryRequest request = new UpdateCategoryRequest("Existing Name", null, null);
 
         assertThrows(DuplicateCategoryException.class, () -> updateCategoryUseCase.update(categoryId, request));
     }
