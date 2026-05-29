@@ -12,8 +12,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -40,14 +38,13 @@ public class RefreshTokenEntity {
     private String token;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "token_status")
-    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(nullable = false, length = 20)
     private TokenStatus status;
 
     @Column(name = "expires_at", nullable = false)
     private LocalDateTime expiresAt;
 
-    @Column(name = "ip_address")
+    @Column(name = "ip_address", length = 45)
     private String ipAddress;
 
     @Column(name = "user_agent", columnDefinition = "TEXT")
@@ -62,6 +59,9 @@ public class RefreshTokenEntity {
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
+        if (this.status == null) {
+            this.status = TokenStatus.ACTIVE;
+        }
     }
 
     public enum TokenStatus {

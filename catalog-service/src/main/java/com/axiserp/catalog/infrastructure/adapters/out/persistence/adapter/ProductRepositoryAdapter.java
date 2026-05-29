@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 import com.axiserp.catalog.domain.model.Product;
@@ -46,8 +44,9 @@ public class ProductRepositoryAdapter implements ProductRepositoryPort {
 
     @Override
     public List<Product> findByFilters(String search, String codigo, UUID categoryId, boolean includeInactive, int page, int size) {
-        PageRequest pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "updatedAt"));
-        return jpaProductRepository.findByFilters(search, codigo, categoryId, includeInactive, pageable)
+        int offset = page * size;
+        String categoryIdStr = categoryId != null ? categoryId.toString() : null;
+        return jpaProductRepository.findByFilters(search, codigo, categoryIdStr, includeInactive, size, offset)
                 .stream()
                 .map(this::toDomain)
                 .toList();
