@@ -33,7 +33,7 @@ class CreateCategoryUseCaseImplTest {
     @Test
     @DisplayName("Should create category successfully")
     void create_success() {
-        CreateCategoryRequest request = new CreateCategoryRequest("Electronics", "Electronic devices");
+        CreateCategoryRequest request = new CreateCategoryRequest("Electronics", "Electronic devices", null);
         Category saved = Category.builder()
                 .id(UUID.randomUUID())
                 .name("Electronics")
@@ -58,7 +58,7 @@ class CreateCategoryUseCaseImplTest {
     @Test
     @DisplayName("Should throw DuplicateCategoryException when name exists")
     void create_duplicateName() {
-        CreateCategoryRequest request = new CreateCategoryRequest("Existing", null);
+        CreateCategoryRequest request = new CreateCategoryRequest("Existing", null, null);
 
         when(categoryRepositoryPort.existsByName("Existing")).thenReturn(true);
 
