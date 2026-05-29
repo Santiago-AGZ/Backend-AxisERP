@@ -1,0 +1,198 @@
+{
+  "info": {
+    "_postman_id": "1fbb5b65-d6dd-4e77-943e-d098f0585097",
+    "name": "axisERP - Catalog Service",
+    "description": "Endpoints de productos y categorias via API Gateway (puerto 8080). Generado desde codigo fuente.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Productos",
+      "item": [
+        {
+          "name": "Create Product",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Monitor Samsung 27 pulgadas\",\n  \"codigo\": \"MON-SAM-027\",\n  \"description\": \"Monitor LED 27 pulgadas QHD\",\n  \"categoryId\": \"{{categoryId}}\",\n  \"purchasePrice\": 150.00,\n  \"salePrice\": 250.00\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/productos",
+              "host": ["{{baseUrl}}"],
+              "path": ["productos"]
+            },
+            "description": "Crear producto. Roles: ADMIN, INVENTARIO."
+          },
+          "response": []
+        },
+        {
+          "name": "List Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/productos?search=&codigo=&categoryId=&includeInactive=false&page=1&size=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["productos"],
+              "query": [
+                { "key": "search", "value": "", "description": "Busqueda por nombre o descripcion" },
+                { "key": "codigo", "value": "", "description": "Filtrar por codigo exacto" },
+                { "key": "categoryId", "value": "", "description": "Filtrar por UUID de categoria" },
+                { "key": "includeInactive", "value": "false", "description": "Incluir productos inactivos" },
+                { "key": "page", "value": "1" },
+                { "key": "size", "value": "20" }
+              ]
+            },
+            "description": "Listar productos con filtros. Roles: ADMIN, INVENTARIO, VENDEDOR."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Product by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/productos/{{productId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["productos", "{{productId}}"]
+            },
+            "description": "Obtener producto por UUID. Roles: ADMIN, INVENTARIO, VENDEDOR."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Product",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Monitor Samsung 27 pulgadas Updated\",\n  \"description\": \"Monitor LED 27 pulgadas QHD 144Hz\",\n  \"categoryId\": \"{{categoryId}}\",\n  \"purchasePrice\": 160.00,\n  \"salePrice\": 270.00\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/productos/{{productId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["productos", "{{productId}}"]
+            },
+            "description": "Actualizar producto (sin cambiar codigo). Roles: ADMIN, INVENTARIO."
+          },
+          "response": []
+        },
+        {
+          "name": "Deactivate Product",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/productos/{{productId}}/desactivar",
+              "host": ["{{baseUrl}}"],
+              "path": ["productos", "{{productId}}", "desactivar"]
+            },
+            "description": "Desactivar producto. Solo ADMIN."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Categorias",
+      "item": [
+        {
+          "name": "Create Category",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Monitores\",\n  \"description\": \"Monitores de computadora\",\n  \"parentId\": null\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/categorias",
+              "host": ["{{baseUrl}}"],
+              "path": ["categorias"]
+            },
+            "description": "Crear categoria. parentId null = categoria raiz. Roles: ADMIN, INVENTARIO."
+          },
+          "response": []
+        },
+        {
+          "name": "List Categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categorias",
+              "host": ["{{baseUrl}}"],
+              "path": ["categorias"]
+            },
+            "description": "Listar todas las categorias activas. Roles: ADMIN, INVENTARIO, VENDEDOR."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Category by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categorias/{{categoryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["categorias", "{{categoryId}}"]
+            },
+            "description": "Obtener categoria por UUID. Roles: ADMIN, INVENTARIO, VENDEDOR."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Category",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Monitores Actualizado\",\n  \"description\": \"Monitores LED y LCD\",\n  \"parentId\": null\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/categorias/{{categoryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["categorias", "{{categoryId}}"]
+            },
+            "description": "Actualizar categoria. Roles: ADMIN, INVENTARIO."
+          },
+          "response": []
+        },
+        {
+          "name": "Deactivate Category",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categorias/{{categoryId}}/desactivar",
+              "host": ["{{baseUrl}}"],
+              "path": ["categorias", "{{categoryId}}", "desactivar"]
+            },
+            "description": "Desactivar categoria. Solo ADMIN."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080/api/v1" },
+    { "key": "authToken", "value": "" },
+    { "key": "productId", "value": "" },
+    { "key": "categoryId", "value": "" }
+  ]
+}
