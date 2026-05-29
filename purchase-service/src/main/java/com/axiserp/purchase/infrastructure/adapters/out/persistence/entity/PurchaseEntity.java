@@ -34,7 +34,7 @@ import lombok.Setter;
 public class PurchaseEntity {
 
     public enum PurchaseStatus {
-        BORRADOR, PENDIENTE, RECIBIDA, PAGADA, CANCELADA
+        BORRADOR, ENVIADA, PENDIENTE, RECIBIDA, PAGADA, CANCELADA, APROBADA
     }
 
     @Id
