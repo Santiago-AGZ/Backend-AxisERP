@@ -29,11 +29,15 @@ public class Product {
     private LocalDateTime updatedAt;
 
     public enum ProductStatus {
-        ACTIVO, INACTIVO
+        ACTIVO, INACTIVO, ELIMINADO
     }
 
     public boolean isActive() {
         return this.status == ProductStatus.ACTIVO;
+    }
+
+    public boolean isDeleted() {
+        return this.status == ProductStatus.ELIMINADO;
     }
 
     public boolean hasValidMargin() {

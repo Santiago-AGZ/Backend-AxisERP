@@ -76,6 +76,6 @@ public class ProductEntity {
     }
 
     public enum ProductStatus {
-        ACTIVO, INACTIVO
+        ACTIVO, INACTIVO, ELIMINADO
     }
 }

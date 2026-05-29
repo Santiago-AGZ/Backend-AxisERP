@@ -52,7 +52,7 @@ public class CategoryRepositoryAdapter implements CategoryRepositoryPort {
     @Override
     public List<Category> findAllActiveOrderedByName() {
         return jpaCategoryRepository.findByStatusOrderByStatusAscNameAsc(
-                        com.axiserp.catalog.infrastructure.adapters.out.persistence.entity.CategoryEntity.CategoryStatus.ACTIVA)
+                        CategoryEntity.CategoryStatus.ACTIVA)
                 .stream()
                 .map(this::toDomain)
                 .toList();
@@ -63,6 +63,7 @@ public class CategoryRepositoryAdapter implements CategoryRepositoryPort {
                 .id(entity.getId())
                 .name(entity.getName())
                 .description(entity.getDescription())
+                .parentId(entity.getParentId())
                 .status(Category.CategoryStatus.valueOf(entity.getStatus().name()))
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
@@ -74,6 +75,7 @@ public class CategoryRepositoryAdapter implements CategoryRepositoryPort {
                 .id(domain.getId())
                 .name(domain.getName())
                 .description(domain.getDescription())
+                .parentId(domain.getParentId())
                 .status(CategoryEntity.CategoryStatus.valueOf(domain.getStatus().name()))
                 .createdAt(domain.getCreatedAt())
                 .updatedAt(domain.getUpdatedAt())

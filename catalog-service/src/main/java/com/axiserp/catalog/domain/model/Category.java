@@ -19,15 +19,20 @@ public class Category {
     private UUID id;
     private String name;
     private String description;
+    private UUID parentId;
     private CategoryStatus status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
     public enum CategoryStatus {
-        ACTIVA, INACTIVA
+        ACTIVA, INACTIVA, ELIMINADA
     }
 
     public boolean isActive() {
         return this.status == CategoryStatus.ACTIVA;
+    }
+
+    public boolean isDeleted() {
+        return this.status == CategoryStatus.ELIMINADA;
     }
 }
