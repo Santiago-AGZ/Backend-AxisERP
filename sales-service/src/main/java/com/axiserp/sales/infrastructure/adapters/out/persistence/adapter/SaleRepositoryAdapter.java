@@ -97,6 +97,7 @@ public class SaleRepositoryAdapter implements SaleRepositoryPort {
                 .notes(domain.getNotes())
                 .createdBy(domain.getCreatedBy())
                 .updatedBy(domain.getUpdatedBy())
+                .version(domain.getVersion())
                 .createdAt(domain.getCreatedAt())
                 .updatedAt(domain.getUpdatedAt())
                 .build();
