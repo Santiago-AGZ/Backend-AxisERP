@@ -25,15 +25,30 @@ import jakarta.servlet.http.HttpServletResponse;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final Logger log = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
+    private static final String SYSTEM_USER_ID = "00000000-0000-0000-0000-000000000000";
 
     @Value("${jwt.secret}")
     private String jwtSecret;
+
+    @Value("${internal.api.key:}")
+    private String internalApiKey;
 
     @Override
     protected void doFilterInternal(
             @NonNull HttpServletRequest request,
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain) throws ServletException, IOException {
+
+        // Inter-service authentication via internal API key
+        String internalKey = request.getHeader("X-Internal-Api-Key");
+        if (internalKey != null && !internalApiKey.isBlank() && internalApiKey.equals(internalKey)) {
+            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                    SYSTEM_USER_ID, null, List.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
+            SecurityContextHolder.getContext().setAuthentication(auth);
+            log.debug("internal_api_key_auth_success path={}", request.getRequestURI());
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         String authHeader = request.getHeader("Authorization");
 

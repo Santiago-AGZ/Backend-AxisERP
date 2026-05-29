@@ -80,7 +80,6 @@ public class CreateSaleUseCaseImpl implements CreateSaleUseCase {
                             .setScale(2, RoundingMode.HALF_UP);
 
                     return SaleItem.builder()
-                            .id(UUID.randomUUID())
                             .productId(itemReq.getProductId())
                             .productName(itemReq.getProductName())
                             .quantity(itemReq.getQuantity())
