@@ -35,8 +35,9 @@ public class CustomerEntity {
     @Column(nullable = false, length = 255)
     private String name;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "document_type", nullable = false, length = 20)
-    private String documentType;
+    private DocumentType documentType;
 
     @Column(name = "document_number", nullable = false, unique = true, length = 50)
     private String documentNumber;
@@ -75,6 +76,10 @@ public class CustomerEntity {
     }
 
     public enum CustomerStatus {
-        ACTIVO, INACTIVO, ELIMINADO
+        ACTIVO, INACTIVO
+    }
+
+    public enum DocumentType {
+        CC, NIT, PASAPORTE, CE
     }
 }
