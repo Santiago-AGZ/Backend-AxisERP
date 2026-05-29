@@ -34,6 +34,6 @@ public class User {
     }
 
     public enum UserStatus {
-        ACTIVO, INACTIVO
+        PENDIENTE, ACTIVO, INACTIVO, ELIMINADO
     }
 }
