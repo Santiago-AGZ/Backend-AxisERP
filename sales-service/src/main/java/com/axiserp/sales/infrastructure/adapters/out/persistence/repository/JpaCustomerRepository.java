@@ -22,17 +22,20 @@ public interface JpaCustomerRepository extends JpaRepository<CustomerEntity, UUI
 
     boolean existsByEmail(String email);
 
+    // :hasSearch evita el problema de lower(bytea) con parámetros null
+    // :pattern debe venir pre-formateado como '%texto%' o '%' desde el adapter
     @Query("""
             SELECT c FROM CustomerEntity c
             WHERE (:includeInactive = true OR c.status = :active)
-              AND (:search IS NULL
-                   OR LOWER(c.name) LIKE LOWER(CONCAT('%', :search, '%'))
-                   OR LOWER(c.documentNumber) LIKE LOWER(CONCAT('%', :search, '%'))
-                   OR LOWER(c.codigo) LIKE LOWER(CONCAT('%', :search, '%')))
+              AND (:hasSearch = false
+                   OR LOWER(c.name) LIKE :pattern
+                   OR LOWER(c.documentNumber) LIKE :pattern
+                   OR LOWER(c.codigo) LIKE :pattern)
             ORDER BY c.updatedAt DESC
             """)
     List<CustomerEntity> findByFilters(
-            @Param("search") String search,
+            @Param("hasSearch") boolean hasSearch,
+            @Param("pattern") String pattern,
             @Param("includeInactive") boolean includeInactive,
             @Param("active") CustomerStatus active,
             Pageable pageable);
