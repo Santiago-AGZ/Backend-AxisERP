@@ -33,8 +33,8 @@ public class DeactivateCategoryUseCaseImpl implements DeactivateCategoryUseCase 
         Category existing = categoryRepositoryPort.findById(id)
                 .orElseThrow(CategoryNotFoundException::new);
 
-        if (!existing.isActive()) {
-            throw new IllegalStateException("La categoria ya esta desactivada");
+        if (existing.isDeleted()) {
+            throw new IllegalStateException("La categoria ya esta eliminada");
         }
 
         int activeProductCount = productRepositoryPort.countActiveByCategoryId(id);
@@ -42,10 +42,10 @@ public class DeactivateCategoryUseCaseImpl implements DeactivateCategoryUseCase 
             throw new CategoryHasProductsException(activeProductCount);
         }
 
-        Category deactivated = CategoryFactory.deactivate(existing);
-        Category saved = categoryRepositoryPort.save(deactivated);
+        Category deleted = CategoryFactory.softDelete(existing);
+        Category saved = categoryRepositoryPort.save(deleted);
 
-        log.info("category_deactivated id={} name={} activeProducts={}", saved.getId(), saved.getName(), activeProductCount);
+        log.info("category_deleted id={} name={}", saved.getId(), saved.getName());
 
         return toResponse(saved);
     }
@@ -55,6 +55,7 @@ public class DeactivateCategoryUseCaseImpl implements DeactivateCategoryUseCase 
                 .id(category.getId())
                 .name(category.getName())
                 .description(category.getDescription())
+                .parentId(category.getParentId())
                 .status(category.getStatus().name())
                 .createdAt(category.getCreatedAt())
                 .updatedAt(category.getUpdatedAt())

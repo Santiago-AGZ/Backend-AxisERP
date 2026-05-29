@@ -32,13 +32,25 @@ public class UpdateCategoryUseCaseImpl implements UpdateCategoryUseCase {
         Category existing = categoryRepositoryPort.findById(id)
                 .orElseThrow(CategoryNotFoundException::new);
 
+        if (existing.isDeleted()) {
+            throw new IllegalStateException("No se puede modificar una categoria eliminada");
+        }
+
         if (request.getName() != null && !request.getName().equals(existing.getName())) {
             if (categoryRepositoryPort.existsByName(request.getName())) {
                 throw new DuplicateCategoryException();
             }
         }
 
-        Category updated = CategoryFactory.update(existing, request.getName(), request.getDescription());
+        if (request.getParentId() != null) {
+            if (request.getParentId().equals(id)) {
+                throw new IllegalArgumentException("Una categoria no puede ser padre de si misma");
+            }
+            categoryRepositoryPort.findById(request.getParentId())
+                    .orElseThrow(() -> new CategoryNotFoundException("Categoria padre no encontrada"));
+        }
+
+        Category updated = CategoryFactory.update(existing, request.getName(), request.getDescription(), request.getParentId());
         Category saved = categoryRepositoryPort.save(updated);
 
         log.info("category_updated id={} name={}", saved.getId(), saved.getName());
@@ -51,6 +63,7 @@ public class UpdateCategoryUseCaseImpl implements UpdateCategoryUseCase {
                 .id(category.getId())
                 .name(category.getName())
                 .description(category.getDescription())
+                .parentId(category.getParentId())
                 .status(category.getStatus().name())
                 .createdAt(category.getCreatedAt())
                 .updatedAt(category.getUpdatedAt())
