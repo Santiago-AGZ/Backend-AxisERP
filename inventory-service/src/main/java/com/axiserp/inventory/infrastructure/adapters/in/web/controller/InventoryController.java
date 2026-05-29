@@ -18,6 +18,8 @@ import com.axiserp.inventory.application.dto.request.AdjustmentRequest;
 import com.axiserp.inventory.application.dto.request.InitializeInventoryRequest;
 import com.axiserp.inventory.application.dto.response.InventoryResponse;
 import com.axiserp.inventory.application.dto.response.MovementResponse;
+import com.axiserp.inventory.infrastructure.adapters.in.web.dto.ApiResponse;
+import com.axiserp.inventory.infrastructure.adapters.in.web.dto.ApiResponse.PaginationMeta;
 import com.axiserp.inventory.ports.input.GetInventoryUseCase;
 import com.axiserp.inventory.ports.input.InitializeInventoryUseCase;
 import com.axiserp.inventory.ports.input.ListMovementsUseCase;
@@ -45,77 +47,88 @@ public class InventoryController {
     private final ReverseMovementUseCase reverseMovementUseCase;
 
     @PostMapping("/initialize")
-    public ResponseEntity<InventoryResponse> initialize(@Valid @RequestBody InitializeInventoryRequest request) {
-        UUID userId = currentUserId();
-        InventoryResponse response = initializeInventoryUseCase.initialize(request, userId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    public ResponseEntity<ApiResponse<InventoryResponse>> initialize(
+            @Valid @RequestBody InitializeInventoryRequest request) {
+        InventoryResponse response = initializeInventoryUseCase.initialize(request, currentUserId());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.created(response, "Inventario inicializado"));
     }
 
     @GetMapping("/products/{productId}")
-    public ResponseEntity<InventoryResponse> getInventory(@PathVariable UUID productId) {
-        return ResponseEntity.ok(getInventoryUseCase.getByProductId(productId));
+    public ResponseEntity<ApiResponse<InventoryResponse>> getInventory(@PathVariable UUID productId) {
+        return ResponseEntity.ok(ApiResponse.ok(
+                getInventoryUseCase.getByProductId(productId), "Inventario encontrado"));
     }
 
     @GetMapping("/products/{productId}/movements")
-    public ResponseEntity<List<MovementResponse>> listMovements(@PathVariable UUID productId) {
-        return ResponseEntity.ok(listMovementsUseCase.listByProductId(productId));
+    public ResponseEntity<ApiResponse<List<MovementResponse>>> listMovements(@PathVariable UUID productId) {
+        List<MovementResponse> data = listMovementsUseCase.listByProductId(productId);
+        return ResponseEntity.ok(ApiResponse.paged(
+                data, "Movimientos recuperados exitosamente",
+                PaginationMeta.of(1, data.size(), data.size())));
     }
 
     @PostMapping("/products/{productId}/entry")
-    public ResponseEntity<MovementResponse> registerEntry(
+    public ResponseEntity<ApiResponse<MovementResponse>> registerEntry(
             @PathVariable UUID productId,
             @RequestParam int quantity,
             @RequestParam(required = false) String referenceType,
             @RequestParam(required = false) UUID referenceId,
             @RequestParam(required = false) String notes) {
-        UUID userId = currentUserId();
-        MovementResponse response = registerEntryUseCase.registerEntry(productId, quantity, referenceType, referenceId, notes, userId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        MovementResponse response = registerEntryUseCase.registerEntry(
+                productId, quantity, referenceType, referenceId, notes, currentUserId());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.created(response, "Entrada registrada"));
     }
 
     @PostMapping("/products/{productId}/exit")
-    public ResponseEntity<MovementResponse> registerExit(
+    public ResponseEntity<ApiResponse<MovementResponse>> registerExit(
             @PathVariable UUID productId,
             @RequestParam int quantity,
             @RequestParam(required = false) String referenceType,
             @RequestParam(required = false) UUID referenceId,
             @RequestParam(required = false) String notes) {
-        UUID userId = currentUserId();
-        MovementResponse response = registerExitUseCase.registerExit(productId, quantity, referenceType, referenceId, notes, userId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        MovementResponse response = registerExitUseCase.registerExit(
+                productId, quantity, referenceType, referenceId, notes, currentUserId());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.created(response, "Salida registrada"));
     }
 
     @PostMapping("/products/{productId}/return")
-    public ResponseEntity<MovementResponse> registerReturn(
+    public ResponseEntity<ApiResponse<MovementResponse>> registerReturn(
             @PathVariable UUID productId,
             @RequestParam int quantity,
             @RequestParam(required = false) String referenceType,
             @RequestParam(required = false) UUID referenceId,
             @RequestParam(required = false) String notes) {
-        UUID userId = currentUserId();
-        MovementResponse response = registerReturnUseCase.registerReturn(productId, quantity, referenceType, referenceId, notes, userId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        MovementResponse response = registerReturnUseCase.registerReturn(
+                productId, quantity, referenceType, referenceId, notes, currentUserId());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.created(response, "Devolución registrada"));
     }
 
     @PostMapping("/products/{productId}/adjust")
-    public ResponseEntity<MovementResponse> registerAdjustment(
+    public ResponseEntity<ApiResponse<MovementResponse>> registerAdjustment(
             @PathVariable UUID productId,
             @Valid @RequestBody AdjustmentRequest request) {
-        UUID userId = currentUserId();
-        MovementResponse response = registerAdjustmentUseCase.registerAdjustment(productId, request, userId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        MovementResponse response = registerAdjustmentUseCase.registerAdjustment(
+                productId, request, currentUserId());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.created(response, "Ajuste registrado"));
     }
 
     @PostMapping("/movements/{movementId}/reverse")
-    public ResponseEntity<MovementResponse> reverseMovement(
+    public ResponseEntity<ApiResponse<MovementResponse>> reverseMovement(
             @PathVariable UUID movementId,
             @RequestParam String justification) {
-        UUID userId = currentUserId();
-        MovementResponse response = reverseMovementUseCase.reverse(movementId, justification, userId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        MovementResponse response = reverseMovementUseCase.reverse(
+                movementId, justification, currentUserId());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.created(response, "Movimiento revertido"));
     }
 
     private UUID currentUserId() {
-        return UUID.fromString((String) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        return UUID.fromString(
+                (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
     }
 }

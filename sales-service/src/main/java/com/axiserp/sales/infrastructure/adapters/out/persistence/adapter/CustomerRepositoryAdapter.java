@@ -28,6 +28,16 @@ public class CustomerRepositoryAdapter implements CustomerRepositoryPort {
     }
 
     @Override
+    public Optional<Customer> findByCodigo(String codigo) {
+        return jpaCustomerRepository.findByCodigo(codigo).map(this::toDomain);
+    }
+
+    @Override
+    public boolean existsByCodigo(String codigo) {
+        return jpaCustomerRepository.existsByCodigo(codigo);
+    }
+
+    @Override
     public boolean existsByDocumentNumber(String documentNumber) {
         return jpaCustomerRepository.existsByDocumentNumber(documentNumber);
     }
@@ -39,17 +49,15 @@ public class CustomerRepositoryAdapter implements CustomerRepositoryPort {
 
     @Override
     public Customer save(Customer customer) {
-        CustomerEntity entity = toEntity(customer);
-        CustomerEntity saved = jpaCustomerRepository.save(entity);
-        return toDomain(saved);
+        return toDomain(jpaCustomerRepository.save(toEntity(customer)));
     }
 
     @Override
     public List<Customer> findByFilters(String search, boolean includeInactive, int page, int size) {
         PageRequest pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "updatedAt"));
         return jpaCustomerRepository.findByFilters(
-                        search, includeInactive,
-                        CustomerEntity.CustomerStatus.ELIMINADO,
+                        search,
+                        includeInactive,
                         CustomerEntity.CustomerStatus.ACTIVO,
                         pageable)
                 .stream()
@@ -57,33 +65,37 @@ public class CustomerRepositoryAdapter implements CustomerRepositoryPort {
                 .toList();
     }
 
-    private Customer toDomain(CustomerEntity entity) {
+    private Customer toDomain(CustomerEntity e) {
         return Customer.builder()
-                .id(entity.getId())
-                .name(entity.getName())
-                .documentType(entity.getDocumentType())
-                .documentNumber(entity.getDocumentNumber())
-                .email(entity.getEmail())
-                .phone(entity.getPhone())
-                .address(entity.getAddress())
-                .status(CustomerStatus.valueOf(entity.getStatus().name()))
-                .createdAt(entity.getCreatedAt())
-                .updatedAt(entity.getUpdatedAt())
+                .id(e.getId())
+                .codigo(e.getCodigo())
+                .name(e.getName())
+                .documentType(e.getDocumentType() != null ? e.getDocumentType().name() : null)
+                .documentNumber(e.getDocumentNumber())
+                .email(e.getEmail())
+                .phone(e.getPhone())
+                .address(e.getAddress())
+                .status(CustomerStatus.valueOf(e.getStatus().name()))
+                .createdAt(e.getCreatedAt())
+                .updatedAt(e.getUpdatedAt())
                 .build();
     }
 
-    private CustomerEntity toEntity(Customer domain) {
+    private CustomerEntity toEntity(Customer c) {
         return CustomerEntity.builder()
-                .id(domain.getId())
-                .name(domain.getName())
-                .documentType(domain.getDocumentType())
-                .documentNumber(domain.getDocumentNumber())
-                .email(domain.getEmail())
-                .phone(domain.getPhone())
-                .address(domain.getAddress())
-                .status(CustomerEntity.CustomerStatus.valueOf(domain.getStatus().name()))
-                .createdAt(domain.getCreatedAt())
-                .updatedAt(domain.getUpdatedAt())
+                .id(c.getId())
+                .codigo(c.getCodigo())
+                .name(c.getName())
+                .documentType(c.getDocumentType() != null
+                        ? CustomerEntity.DocumentType.valueOf(c.getDocumentType())
+                        : null)
+                .documentNumber(c.getDocumentNumber())
+                .email(c.getEmail())
+                .phone(c.getPhone())
+                .address(c.getAddress())
+                .status(CustomerEntity.CustomerStatus.valueOf(c.getStatus().name()))
+                .createdAt(c.getCreatedAt())
+                .updatedAt(c.getUpdatedAt())
                 .build();
     }
 }

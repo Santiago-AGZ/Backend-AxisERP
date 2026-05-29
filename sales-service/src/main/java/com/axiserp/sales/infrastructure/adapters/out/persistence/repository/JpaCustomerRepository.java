@@ -1,6 +1,7 @@
 package com.axiserp.sales.infrastructure.adapters.out.persistence.repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.domain.Pageable;
@@ -13,23 +14,26 @@ import com.axiserp.sales.infrastructure.adapters.out.persistence.entity.Customer
 
 public interface JpaCustomerRepository extends JpaRepository<CustomerEntity, UUID> {
 
+    Optional<CustomerEntity> findByCodigo(String codigo);
+
+    boolean existsByCodigo(String codigo);
+
     boolean existsByDocumentNumber(String documentNumber);
 
     boolean existsByEmail(String email);
 
     @Query("""
             SELECT c FROM CustomerEntity c
-            WHERE c.status <> :eliminated
-              AND (:includeInactive = true OR c.status = :active)
+            WHERE (:includeInactive = true OR c.status = :active)
               AND (:search IS NULL
                    OR LOWER(c.name) LIKE LOWER(CONCAT('%', :search, '%'))
-                   OR LOWER(c.documentNumber) LIKE LOWER(CONCAT('%', :search, '%')))
+                   OR LOWER(c.documentNumber) LIKE LOWER(CONCAT('%', :search, '%'))
+                   OR LOWER(c.codigo) LIKE LOWER(CONCAT('%', :search, '%')))
             ORDER BY c.updatedAt DESC
             """)
     List<CustomerEntity> findByFilters(
             @Param("search") String search,
             @Param("includeInactive") boolean includeInactive,
-            @Param("eliminated") CustomerStatus eliminated,
             @Param("active") CustomerStatus active,
             Pageable pageable);
 }

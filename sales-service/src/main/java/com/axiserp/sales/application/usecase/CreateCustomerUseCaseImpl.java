@@ -29,16 +29,19 @@ public class CreateCustomerUseCaseImpl implements CreateCustomerUseCase {
     @Override
     @Transactional
     public CustomerResponse create(CreateCustomerRequest request, UUID createdBy) {
+        if (customerRepositoryPort.existsByCodigo(request.getCodigo())) {
+            throw new IllegalStateException("Ya existe un cliente con el código: " + request.getCodigo());
+        }
         if (customerRepositoryPort.existsByDocumentNumber(request.getDocumentNumber())) {
             throw new DuplicateDocumentException(request.getDocumentNumber());
         }
-
         if (request.getEmail() != null && !request.getEmail().isBlank()
                 && customerRepositoryPort.existsByEmail(request.getEmail())) {
             throw new IllegalStateException("Ya existe un cliente con el email: " + request.getEmail());
         }
 
         Customer customer = Customer.builder()
+                .codigo(request.getCodigo())
                 .name(request.getName())
                 .documentType(request.getDocumentType())
                 .documentNumber(request.getDocumentNumber())
@@ -51,23 +54,24 @@ public class CreateCustomerUseCaseImpl implements CreateCustomerUseCase {
                 .build();
 
         Customer saved = customerRepositoryPort.save(customer);
-        log.info("customer_created id={} documentNumber={}", saved.getId(), saved.getDocumentNumber());
+        log.info("customer_created codigo={} documentNumber={}", saved.getCodigo(), saved.getDocumentNumber());
 
         return toResponse(saved);
     }
 
-    private CustomerResponse toResponse(Customer customer) {
+    static CustomerResponse toResponse(Customer c) {
         return CustomerResponse.builder()
-                .id(customer.getId())
-                .name(customer.getName())
-                .documentType(customer.getDocumentType())
-                .documentNumber(customer.getDocumentNumber())
-                .email(customer.getEmail())
-                .phone(customer.getPhone())
-                .address(customer.getAddress())
-                .status(customer.getStatus().name())
-                .createdAt(customer.getCreatedAt())
-                .updatedAt(customer.getUpdatedAt())
+                .id(c.getId())
+                .codigo(c.getCodigo())
+                .name(c.getName())
+                .documentType(c.getDocumentType())
+                .documentNumber(c.getDocumentNumber())
+                .email(c.getEmail())
+                .phone(c.getPhone())
+                .address(c.getAddress())
+                .status(c.getStatus().name())
+                .createdAt(c.getCreatedAt())
+                .updatedAt(c.getUpdatedAt())
                 .build();
     }
 }

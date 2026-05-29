@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.axiserp.sales.application.dto.request.CreateCustomerRequest;
 import com.axiserp.sales.application.dto.response.CustomerResponse;
+import com.axiserp.sales.infrastructure.adapters.in.web.dto.ApiResponse;
+import com.axiserp.sales.infrastructure.adapters.in.web.dto.ApiResponse.PaginationMeta;
 import com.axiserp.sales.ports.input.CreateCustomerUseCase;
 import com.axiserp.sales.ports.input.DeactivateCustomerUseCase;
 import com.axiserp.sales.ports.input.GetCustomerUseCase;
@@ -38,35 +40,42 @@ public class CustomerController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'VENDEDOR')")
     @PostMapping
-    public ResponseEntity<CustomerResponse> createCustomer(
+    public ResponseEntity<ApiResponse<CustomerResponse>> createCustomer(
             @Valid @RequestBody CreateCustomerRequest request,
             Authentication authentication) {
 
         UUID userId = UUID.fromString((String) authentication.getPrincipal());
         CustomerResponse response = createCustomerUseCase.create(request, userId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.created(response, "Cliente creado exitosamente"));
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'VENDEDOR')")
-    @GetMapping("/{id}")
-    public ResponseEntity<CustomerResponse> getCustomer(@PathVariable UUID id) {
-        return ResponseEntity.ok(getCustomerUseCase.getById(id));
+    @GetMapping("/{codigo}")
+    public ResponseEntity<ApiResponse<CustomerResponse>> getCustomer(@PathVariable String codigo) {
+        CustomerResponse response = getCustomerUseCase.getByCodigo(codigo);
+        return ResponseEntity.ok(ApiResponse.ok(response, "Cliente encontrado"));
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'VENDEDOR')")
     @GetMapping
-    public ResponseEntity<List<CustomerResponse>> listCustomers(
+    public ResponseEntity<ApiResponse<List<CustomerResponse>>> listCustomers(
             @RequestParam(required = false) String search,
             @RequestParam(defaultValue = "false") boolean includeInactive,
-            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size) {
 
-        return ResponseEntity.ok(listCustomersUseCase.list(search, includeInactive, page, size));
+        List<CustomerResponse> data = listCustomersUseCase.list(search, includeInactive, page - 1, size);
+        return ResponseEntity.ok(ApiResponse.paged(
+                data,
+                "Clientes recuperados exitosamente",
+                PaginationMeta.of(page, size, data.size())));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/deactivate")
-    public ResponseEntity<CustomerResponse> deactivateCustomer(@PathVariable UUID id) {
-        return ResponseEntity.ok(deactivateCustomerUseCase.deactivate(id));
+    public ResponseEntity<ApiResponse<CustomerResponse>> deactivateCustomer(@PathVariable UUID id) {
+        CustomerResponse response = deactivateCustomerUseCase.deactivate(id);
+        return ResponseEntity.ok(ApiResponse.ok(response, "Cliente desactivado"));
     }
 }
