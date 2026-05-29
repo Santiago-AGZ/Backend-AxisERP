@@ -17,6 +17,7 @@ import lombok.Setter;
 public class CustomerResponse {
 
     private UUID id;
+    private String codigo;
     private String name;
     private String documentType;
     private String documentNumber;

@@ -33,6 +33,9 @@ public class SupplierEntity {
     @Id
     private UUID id;
 
+    @Column(nullable = false, unique = true, length = 20)
+    private String codigo;
+
     @Column(nullable = false)
     private String name;
 

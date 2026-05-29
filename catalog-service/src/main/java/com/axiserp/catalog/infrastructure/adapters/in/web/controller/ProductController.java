@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.axiserp.catalog.application.dto.request.CreateProductRequest;
 import com.axiserp.catalog.application.dto.request.UpdateProductRequest;
 import com.axiserp.catalog.application.dto.response.ProductResponse;
+import com.axiserp.catalog.infrastructure.adapters.in.web.dto.ApiResponse;
+import com.axiserp.catalog.infrastructure.adapters.in.web.dto.ApiResponse.PaginationMeta;
 import com.axiserp.catalog.ports.input.CreateProductUseCase;
 import com.axiserp.catalog.ports.input.DeactivateProductUseCase;
 import com.axiserp.catalog.ports.input.GetProductUseCase;
@@ -42,46 +44,49 @@ public class ProductController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'INVENTARIO')")
     @PostMapping
-    public ResponseEntity<ProductResponse> createProduct(
+    public ResponseEntity<ApiResponse<ProductResponse>> createProduct(
             @Valid @RequestBody CreateProductRequest request,
             Authentication authentication) {
 
         UUID userId = UUID.fromString((String) authentication.getPrincipal());
         ProductResponse response = createProductUseCase.create(request, userId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.created(response, "Producto creado exitosamente"));
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'INVENTARIO', 'VENDEDOR')")
     @GetMapping("/{id}")
-    public ResponseEntity<ProductResponse> getProduct(@PathVariable UUID id) {
-        return ResponseEntity.ok(getProductUseCase.getById(id));
+    public ResponseEntity<ApiResponse<ProductResponse>> getProduct(@PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.ok(getProductUseCase.getById(id), "Producto encontrado"));
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'INVENTARIO', 'VENDEDOR')")
     @GetMapping
-    public ResponseEntity<List<ProductResponse>> listProducts(
+    public ResponseEntity<ApiResponse<List<ProductResponse>>> listProducts(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String codigo,
             @RequestParam(required = false) UUID categoryId,
             @RequestParam(defaultValue = "false") boolean includeInactive,
-            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size) {
 
-        return ResponseEntity.ok(listProductsUseCase.list(search, codigo, categoryId, includeInactive, page, size));
+        List<ProductResponse> data = listProductsUseCase.list(search, codigo, categoryId, includeInactive, page - 1, size);
+        return ResponseEntity.ok(ApiResponse.paged(
+                data, "Productos recuperados exitosamente",
+                PaginationMeta.of(page, size, data.size())));
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'INVENTARIO')")
     @PutMapping("/{id}")
-    public ResponseEntity<ProductResponse> updateProduct(
+    public ResponseEntity<ApiResponse<ProductResponse>> updateProduct(
             @PathVariable UUID id,
             @Valid @RequestBody UpdateProductRequest request) {
-
-        return ResponseEntity.ok(updateProductUseCase.update(id, request));
+        return ResponseEntity.ok(ApiResponse.ok(updateProductUseCase.update(id, request), "Producto actualizado"));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/desactivar")
-    public ResponseEntity<ProductResponse> deactivateProduct(@PathVariable UUID id) {
-        return ResponseEntity.ok(deactivateProductUseCase.deactivate(id));
+    public ResponseEntity<ApiResponse<ProductResponse>> deactivateProduct(@PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.ok(deactivateProductUseCase.deactivate(id), "Producto desactivado"));
     }
 }

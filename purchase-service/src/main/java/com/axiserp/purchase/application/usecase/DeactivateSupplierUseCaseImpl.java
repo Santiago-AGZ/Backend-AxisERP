@@ -33,21 +33,7 @@ public class DeactivateSupplierUseCaseImpl implements DeactivateSupplierUseCase 
         supplier.setUpdatedAt(LocalDateTime.now());
 
         Supplier saved = supplierRepositoryPort.save(supplier);
-        log.info("supplier_deactivated id={} nit={}", saved.getId(), saved.getNit());
-        return toResponse(saved);
-    }
-
-    private SupplierResponse toResponse(Supplier supplier) {
-        return SupplierResponse.builder()
-                .id(supplier.getId())
-                .name(supplier.getName())
-                .nit(supplier.getNit())
-                .phone(supplier.getPhone())
-                .email(supplier.getEmail())
-                .address(supplier.getAddress())
-                .status(supplier.getStatus())
-                .createdAt(supplier.getCreatedAt())
-                .updatedAt(supplier.getUpdatedAt())
-                .build();
+        log.info("supplier_deactivated codigo={}", saved.getCodigo());
+        return CreateSupplierUseCaseImpl.toResponse(saved);
     }
 }

@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.axiserp.sales.application.dto.request.CreateSaleRequest;
 import com.axiserp.sales.application.dto.response.SaleResponse;
+import com.axiserp.sales.infrastructure.adapters.in.web.dto.ApiResponse;
+import com.axiserp.sales.infrastructure.adapters.in.web.dto.ApiResponse.PaginationMeta;
 import com.axiserp.sales.ports.input.ConfirmSaleUseCase;
 import com.axiserp.sales.ports.input.CreateSaleUseCase;
 import com.axiserp.sales.ports.input.GetSaleUseCase;
@@ -42,47 +44,51 @@ public class SaleController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'VENDEDOR')")
     @PostMapping
-    public ResponseEntity<SaleResponse> createSale(
+    public ResponseEntity<ApiResponse<SaleResponse>> createSale(
             @Valid @RequestBody CreateSaleRequest request,
             Authentication authentication) {
 
         UUID userId = UUID.fromString((String) authentication.getPrincipal());
         SaleResponse response = createSaleUseCase.create(request, userId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.created(response, "Venta creada exitosamente"));
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'VENDEDOR')")
     @GetMapping("/{id}")
-    public ResponseEntity<SaleResponse> getSale(@PathVariable UUID id) {
-        return ResponseEntity.ok(getSaleUseCase.getById(id));
+    public ResponseEntity<ApiResponse<SaleResponse>> getSale(@PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.ok(getSaleUseCase.getById(id), "Venta encontrada"));
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'VENDEDOR')")
     @GetMapping
-    public ResponseEntity<List<SaleResponse>> listSales(
+    public ResponseEntity<ApiResponse<List<SaleResponse>>> listSales(
             @RequestParam(required = false) UUID customerId,
             @RequestParam(required = false) String status,
-            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size) {
 
-        return ResponseEntity.ok(listSalesUseCase.list(customerId, status, page, size));
+        List<SaleResponse> data = listSalesUseCase.list(customerId, status, page - 1, size);
+        return ResponseEntity.ok(ApiResponse.paged(
+                data, "Ventas recuperadas exitosamente",
+                PaginationMeta.of(page, size, data.size())));
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'VENDEDOR')")
     @PatchMapping("/{id}/confirm")
-    public ResponseEntity<SaleResponse> confirmSale(@PathVariable UUID id) {
-        return ResponseEntity.ok(confirmSaleUseCase.confirm(id));
+    public ResponseEntity<ApiResponse<SaleResponse>> confirmSale(@PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.ok(confirmSaleUseCase.confirm(id), "Venta confirmada"));
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'VENDEDOR')")
     @PatchMapping("/{id}/pay")
-    public ResponseEntity<SaleResponse> paySale(@PathVariable UUID id) {
-        return ResponseEntity.ok(paySaleUseCase.pay(id));
+    public ResponseEntity<ApiResponse<SaleResponse>> paySale(@PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.ok(paySaleUseCase.pay(id), "Venta pagada"));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/void")
-    public ResponseEntity<SaleResponse> voidSale(@PathVariable UUID id) {
-        return ResponseEntity.ok(voidSaleUseCase.voidSale(id));
+    public ResponseEntity<ApiResponse<SaleResponse>> voidSale(@PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.ok(voidSaleUseCase.voidSale(id), "Venta anulada"));
     }
 }

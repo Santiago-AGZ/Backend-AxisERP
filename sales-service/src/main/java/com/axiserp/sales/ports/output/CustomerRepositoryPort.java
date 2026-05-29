@@ -10,6 +10,10 @@ public interface CustomerRepositoryPort {
 
     Optional<Customer> findById(UUID id);
 
+    Optional<Customer> findByCodigo(String codigo);
+
+    boolean existsByCodigo(String codigo);
+
     boolean existsByDocumentNumber(String documentNumber);
 
     boolean existsByEmail(String email);

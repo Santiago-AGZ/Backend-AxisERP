@@ -14,6 +14,13 @@ import lombok.Setter;
 @AllArgsConstructor
 public class CreateSupplierRequest {
 
+    @NotBlank(message = "El código del proveedor es obligatorio")
+    @jakarta.validation.constraints.Size(max = 20, message = "El código no puede superar 20 caracteres")
+    @jakarta.validation.constraints.Pattern(
+        regexp = "^PROV-\\d{6}$",
+        message = "El código debe tener formato PROV-000001")
+    private String codigo;
+
     @NotBlank(message = "El nombre del proveedor es obligatorio")
     private String name;
 
