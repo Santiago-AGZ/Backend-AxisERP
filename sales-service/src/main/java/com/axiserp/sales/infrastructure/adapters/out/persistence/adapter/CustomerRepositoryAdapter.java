@@ -55,8 +55,11 @@ public class CustomerRepositoryAdapter implements CustomerRepositoryPort {
     @Override
     public List<Customer> findByFilters(String search, boolean includeInactive, int page, int size) {
         PageRequest pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "updatedAt"));
+        boolean hasSearch = search != null && !search.isBlank();
+        String pattern = hasSearch ? "%" + search.toLowerCase() + "%" : "%";
         return jpaCustomerRepository.findByFilters(
-                        search,
+                        hasSearch,
+                        pattern,
                         includeInactive,
                         CustomerEntity.CustomerStatus.ACTIVO,
                         pageable)
