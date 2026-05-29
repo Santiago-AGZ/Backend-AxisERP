@@ -8,7 +8,9 @@ import com.axiserp.purchase.domain.model.Supplier;
 
 public interface SupplierRepositoryPort {
     Optional<Supplier> findById(UUID id);
+    Optional<Supplier> findByCodigo(String codigo);
     Optional<Supplier> findByNit(String nit);
+    boolean existsByCodigo(String codigo);
     boolean existsByNit(String nit);
     Supplier save(Supplier supplier);
     List<Supplier> findAllActive();

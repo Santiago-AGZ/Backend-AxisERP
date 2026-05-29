@@ -17,6 +17,7 @@ import lombok.Setter;
 public class Supplier {
 
     private UUID id;
+    private String codigo;
     private String name;
     private String nit;
     private String phone;
@@ -31,6 +32,6 @@ public class Supplier {
     }
 
     public boolean isDeleted() {
-        return this.status == SupplierStatus.ELIMINADO;
+        return this.status == SupplierStatus.INACTIVO;
     }
 }

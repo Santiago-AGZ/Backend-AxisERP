@@ -35,23 +35,7 @@ public class DeactivateCustomerUseCaseImpl implements DeactivateCustomerUseCase 
         customer.setUpdatedAt(LocalDateTime.now());
 
         Customer saved = customerRepositoryPort.save(customer);
-        log.info("customer_deactivated id={}", saved.getId());
-
-        return toResponse(saved);
-    }
-
-    private CustomerResponse toResponse(Customer customer) {
-        return CustomerResponse.builder()
-                .id(customer.getId())
-                .name(customer.getName())
-                .documentType(customer.getDocumentType())
-                .documentNumber(customer.getDocumentNumber())
-                .email(customer.getEmail())
-                .phone(customer.getPhone())
-                .address(customer.getAddress())
-                .status(customer.getStatus().name())
-                .createdAt(customer.getCreatedAt())
-                .updatedAt(customer.getUpdatedAt())
-                .build();
+        log.info("customer_deactivated codigo={}", saved.getCodigo());
+        return CreateCustomerUseCaseImpl.toResponse(saved);
     }
 }

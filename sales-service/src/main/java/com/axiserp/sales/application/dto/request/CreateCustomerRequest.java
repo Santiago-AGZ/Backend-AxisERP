@@ -16,6 +16,13 @@ import lombok.Setter;
 @AllArgsConstructor
 public class CreateCustomerRequest {
 
+    @NotBlank(message = "El código del cliente es obligatorio")
+    @Size(max = 20, message = "El código no puede superar 20 caracteres")
+    @jakarta.validation.constraints.Pattern(
+        regexp = "^CLI-\\d{6}$",
+        message = "El código debe tener formato CLI-000001")
+    private String codigo;
+
     @NotBlank(message = "El nombre es obligatorio")
     @Size(max = 255, message = "El nombre no puede superar 255 caracteres")
     private String name;

@@ -19,6 +19,7 @@ import lombok.Setter;
 public class SupplierResponse {
 
     private UUID id;
+    private String codigo;
     private String name;
     private String nit;
     private String phone;

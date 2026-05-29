@@ -19,6 +19,8 @@ import com.axiserp.purchase.application.dto.request.CreatePurchaseRequest;
 import com.axiserp.purchase.application.dto.request.ReceivePurchaseRequest;
 import com.axiserp.purchase.application.dto.response.PurchaseResponse;
 import com.axiserp.purchase.domain.model.PurchaseStatus;
+import com.axiserp.purchase.infrastructure.adapters.in.web.dto.ApiResponse;
+import com.axiserp.purchase.infrastructure.adapters.in.web.dto.ApiResponse.PaginationMeta;
 import com.axiserp.purchase.ports.input.CancelPurchaseUseCase;
 import com.axiserp.purchase.ports.input.CreatePurchaseUseCase;
 import com.axiserp.purchase.ports.input.GetPurchaseUseCase;
@@ -42,40 +44,46 @@ public class PurchaseController {
     private final CancelPurchaseUseCase cancelPurchaseUseCase;
 
     @PostMapping
-    public ResponseEntity<PurchaseResponse> createPurchase(
+    public ResponseEntity<ApiResponse<PurchaseResponse>> createPurchase(
             @Valid @RequestBody CreatePurchaseRequest request) {
         UUID userId = UUID.fromString(
                 (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         PurchaseResponse response = createPurchaseUseCase.execute(request, userId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.created(response, "Compra creada exitosamente"));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PurchaseResponse> getPurchase(@PathVariable UUID id) {
-        return ResponseEntity.ok(getPurchaseUseCase.execute(id));
+    public ResponseEntity<ApiResponse<PurchaseResponse>> getPurchase(@PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.ok(getPurchaseUseCase.execute(id), "Compra encontrada"));
     }
 
     @GetMapping
-    public ResponseEntity<List<PurchaseResponse>> listPurchases() {
-        return ResponseEntity.ok(listPurchasesUseCase.execute());
+    public ResponseEntity<ApiResponse<List<PurchaseResponse>>> listPurchases() {
+        List<PurchaseResponse> data = listPurchasesUseCase.execute();
+        return ResponseEntity.ok(ApiResponse.paged(
+                data, "Compras recuperadas exitosamente",
+                PaginationMeta.of(1, data.size(), data.size())));
     }
 
     @PatchMapping("/{id}/status")
-    public ResponseEntity<PurchaseResponse> updateStatus(
+    public ResponseEntity<ApiResponse<PurchaseResponse>> updateStatus(
             @PathVariable UUID id,
             @RequestParam PurchaseStatus status) {
-        return ResponseEntity.ok(updatePurchaseStatusUseCase.execute(id, status));
+        return ResponseEntity.ok(ApiResponse.ok(
+                updatePurchaseStatusUseCase.execute(id, status), "Estado actualizado"));
     }
 
     @PostMapping("/{id}/receive")
-    public ResponseEntity<PurchaseResponse> receive(
+    public ResponseEntity<ApiResponse<PurchaseResponse>> receive(
             @PathVariable UUID id,
             @Valid @RequestBody ReceivePurchaseRequest request) {
-        return ResponseEntity.ok(receivePurchaseUseCase.execute(id, request));
+        return ResponseEntity.ok(ApiResponse.ok(
+                receivePurchaseUseCase.execute(id, request), "Compra recibida"));
     }
 
     @PatchMapping("/{id}/cancel")
-    public ResponseEntity<PurchaseResponse> cancel(@PathVariable UUID id) {
-        return ResponseEntity.ok(cancelPurchaseUseCase.execute(id));
+    public ResponseEntity<ApiResponse<PurchaseResponse>> cancel(@PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.ok(cancelPurchaseUseCase.execute(id), "Compra cancelada"));
     }
 }

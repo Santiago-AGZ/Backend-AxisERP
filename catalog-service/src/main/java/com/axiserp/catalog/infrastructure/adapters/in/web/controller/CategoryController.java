@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.axiserp.catalog.application.dto.request.CreateCategoryRequest;
 import com.axiserp.catalog.application.dto.request.UpdateCategoryRequest;
 import com.axiserp.catalog.application.dto.response.CategoryResponse;
+import com.axiserp.catalog.infrastructure.adapters.in.web.dto.ApiResponse;
+import com.axiserp.catalog.infrastructure.adapters.in.web.dto.ApiResponse.PaginationMeta;
 import com.axiserp.catalog.ports.input.CreateCategoryUseCase;
 import com.axiserp.catalog.ports.input.DeactivateCategoryUseCase;
 import com.axiserp.catalog.ports.input.GetCategoryUseCase;
@@ -40,37 +42,39 @@ public class CategoryController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'INVENTARIO')")
     @PostMapping
-    public ResponseEntity<CategoryResponse> createCategory(
+    public ResponseEntity<ApiResponse<CategoryResponse>> createCategory(
             @Valid @RequestBody CreateCategoryRequest request) {
-
         CategoryResponse response = createCategoryUseCase.create(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.created(response, "Categoría creada exitosamente"));
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'INVENTARIO', 'VENDEDOR')")
     @GetMapping
-    public ResponseEntity<List<CategoryResponse>> listCategories() {
-        return ResponseEntity.ok(listCategoriesUseCase.listAll());
+    public ResponseEntity<ApiResponse<List<CategoryResponse>>> listCategories() {
+        List<CategoryResponse> data = listCategoriesUseCase.listAll();
+        return ResponseEntity.ok(ApiResponse.paged(
+                data, "Categorías recuperadas exitosamente",
+                PaginationMeta.of(1, data.size(), data.size())));
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'INVENTARIO', 'VENDEDOR')")
     @GetMapping("/{id}")
-    public ResponseEntity<CategoryResponse> getCategory(@PathVariable UUID id) {
-        return ResponseEntity.ok(getCategoryUseCase.getById(id));
+    public ResponseEntity<ApiResponse<CategoryResponse>> getCategory(@PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.ok(getCategoryUseCase.getById(id), "Categoría encontrada"));
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'INVENTARIO')")
     @PutMapping("/{id}")
-    public ResponseEntity<CategoryResponse> updateCategory(
+    public ResponseEntity<ApiResponse<CategoryResponse>> updateCategory(
             @PathVariable UUID id,
             @Valid @RequestBody UpdateCategoryRequest request) {
-
-        return ResponseEntity.ok(updateCategoryUseCase.update(id, request));
+        return ResponseEntity.ok(ApiResponse.ok(updateCategoryUseCase.update(id, request), "Categoría actualizada"));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/desactivar")
-    public ResponseEntity<CategoryResponse> deactivateCategory(@PathVariable UUID id) {
-        return ResponseEntity.ok(deactivateCategoryUseCase.deactivate(id));
+    public ResponseEntity<ApiResponse<CategoryResponse>> deactivateCategory(@PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.ok(deactivateCategoryUseCase.deactivate(id), "Categoría desactivada"));
     }
 }

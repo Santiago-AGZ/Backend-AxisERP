@@ -26,8 +26,18 @@ public class SupplierRepositoryAdapter implements SupplierRepositoryPort {
     }
 
     @Override
+    public Optional<Supplier> findByCodigo(String codigo) {
+        return jpaSupplierRepository.findByCodigo(codigo).map(this::toDomain);
+    }
+
+    @Override
     public Optional<Supplier> findByNit(String nit) {
         return jpaSupplierRepository.findByNit(nit).map(this::toDomain);
+    }
+
+    @Override
+    public boolean existsByCodigo(String codigo) {
+        return jpaSupplierRepository.existsByCodigo(codigo);
     }
 
     @Override
@@ -37,18 +47,14 @@ public class SupplierRepositoryAdapter implements SupplierRepositoryPort {
 
     @Override
     public Supplier save(Supplier supplier) {
-        SupplierEntity entity = toEntity(supplier);
-        SupplierEntity saved = jpaSupplierRepository.save(entity);
-        return toDomain(saved);
+        return toDomain(jpaSupplierRepository.save(toEntity(supplier)));
     }
 
     @Override
     public List<Supplier> findAllActive() {
         return jpaSupplierRepository
                 .findByStatusOrderByNameAsc(SupplierEntity.SupplierStatus.ACTIVO)
-                .stream()
-                .map(this::toDomain)
-                .toList();
+                .stream().map(this::toDomain).toList();
     }
 
     @Override
@@ -56,31 +62,33 @@ public class SupplierRepositoryAdapter implements SupplierRepositoryPort {
         return jpaSupplierRepository.findAll().stream().map(this::toDomain).toList();
     }
 
-    private Supplier toDomain(SupplierEntity entity) {
+    private Supplier toDomain(SupplierEntity e) {
         return Supplier.builder()
-                .id(entity.getId())
-                .name(entity.getName())
-                .nit(entity.getNit())
-                .phone(entity.getPhone())
-                .email(entity.getEmail())
-                .address(entity.getAddress())
-                .status(SupplierStatus.valueOf(entity.getStatus().name()))
-                .createdAt(entity.getCreatedAt())
-                .updatedAt(entity.getUpdatedAt())
+                .id(e.getId())
+                .codigo(e.getCodigo())
+                .name(e.getName())
+                .nit(e.getNit())
+                .phone(e.getPhone())
+                .email(e.getEmail())
+                .address(e.getAddress())
+                .status(SupplierStatus.valueOf(e.getStatus().name()))
+                .createdAt(e.getCreatedAt())
+                .updatedAt(e.getUpdatedAt())
                 .build();
     }
 
-    private SupplierEntity toEntity(Supplier domain) {
+    private SupplierEntity toEntity(Supplier s) {
         return SupplierEntity.builder()
-                .id(domain.getId())
-                .name(domain.getName())
-                .nit(domain.getNit())
-                .phone(domain.getPhone())
-                .email(domain.getEmail())
-                .address(domain.getAddress())
-                .status(SupplierEntity.SupplierStatus.valueOf(domain.getStatus().name()))
-                .createdAt(domain.getCreatedAt())
-                .updatedAt(domain.getUpdatedAt())
+                .id(s.getId())
+                .codigo(s.getCodigo())
+                .name(s.getName())
+                .nit(s.getNit())
+                .phone(s.getPhone())
+                .email(s.getEmail())
+                .address(s.getAddress())
+                .status(SupplierEntity.SupplierStatus.valueOf(s.getStatus().name()))
+                .createdAt(s.getCreatedAt())
+                .updatedAt(s.getUpdatedAt())
                 .build();
     }
 }

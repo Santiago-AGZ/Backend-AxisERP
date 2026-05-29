@@ -27,12 +27,16 @@ public class CreateSupplierUseCaseImpl implements CreateSupplierUseCase {
 
     @Override
     public SupplierResponse execute(CreateSupplierRequest request) {
+        if (supplierRepositoryPort.existsByCodigo(request.getCodigo())) {
+            throw new IllegalStateException("Ya existe un proveedor con el código: " + request.getCodigo());
+        }
         if (supplierRepositoryPort.existsByNit(request.getNit())) {
             throw new DuplicateNitException(request.getNit());
         }
 
         Supplier supplier = Supplier.builder()
                 .id(UUID.randomUUID())
+                .codigo(request.getCodigo())
                 .name(request.getName())
                 .nit(request.getNit())
                 .phone(request.getPhone())
@@ -44,21 +48,22 @@ public class CreateSupplierUseCaseImpl implements CreateSupplierUseCase {
                 .build();
 
         Supplier saved = supplierRepositoryPort.save(supplier);
-        log.info("supplier_created id={} nit={}", saved.getId(), saved.getNit());
+        log.info("supplier_created codigo={} nit={}", saved.getCodigo(), saved.getNit());
         return toResponse(saved);
     }
 
-    private SupplierResponse toResponse(Supplier supplier) {
+    static SupplierResponse toResponse(Supplier s) {
         return SupplierResponse.builder()
-                .id(supplier.getId())
-                .name(supplier.getName())
-                .nit(supplier.getNit())
-                .phone(supplier.getPhone())
-                .email(supplier.getEmail())
-                .address(supplier.getAddress())
-                .status(supplier.getStatus())
-                .createdAt(supplier.getCreatedAt())
-                .updatedAt(supplier.getUpdatedAt())
+                .id(s.getId())
+                .codigo(s.getCodigo())
+                .name(s.getName())
+                .nit(s.getNit())
+                .phone(s.getPhone())
+                .email(s.getEmail())
+                .address(s.getAddress())
+                .status(s.getStatus())
+                .createdAt(s.getCreatedAt())
+                .updatedAt(s.getUpdatedAt())
                 .build();
     }
 }

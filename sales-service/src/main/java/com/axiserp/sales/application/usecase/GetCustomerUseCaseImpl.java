@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 
 import com.axiserp.sales.application.dto.response.CustomerResponse;
 import com.axiserp.sales.domain.exception.CustomerNotFoundException;
-import com.axiserp.sales.domain.model.Customer;
 import com.axiserp.sales.ports.input.GetCustomerUseCase;
 import com.axiserp.sales.ports.output.CustomerRepositoryPort;
 
@@ -20,23 +19,15 @@ public class GetCustomerUseCaseImpl implements GetCustomerUseCase {
 
     @Override
     public CustomerResponse getById(UUID id) {
-        Customer customer = customerRepositoryPort.findById(id)
+        return customerRepositoryPort.findById(id)
+                .map(CreateCustomerUseCaseImpl::toResponse)
                 .orElseThrow(() -> new CustomerNotFoundException(id));
-        return toResponse(customer);
     }
 
-    private CustomerResponse toResponse(Customer customer) {
-        return CustomerResponse.builder()
-                .id(customer.getId())
-                .name(customer.getName())
-                .documentType(customer.getDocumentType())
-                .documentNumber(customer.getDocumentNumber())
-                .email(customer.getEmail())
-                .phone(customer.getPhone())
-                .address(customer.getAddress())
-                .status(customer.getStatus().name())
-                .createdAt(customer.getCreatedAt())
-                .updatedAt(customer.getUpdatedAt())
-                .build();
+    @Override
+    public CustomerResponse getByCodigo(String codigo) {
+        return customerRepositoryPort.findByCodigo(codigo)
+                .map(CreateCustomerUseCaseImpl::toResponse)
+                .orElseThrow(() -> new CustomerNotFoundException(codigo));
     }
 }

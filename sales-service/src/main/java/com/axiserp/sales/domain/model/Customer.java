@@ -17,6 +17,7 @@ import lombok.Setter;
 public class Customer {
 
     private UUID id;
+    private String codigo;
     private String name;
     private String documentType;
     private String documentNumber;
@@ -32,6 +33,6 @@ public class Customer {
     }
 
     public boolean isDeleted() {
-        return this.status == CustomerStatus.ELIMINADO;
+        return this.status == CustomerStatus.INACTIVO;
     }
 }
