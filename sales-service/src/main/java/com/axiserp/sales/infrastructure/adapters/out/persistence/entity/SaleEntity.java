@@ -98,6 +98,6 @@ public class SaleEntity {
     }
 
     public enum SaleStatus {
-        BORRADOR, PENDIENTE, CONFIRMADA, PAGADA, ANULADA
+        BORRADOR, PENDIENTE, CONFIRMADA, PAGADO, ANULADA
     }
 }

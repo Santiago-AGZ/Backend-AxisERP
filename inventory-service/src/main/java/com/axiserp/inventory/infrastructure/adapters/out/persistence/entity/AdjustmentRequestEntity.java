@@ -13,6 +13,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,13 +22,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "inventory_movements")
+@Table(name = "adjustment_requests")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class InventoryMovementEntity {
+public class AdjustmentRequestEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -40,32 +41,44 @@ public class InventoryMovementEntity {
     @Column(name = "movement_type", nullable = false, length = 30)
     private MovementType movementType;
 
-    @Column(nullable = false)
+    @Column(name = "quantity", nullable = false)
     private int quantity;
 
-    @Column(name = "previous_stock", nullable = false)
-    private int previousStock;
+    @Column(name = "reason", nullable = false)
+    private String reason;
 
-    @Column(name = "new_stock", nullable = false)
-    private int newStock;
+    @Column(name = "status", nullable = false, length = 20)
+    private String status;
 
-    @Column(name = "reference_type", length = 50)
-    private String referenceType;
+    @Column(name = "requested_by", nullable = false)
+    private UUID requestedBy;
 
-    @Column(name = "reference_id")
-    private UUID referenceId;
+    @Column(name = "approved_by")
+    private UUID approvedBy;
+
+    @Column(name = "rejection_reason")
+    private String rejectionReason;
 
     @Column(name = "notes")
     private String notes;
 
-    @Column(name = "user_id", nullable = false)
-    private UUID userId;
-
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
+
+    @Column(name = "resolved_at")
+    private LocalDateTime resolvedAt;
 
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
     }
 }

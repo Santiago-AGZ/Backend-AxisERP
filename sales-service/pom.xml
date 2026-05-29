@@ -14,10 +14,10 @@
 	</parent>
 
 	<groupId>com.axiserp</groupId>
-	<artifactId>report-service</artifactId>
+	<artifactId>sales-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 
-	<name>report-service</name>
+	<name>sales-service</name>
 	<description>AxisERP Catalog Service</description>
 
 	<properties>

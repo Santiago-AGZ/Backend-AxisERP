@@ -6,13 +6,19 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: axiserp
+      POSTGRES_INITDB_ARGS: "-c max_connections=200"
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./init-databases.sql:/docker-entrypoint-initdb.d/01-init-databases.sql
     networks:
       - axiserp-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   auth-service:
     build: ./auth-service
@@ -50,7 +56,7 @@ services:
     container_name: inventory-service
     restart: unless-stopped
     ports:
-      - "8083:8083"
+      - "8087:8087"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/axiserp
       SPRING_DATASOURCE_USERNAME: postgres
@@ -60,12 +66,27 @@ services:
     networks:
       - axiserp-network
 
-  commerce-service:
-    build: ./commerce-service
-    container_name: commerce-service
+  sales-service:
+    build: ./sales-service
+    container_name: sales-service
     restart: unless-stopped
     ports:
       - "8084:8084"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/axiserp
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+    depends_on:
+      - postgres
+    networks:
+      - axiserp-network
+
+  purchase-service:
+    build: ./purchase-service
+    container_name: purchase-service
+    restart: unless-stopped
+    ports:
+      - "8086:8086"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/axiserp
       SPRING_DATASOURCE_USERNAME: postgres
@@ -100,7 +121,8 @@ services:
       - auth-service
       - catalog-service
       - inventory-service
-      - commerce-service
+      - sales-service
+      - purchase-service
       - report-service
     networks:
       - axiserp-network

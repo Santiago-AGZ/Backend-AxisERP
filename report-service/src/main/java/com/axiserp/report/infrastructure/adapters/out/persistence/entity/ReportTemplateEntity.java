@@ -1,4 +1,4 @@
-package com.axiserp.inventory.infrastructure.adapters.out.persistence.entity;
+package com.axiserp.report.infrastructure.adapters.out.persistence.entity;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -11,7 +11,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
-import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,44 +18,35 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "inventory")
+@Table(name = "report_templates")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class InventoryEntity {
+public class ReportTemplateEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "product_id", nullable = false, unique = true)
-    private UUID productId;
+    @Column(nullable = false, length = 100)
+    private String name;
 
-    @Column(name = "current_stock", nullable = false)
-    private int currentStock;
+    @Column(name = "report_type", nullable = false, length = 50)
+    private String reportType;
 
-    @Column(name = "min_stock", nullable = false)
-    private int minStock;
+    @Column(columnDefinition = "TEXT")
+    private String description;
 
-    @Column(name = "max_stock")
-    private Integer maxStock;
+    @Column(name = "default_filters", columnDefinition = "JSONB")
+    private String defaultFilters;
 
-    @Column(name = "reserved_stock", nullable = false)
-    private int reservedStock;
+    @Column(name = "columns_config", columnDefinition = "JSONB")
+    private String columnsConfig;
 
-    @Version
-    private Long version;
-
-    @Column(name = "last_movement_at")
-    private LocalDateTime lastMovementAt;
-
-    @Column(name = "created_by")
-    private UUID createdBy;
-
-    @Column(name = "updated_by")
-    private UUID updatedBy;
+    @Column(name = "is_active", nullable = false)
+    private boolean isActive;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
