@@ -76,7 +76,6 @@ public class InventoryRepositoryAdapter implements InventoryRepositoryPort {
                 .maxStock(i.getMaxStock() > 0 ? i.getMaxStock() : null)
                 .reservedStock(0)
                 .version(i.getVersion())
-                .createdBy(null)
                 .createdAt(i.getCreatedAt())
                 .updatedAt(i.getUpdatedAt())
                 .build();
@@ -92,14 +91,17 @@ public class InventoryRepositoryAdapter implements InventoryRepositoryPort {
                 .newStock(e.getNewStock())
                 .referenceType(e.getReferenceType())
                 .referenceId(e.getReferenceId())
-                .justification(e.getJustification())
+                // BD tiene 'notes' para justificación/notas; 'user_id' para el autor
+                .justification(e.getNotes())
                 .notes(e.getNotes())
-                .createdBy(e.getCreatedBy())
+                .createdBy(e.getUserId())
                 .createdAt(e.getCreatedAt())
                 .build();
     }
 
     private InventoryMovementEntity toMovementEntity(InventoryMovement m) {
+        // Priorizar justification sobre notes para el campo 'notes' de la BD
+        String notesValue = m.getJustification() != null ? m.getJustification() : m.getNotes();
         return InventoryMovementEntity.builder()
                 .id(m.getId())
                 .productId(m.getProductId())
@@ -109,9 +111,8 @@ public class InventoryRepositoryAdapter implements InventoryRepositoryPort {
                 .newStock(m.getNewStock())
                 .referenceType(m.getReferenceType())
                 .referenceId(m.getReferenceId())
-                .justification(m.getJustification())
-                .notes(m.getNotes())
-                .createdBy(m.getCreatedBy())
+                .notes(notesValue)
+                .userId(m.getCreatedBy())
                 .createdAt(m.getCreatedAt())
                 .build();
     }
