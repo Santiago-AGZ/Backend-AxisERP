@@ -31,15 +31,13 @@ public class InventoryRepositoryAdapter implements InventoryRepositoryPort {
 
     @Override
     public Inventory save(Inventory inventory) {
-        InventoryEntity entity = toEntity(inventory);
-        InventoryEntity saved = jpaInventoryRepository.save(entity);
+        InventoryEntity saved = jpaInventoryRepository.save(toEntity(inventory));
         return toDomain(saved);
     }
 
     @Override
     public InventoryMovement saveMovement(InventoryMovement movement) {
-        InventoryMovementEntity entity = toMovementEntity(movement);
-        InventoryMovementEntity saved = jpaMovementRepository.save(entity);
+        InventoryMovementEntity saved = jpaMovementRepository.save(toMovementEntity(movement));
         return toMovementDomain(saved);
     }
 
@@ -56,65 +54,65 @@ public class InventoryRepositoryAdapter implements InventoryRepositoryPort {
                 .toList();
     }
 
-    private Inventory toDomain(InventoryEntity entity) {
+    private Inventory toDomain(InventoryEntity e) {
         return Inventory.builder()
-                .id(entity.getId())
-                .productId(entity.getProductId())
-                .currentStock(entity.getCurrentStock())
-                .minStock(entity.getMinStock())
-                .maxStock(entity.getMaxStock())
-                .version(entity.getVersion())
-                .createdAt(entity.getCreatedAt())
-                .updatedAt(entity.getUpdatedAt())
+                .id(e.getId())
+                .productId(e.getProductId())
+                .currentStock(e.getCurrentStock())
+                .minStock(e.getMinStock())
+                .maxStock(e.getMaxStock() != null ? e.getMaxStock() : 0)
+                .version(e.getVersion())
+                .createdAt(e.getCreatedAt())
+                .updatedAt(e.getUpdatedAt())
                 .build();
     }
 
-    private InventoryEntity toEntity(Inventory domain) {
+    private InventoryEntity toEntity(Inventory i) {
         return InventoryEntity.builder()
-                .id(domain.getId())
-                .productId(domain.getProductId())
-                .currentStock(domain.getCurrentStock())
-                .minStock(domain.getMinStock())
-                .maxStock(domain.getMaxStock())
-                .version(domain.getVersion())
-                .createdAt(domain.getCreatedAt())
-                .updatedAt(domain.getUpdatedAt())
+                .id(i.getId())
+                .productId(i.getProductId())
+                .currentStock(i.getCurrentStock())
+                .minStock(i.getMinStock())
+                .maxStock(i.getMaxStock() > 0 ? i.getMaxStock() : null)
+                .reservedStock(0)
+                .version(i.getVersion())
+                .createdBy(null)
+                .createdAt(i.getCreatedAt())
+                .updatedAt(i.getUpdatedAt())
                 .build();
     }
 
-    private InventoryMovement toMovementDomain(InventoryMovementEntity entity) {
+    private InventoryMovement toMovementDomain(InventoryMovementEntity e) {
         return InventoryMovement.builder()
-                .id(entity.getId())
-                .inventoryId(entity.getInventoryId())
-                .productId(entity.getProductId())
-                .movementType(MovementType.valueOf(entity.getMovementType().name()))
-                .quantity(entity.getQuantity())
-                .previousStock(entity.getPreviousStock())
-                .newStock(entity.getNewStock())
-                .referenceType(entity.getReferenceType())
-                .referenceId(entity.getReferenceId())
-                .justification(entity.getJustification())
-                .notes(entity.getNotes())
-                .createdBy(entity.getCreatedBy())
-                .createdAt(entity.getCreatedAt())
+                .id(e.getId())
+                .productId(e.getProductId())
+                .movementType(MovementType.valueOf(e.getMovementType().name()))
+                .quantity(e.getQuantity())
+                .previousStock(e.getPreviousStock())
+                .newStock(e.getNewStock())
+                .referenceType(e.getReferenceType())
+                .referenceId(e.getReferenceId())
+                .justification(e.getJustification())
+                .notes(e.getNotes())
+                .createdBy(e.getCreatedBy())
+                .createdAt(e.getCreatedAt())
                 .build();
     }
 
-    private InventoryMovementEntity toMovementEntity(InventoryMovement domain) {
+    private InventoryMovementEntity toMovementEntity(InventoryMovement m) {
         return InventoryMovementEntity.builder()
-                .id(domain.getId())
-                .inventoryId(domain.getInventoryId())
-                .productId(domain.getProductId())
-                .movementType(domain.getMovementType())
-                .quantity(domain.getQuantity())
-                .previousStock(domain.getPreviousStock())
-                .newStock(domain.getNewStock())
-                .referenceType(domain.getReferenceType())
-                .referenceId(domain.getReferenceId())
-                .justification(domain.getJustification())
-                .notes(domain.getNotes())
-                .createdBy(domain.getCreatedBy())
-                .createdAt(domain.getCreatedAt())
+                .id(m.getId())
+                .productId(m.getProductId())
+                .movementType(m.getMovementType())
+                .quantity(m.getQuantity())
+                .previousStock(m.getPreviousStock())
+                .newStock(m.getNewStock())
+                .referenceType(m.getReferenceType())
+                .referenceId(m.getReferenceId())
+                .justification(m.getJustification())
+                .notes(m.getNotes())
+                .createdBy(m.getCreatedBy())
+                .createdAt(m.getCreatedAt())
                 .build();
     }
 }

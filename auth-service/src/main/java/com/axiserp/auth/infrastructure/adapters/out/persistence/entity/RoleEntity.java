@@ -30,11 +30,17 @@ public class RoleEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false, unique = true, length = 50)
+    @Column(nullable = false, length = 100)
     private String name;
 
     @Column(nullable = false, length = 255)
     private String description;
+
+    @Column(name = "created_by")
+    private UUID createdBy;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

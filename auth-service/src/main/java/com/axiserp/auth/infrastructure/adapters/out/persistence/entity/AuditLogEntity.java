@@ -43,8 +43,7 @@ public class AuditLogEntity {
     private String userName;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "audit_action")
-    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(nullable = false, length = 30)
     private AuditAction action;
 
     @Column(name = "entity_type", nullable = false, length = 100)
@@ -57,7 +56,7 @@ public class AuditLogEntity {
     @JdbcTypeCode(SqlTypes.JSON)
     private String detail;
 
-    @Column(name = "ip_address")
+    @Column(name = "ip_address", length = 45)
     private String ipAddress;
 
     @Column(name = "user_agent", columnDefinition = "TEXT")
@@ -70,7 +69,7 @@ public class AuditLogEntity {
 
     public enum AuditAction {
         LOGIN, LOGOUT,
-        CREATE, UPDATE, DELETE, DEACTIVATE, VOID,
+        CREATE, UPDATE, DELETE, DEACTIVATE, REACTIVATE, VOID,
         PASSWORD_RESET_REQUEST, PASSWORD_RESET_COMPLETE
     }
 }
