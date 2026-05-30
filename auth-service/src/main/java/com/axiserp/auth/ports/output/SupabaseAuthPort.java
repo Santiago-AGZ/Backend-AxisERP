@@ -4,4 +4,5 @@ import java.util.UUID;
 
 public interface SupabaseAuthPort {
     SupabaseUser createUser(String email, String roleName, String name, UUID createdBy);
+    void sendPasswordReset(String email);
 }

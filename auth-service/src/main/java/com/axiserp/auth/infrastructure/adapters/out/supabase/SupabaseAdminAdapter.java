@@ -22,11 +22,13 @@ public class SupabaseAdminAdapter implements SupabaseAuthPort {
     private static final Logger log = LoggerFactory.getLogger(SupabaseAdminAdapter.class);
 
     private final RestClient restClient;
+    private final RestClient publicRestClient;
 
     public SupabaseAdminAdapter(
             RestClient.Builder restClientBuilder,
             @Value("${supabase.url}") String supabaseUrl,
-            @Value("${supabase.service-role-key}") String serviceRoleKey) {
+            @Value("${supabase.service-role-key}") String serviceRoleKey,
+            @Value("${supabase.anon-key}") String anonKey) {
 
         String baseUrl = supabaseUrl + "/auth/v1/admin";
 
@@ -36,6 +38,26 @@ public class SupabaseAdminAdapter implements SupabaseAuthPort {
                 .defaultHeader("Authorization", "Bearer " + serviceRoleKey)
                 .defaultHeader("Content-Type", "application/json")
                 .build();
+
+        this.publicRestClient = restClientBuilder
+                .baseUrl(supabaseUrl + "/auth/v1")
+                .defaultHeader("apikey", anonKey)
+                .defaultHeader("Content-Type", "application/json")
+                .build();
+    }
+
+    @Override
+    public void sendPasswordReset(String email) {
+        log.info("Sending password reset email to: {}", email);
+        try {
+            publicRestClient.post()
+                    .uri("/recover")
+                    .body(Map.of("email", email))
+                    .retrieve()
+                    .toBodilessEntity();
+        } catch (HttpStatusCodeException e) {
+            log.warn("Password reset API responded: {}", e.getStatusCode());
+        }
     }
 
     @Override

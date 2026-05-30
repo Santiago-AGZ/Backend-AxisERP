@@ -1,5 +1,7 @@
 package com.axiserp.auth.infrastructure.adapters.in.web.controller;
 
+import jakarta.validation.Valid;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -10,15 +12,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.axiserp.auth.application.dto.request.LoginRequest;
-import com.axiserp.auth.application.dto.request.RefreshTokenRequest;
-import com.axiserp.auth.application.dto.response.LoginResponse;
+import com.axiserp.auth.application.dto.request.PasswordResetRequest;
 import com.axiserp.auth.application.dto.response.UserInfoResponse;
-import com.axiserp.auth.ports.input.AuthenticateUserUseCase;
 import com.axiserp.auth.ports.input.GetUserInfoUseCase;
-import com.axiserp.auth.ports.input.RefreshTokenUseCase;
+import com.axiserp.auth.ports.output.SupabaseAuthPort;
 
-import jakarta.validation.Valid;
+import java.util.Map;
+
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -26,33 +26,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final AuthenticateUserUseCase authenticateUserUseCase;
-    private final RefreshTokenUseCase refreshTokenUseCase;
     private final GetUserInfoUseCase getUserInfoUseCase;
-
-    @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(
-            @Valid @RequestBody LoginRequest request,
-            jakarta.servlet.http.HttpServletRequest httpRequest) {
-
-        String ipAddress = getClientIp(httpRequest);
-        String userAgent = httpRequest.getHeader("User-Agent");
-
-        LoginResponse response = authenticateUserUseCase.authenticate(request, ipAddress, userAgent);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
-    }
-
-    @PostMapping("/refresh")
-    public ResponseEntity<LoginResponse> refresh(
-            @Valid @RequestBody RefreshTokenRequest request,
-            jakarta.servlet.http.HttpServletRequest httpRequest) {
-
-        String ipAddress = getClientIp(httpRequest);
-        String userAgent = httpRequest.getHeader("User-Agent");
-
-        LoginResponse response = refreshTokenUseCase.refresh(request.getRefreshToken(), ipAddress, userAgent);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
-    }
+    private final SupabaseAuthPort supabaseAuthPort;
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/me")
@@ -62,11 +37,11 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    private String getClientIp(jakarta.servlet.http.HttpServletRequest request) {
-        String xForwardedFor = request.getHeader("X-Forwarded-For");
-        if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
-            return xForwardedFor.split(",")[0].trim();
-        }
-        return request.getRemoteAddr();
+    @PostMapping("/password-reset")
+    public ResponseEntity<Map<String, Object>> passwordReset(
+            @Valid @RequestBody PasswordResetRequest request) {
+        supabaseAuthPort.sendPasswordReset(request.email());
+        return ResponseEntity.ok(Map.of(
+                "message", "Si el correo existe, recibirás un enlace de recuperación"));
     }
 }
