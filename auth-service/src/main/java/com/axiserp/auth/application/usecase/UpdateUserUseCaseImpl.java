@@ -11,6 +11,7 @@ import com.axiserp.auth.application.dto.request.UpdateUserRequest;
 import com.axiserp.auth.application.dto.response.UserResponse;
 import com.axiserp.auth.application.service.AuditService;
 import com.axiserp.auth.domain.exception.DuplicateEmailException;
+import com.axiserp.auth.domain.exception.UserNotFoundException;
 import com.axiserp.auth.domain.factory.UserFactory;
 import com.axiserp.auth.domain.model.AuditLog.AuditAction;
 import com.axiserp.auth.domain.model.User;
@@ -35,6 +36,10 @@ public class UpdateUserUseCaseImpl implements UpdateUserUseCase {
     public UserResponse update(UUID id, UpdateUserRequest request) {
         User user = userRepositoryPort.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        if (user.getStatus() == User.UserStatus.ELIMINADO) {
+            throw new UserNotFoundException("Usuario no encontrado");
+        }
 
         if (!user.getEmail().equalsIgnoreCase(request.getEmail())
                 && userRepositoryPort.existsByEmail(request.getEmail())) {

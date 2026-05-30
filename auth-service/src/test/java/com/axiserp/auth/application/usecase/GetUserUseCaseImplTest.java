@@ -50,7 +50,6 @@ class GetUserUseCaseImplTest {
                 .id(userId)
                 .name("Test User")
                 .email("test@axiserp.com")
-                .passwordHash("$2a$10$hashed")
                 .roleId(roleId)
                 .status(User.UserStatus.ACTIVO)
                 .createdAt(LocalDateTime.now())
@@ -75,6 +74,20 @@ class GetUserUseCaseImplTest {
     @DisplayName("Should throw RuntimeException when user not found")
     void getById_notFound() {
         when(userRepositoryPort.findById(userId)).thenReturn(Optional.empty());
+
+        assertThrows(RuntimeException.class, () -> getUserUseCase.getById(userId));
+    }
+
+    @Test
+    @DisplayName("Should throw UserNotFoundException when user is ELIMINADO")
+    void getById_deletedUser() {
+        User deletedUser = User.builder()
+                .id(userId)
+                .status(User.UserStatus.ELIMINADO)
+                .deletedAt(java.time.LocalDateTime.now())
+                .build();
+
+        when(userRepositoryPort.findById(userId)).thenReturn(Optional.of(deletedUser));
 
         assertThrows(RuntimeException.class, () -> getUserUseCase.getById(userId));
     }

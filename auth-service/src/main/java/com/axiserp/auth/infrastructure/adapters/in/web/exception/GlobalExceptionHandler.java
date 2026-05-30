@@ -15,10 +15,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.axiserp.auth.domain.exception.DuplicateEmailException;
-import com.axiserp.auth.domain.exception.InvalidCredentialsException;
-import com.axiserp.auth.domain.exception.TokenExpiredException;
 import com.axiserp.auth.domain.exception.UserInactiveException;
-import com.axiserp.auth.domain.exception.UserLockedException;
+import com.axiserp.auth.domain.exception.UserNotFoundException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -47,29 +45,19 @@ public class GlobalExceptionHandler {
                 "No tiene permisos para realizar esta operación");
     }
 
-    @ExceptionHandler(InvalidCredentialsException.class)
-    public ResponseEntity<Map<String, Object>> handleInvalidCredentials(InvalidCredentialsException ex) {
-        return buildErrorResponse(HttpStatus.UNAUTHORIZED, "Unauthorized", ex.getMessage());
-    }
-
     @ExceptionHandler(UserInactiveException.class)
     public ResponseEntity<Map<String, Object>> handleUserInactive(UserInactiveException ex) {
         return buildErrorResponse(HttpStatus.FORBIDDEN, "Forbidden", ex.getMessage());
     }
 
-    @ExceptionHandler(UserLockedException.class)
-    public ResponseEntity<Map<String, Object>> handleUserLocked(UserLockedException ex) {
-        return buildErrorResponse(HttpStatus.LOCKED, "Locked", ex.getMessage());
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleUserNotFound(UserNotFoundException ex) {
+        return buildErrorResponse(HttpStatus.NOT_FOUND, "Not Found", ex.getMessage());
     }
 
     @ExceptionHandler(DuplicateEmailException.class)
     public ResponseEntity<Map<String, Object>> handleDuplicateEmail(DuplicateEmailException ex) {
         return buildErrorResponse(HttpStatus.CONFLICT, "Conflict", ex.getMessage());
-    }
-
-    @ExceptionHandler(TokenExpiredException.class)
-    public ResponseEntity<Map<String, Object>> handleTokenExpired(TokenExpiredException ex) {
-        return buildErrorResponse(HttpStatus.UNAUTHORIZED, "Unauthorized", ex.getMessage());
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

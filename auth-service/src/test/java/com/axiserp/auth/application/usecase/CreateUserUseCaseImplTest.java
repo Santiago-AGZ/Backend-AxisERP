@@ -23,6 +23,7 @@ import com.axiserp.auth.application.service.AuditService;
 import com.axiserp.auth.domain.model.Role;
 import com.axiserp.auth.domain.model.User;
 import com.axiserp.auth.domain.exception.DuplicateEmailException;
+import com.axiserp.auth.domain.exception.UserInactiveException;
 import com.axiserp.auth.ports.output.RoleRepositoryPort;
 import com.axiserp.auth.ports.output.SupabaseAuthPort;
 import com.axiserp.auth.ports.output.SupabaseUser;
@@ -66,7 +67,6 @@ class CreateUserUseCaseImplTest {
                 .id(supabaseId)
                 .name("Test User")
                 .email("test@axiserp.com")
-                .passwordHash("")
                 .roleId(roleId)
                 .status(User.UserStatus.PENDIENTE)
                 .createdBy(adminId)
@@ -74,6 +74,8 @@ class CreateUserUseCaseImplTest {
                 .build();
 
         when(userRepositoryPort.existsByEmail("test@axiserp.com")).thenReturn(false);
+        when(userRepositoryPort.findById(adminId)).thenReturn(Optional.of(
+                User.builder().id(adminId).status(User.UserStatus.ACTIVO).build()));
         when(roleRepositoryPort.findByName("ADMIN")).thenReturn(Optional.of(role));
         when(supabaseAuthPort.createUser("test@axiserp.com", "ADMIN", "Test User", adminId))
                 .thenReturn(supabaseUser);
@@ -108,9 +110,24 @@ class CreateUserUseCaseImplTest {
         CreateUserRequest request = new CreateUserRequest("Test User", "test@axiserp.com", "INVALID");
 
         when(userRepositoryPort.existsByEmail("test@axiserp.com")).thenReturn(false);
+        when(userRepositoryPort.findById(adminId)).thenReturn(Optional.of(
+                User.builder().id(adminId).status(User.UserStatus.ACTIVO).build()));
         when(roleRepositoryPort.findByName("INVALID")).thenReturn(Optional.empty());
 
         assertThrows(IllegalArgumentException.class, () -> createUserUseCase.create(request, adminId));
+        verify(supabaseAuthPort, never()).createUser(any(), any(), any(), any());
+    }
+
+    @Test
+    @DisplayName("Should throw UserInactiveException when admin is inactive")
+    void create_adminInactive() {
+        CreateUserRequest request = new CreateUserRequest("Test User", "test@axiserp.com", "ADMIN");
+
+        when(userRepositoryPort.existsByEmail("test@axiserp.com")).thenReturn(false);
+        when(userRepositoryPort.findById(adminId)).thenReturn(Optional.of(
+                User.builder().id(adminId).status(User.UserStatus.INACTIVO).build()));
+
+        assertThrows(UserInactiveException.class, () -> createUserUseCase.create(request, adminId));
         verify(supabaseAuthPort, never()).createUser(any(), any(), any(), any());
     }
 }
