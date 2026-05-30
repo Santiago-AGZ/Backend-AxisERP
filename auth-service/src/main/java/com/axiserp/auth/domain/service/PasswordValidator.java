@@ -40,7 +40,7 @@ public class PasswordValidator {
             throw new WeakPasswordException("La contraseña debe contener al menos un carácter especial (@#$%^&*!)");
         }
 
-        if (!NO_SPACES_PATTERN.matcher(password).find()) {
+        if (!NO_SPACES_PATTERN.matcher(password).matches()) {
             throw new WeakPasswordException("La contraseña no puede contener espacios en blanco");
         }
     }
