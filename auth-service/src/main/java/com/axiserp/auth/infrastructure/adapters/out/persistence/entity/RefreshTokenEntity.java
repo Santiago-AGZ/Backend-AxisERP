@@ -5,6 +5,8 @@ import java.util.UUID;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -19,7 +21,7 @@ import lombok.Setter;
 
 /**
  * Refresh token entity para renovación de acceso.
- * Tokens válidos por 7 días, con auditoría de IP y user agent.
+ * Tokens válidos por 7 días, con auditoría de IP, user agent, y estado.
  */
 @Entity
 @Table(name = "refresh_tokens", indexes = {
@@ -33,6 +35,12 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RefreshTokenEntity {
+
+    public enum TokenStatus {
+        ACTIVE,
+        EXPIRED,
+        REVOKED
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -55,6 +63,13 @@ public class RefreshTokenEntity {
 
     @Column(name = "user_agent", columnDefinition = "TEXT")
     private String userAgent;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TokenStatus status = TokenStatus.ACTIVE;
+
+    @Column(name = "revoked_at")
+    private LocalDateTime revokedAt;
 
     @PrePersist
     protected void onCreate() {
