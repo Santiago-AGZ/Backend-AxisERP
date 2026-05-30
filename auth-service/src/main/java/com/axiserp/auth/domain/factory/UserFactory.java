@@ -18,15 +18,17 @@ public class UserFactory {
 
     /**
      * Crea un nuevo usuario con valores por defecto.
+     * Autenticación delegada a Supabase Auth; no se almacena password hash local.
      */
-    public static User createNew(String name, String email, String hashedPassword,
+    public static User createNew(UUID id, String name, String email,
                                   UUID roleId, UUID createdBy) {
         return User.builder()
+                .id(id)
                 .name(name)
                 .email(email)
-                .passwordHash(hashedPassword)
+                .passwordHash("")
                 .roleId(roleId)
-                .status(UserStatus.ACTIVO)
+                .status(UserStatus.PENDIENTE)
                 .createdBy(createdBy)
                 .failedLoginAttempts(0)
                 .lastLoginAt(null)

@@ -4,7 +4,6 @@ import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,7 +28,6 @@ public class CreateUserUseCaseImpl implements CreateUserUseCase {
 
     private final UserRepositoryPort userRepositoryPort;
     private final RoleRepositoryPort roleRepositoryPort;
-    private final PasswordEncoder passwordEncoder;
     private final AuditService auditService;
 
     @Override
@@ -42,10 +40,8 @@ public class CreateUserUseCaseImpl implements CreateUserUseCase {
         var role = roleRepositoryPort.findByName(request.getRole())
                 .orElseThrow(() -> new IllegalArgumentException("Rol no válido: " + request.getRole()));
 
-        String hashedPassword = passwordEncoder.encode(request.getPassword());
-
         User user = UserFactory.createNew(
-                request.getName(), request.getEmail(), hashedPassword, role.getId(), createdBy);
+                UUID.randomUUID(), request.getName(), request.getEmail(), role.getId(), createdBy);
 
         User saved = userRepositoryPort.save(user);
 

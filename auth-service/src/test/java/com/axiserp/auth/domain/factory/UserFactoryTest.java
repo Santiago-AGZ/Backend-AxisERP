@@ -13,19 +13,21 @@ import com.axiserp.auth.domain.model.User.UserStatus;
 
 class UserFactoryTest {
 
+    private UUID id = UUID.randomUUID();
     private UUID roleId = UUID.randomUUID();
     private UUID adminId = UUID.randomUUID();
 
     @Test
     @DisplayName("Should create new user with default values")
     void createNew_success() {
-        User user = UserFactory.createNew("Test", "test@axiserp.com", "hashed123", roleId, adminId);
+        User user = UserFactory.createNew(id, "Test", "test@axiserp.com", roleId, adminId);
 
+        assertEquals(id, user.getId());
         assertEquals("Test", user.getName());
         assertEquals("test@axiserp.com", user.getEmail());
-        assertEquals("hashed123", user.getPasswordHash());
+        assertEquals("", user.getPasswordHash());
         assertEquals(roleId, user.getRoleId());
-        assertEquals(UserStatus.ACTIVO, user.getStatus());
+        assertEquals(UserStatus.PENDIENTE, user.getStatus());
         assertEquals(adminId, user.getCreatedBy());
         assertEquals(0, user.getFailedLoginAttempts());
         assertNull(user.getLastLoginAt());
@@ -37,7 +39,7 @@ class UserFactoryTest {
     @Test
     @DisplayName("Should update user preserving immutable fields")
     void update_success() {
-        User existing = UserFactory.createNew("Old", "old@axiserp.com", "hashed", roleId, adminId);
+        User existing = UserFactory.createNew(UUID.randomUUID(), "Old", "old@axiserp.com", roleId, adminId);
         UUID newRoleId = UUID.randomUUID();
 
         User updated = UserFactory.update(existing, "New Name", "new@axiserp.com", newRoleId);
@@ -45,7 +47,7 @@ class UserFactoryTest {
         assertEquals("New Name", updated.getName());
         assertEquals("new@axiserp.com", updated.getEmail());
         assertEquals(newRoleId, updated.getRoleId());
-        assertEquals("hashed", updated.getPasswordHash());
+        assertEquals("", updated.getPasswordHash());
         assertEquals(existing.getId(), updated.getId());
         assertEquals(existing.getCreatedBy(), updated.getCreatedBy());
         assertEquals(existing.getStatus(), updated.getStatus());
@@ -55,7 +57,7 @@ class UserFactoryTest {
     @Test
     @DisplayName("Should deactivate user setting INACTIVO status and deletedAt")
     void deactivate_success() {
-        User existing = UserFactory.createNew("Test", "test@axiserp.com", "hashed", roleId, adminId);
+        User existing = UserFactory.createNew(UUID.randomUUID(), "Test", "test@axiserp.com", roleId, adminId);
 
         User deactivated = UserFactory.deactivate(existing);
 
@@ -69,7 +71,7 @@ class UserFactoryTest {
     @Test
     @DisplayName("Should update password and reset failed attempts")
     void withNewPassword_success() {
-        User existing = UserFactory.createNew("Test", "test@axiserp.com", "oldHash", roleId, adminId);
+        User existing = UserFactory.createNew(UUID.randomUUID(), "Test", "test@axiserp.com", roleId, adminId);
 
         User updated = UserFactory.withNewPassword(existing, "newHash");
 
@@ -82,7 +84,7 @@ class UserFactoryTest {
     @Test
     @DisplayName("Should increment failed attempts and lock at 5")
     void withFailedAttempt_locksAtFive() {
-        User user = UserFactory.createNew("Test", "test@axiserp.com", "hashed", roleId, adminId);
+        User user = UserFactory.createNew(UUID.randomUUID(), "Test", "test@axiserp.com", roleId, adminId);
 
         for (int i = 1; i <= 5; i++) {
             user = UserFactory.withFailedAttempt(user);
@@ -95,18 +97,18 @@ class UserFactoryTest {
     @Test
     @DisplayName("Should not lock user before 5 attempts")
     void withFailedAttempt_notLockedBeforeFive() {
-        User user = UserFactory.createNew("Test", "test@axiserp.com", "hashed", roleId, adminId);
+        User user = UserFactory.createNew(UUID.randomUUID(), "Test", "test@axiserp.com", roleId, adminId);
 
         for (int i = 1; i <= 4; i++) {
             user = UserFactory.withFailedAttempt(user);
-            assertEquals(UserStatus.ACTIVO, user.getStatus());
+            assertEquals(UserStatus.PENDIENTE, user.getStatus());
         }
     }
 
     @Test
     @DisplayName("Should reset failed attempts on successful login")
     void withSuccessfulLogin_resetsAttempts() {
-        User user = UserFactory.createNew("Test", "test@axiserp.com", "hashed", roleId, adminId);
+        User user = UserFactory.createNew(UUID.randomUUID(), "Test", "test@axiserp.com", roleId, adminId);
         user = UserFactory.withFailedAttempt(user);
         user = UserFactory.withFailedAttempt(user);
         assertEquals(2, user.getFailedLoginAttempts());
