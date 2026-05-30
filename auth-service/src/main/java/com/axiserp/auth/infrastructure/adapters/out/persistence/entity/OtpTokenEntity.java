@@ -49,6 +49,7 @@ public class OtpTokenEntity {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @Builder.Default
     @Column(name = "attempts")
     private Integer attempts = 0;
 
