@@ -10,6 +10,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -23,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
+@Order(Ordered.LOWEST_PRECEDENCE - 100)
 public class RateLimitingFilter extends OncePerRequestFilter {
 
     private final Cache<String, Bucket> ipBuckets = Caffeine.newBuilder()

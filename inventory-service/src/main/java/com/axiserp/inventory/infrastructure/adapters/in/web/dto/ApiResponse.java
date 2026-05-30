@@ -58,15 +58,27 @@ public class ApiResponse<T> {
         private final Object rejectedValue;
     }
 
-    @Getter @Builder
+    @Getter
+    @Builder
     public static class ApiMeta {
         private final Instant timestamp;
         private final String requestId;
+        private final String path;
+        private final String method;
 
         public static ApiMeta now() {
+            String requestPath = null;
+            String requestMethod = null;
+            var attrs = org.springframework.web.context.request.RequestContextHolder.getRequestAttributes();
+            if (attrs instanceof org.springframework.web.context.request.ServletRequestAttributes servlet) {
+                requestPath = servlet.getRequest().getRequestURI();
+                requestMethod = servlet.getRequest().getMethod();
+            }
             return ApiMeta.builder()
                     .timestamp(Instant.now())
                     .requestId(java.util.UUID.randomUUID().toString())
+                    .path(requestPath)
+                    .method(requestMethod)
                     .build();
         }
     }

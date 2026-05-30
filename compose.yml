@@ -1,28 +1,17 @@
 services:
 
-  # ============================================================================
-  # NEON DATABASES: Cada servicio apunta a su propia BD en Neon PostgreSQL
-  # Las credenciales vienen del .env (no commitear)
-  # ============================================================================
-
   auth-service:
     build: ./auth-service
     container_name: auth-service
     restart: unless-stopped
     ports:
       - "8081:8081"
+    env_file:
+      - .env
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://ep-wispy-voice-aqodv5c1-pooler.c-8.us-east-1.aws.neon.tech:5432/neondb?sslmode=require
-      SPRING_DATASOURCE_USERNAME: neondb_owner
-      SPRING_DATASOURCE_PASSWORD: npg_6D4bJSLtAuzk
-      JWT_SECRET: a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2
-      SPRING_MAIL_HOST: smtp.gmail.com
-      SPRING_MAIL_PORT: 587
-      SPRING_MAIL_USERNAME: noreply@axiserp.local
-      SPRING_MAIL_PASSWORD: dev-password
-      APP_FRONTEND_URL: http://localhost:3000
-      APP_EMAIL_FROM: noreply@axiserp.local
-      APP_EMAIL_FROM_NAME: AxisERP
+      SPRING_DATASOURCE_URL: ${AUTH_DB_URL}
+      SPRING_DATASOURCE_USERNAME: ${AUTH_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${AUTH_DB_PASSWORD}
     networks:
       - axiserp-network
 
@@ -32,11 +21,12 @@ services:
     restart: unless-stopped
     ports:
       - "8082:8082"
+    env_file:
+      - .env
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://ep-rapid-night-aq5mpoqi-pooler.c-8.us-east-1.aws.neon.tech:5432/neondb?sslmode=require
-      SPRING_DATASOURCE_USERNAME: neondb_owner
-      SPRING_DATASOURCE_PASSWORD: npg_W9Zr4nodvQih
-      JWT_SECRET: a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2
+      SPRING_DATASOURCE_URL: ${CATALOG_DB_URL}
+      SPRING_DATASOURCE_USERNAME: ${CATALOG_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${CATALOG_DB_PASSWORD}
     networks:
       - axiserp-network
 
@@ -46,13 +36,12 @@ services:
     restart: unless-stopped
     ports:
       - "8087:8087"
+    env_file:
+      - .env
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://ep-still-resonance-apfxlmlm-pooler.c-7.us-east-1.aws.neon.tech:5432/neondb?sslmode=require
-      SPRING_DATASOURCE_USERNAME: neondb_owner
-      SPRING_DATASOURCE_PASSWORD: npg_4GmCpJk3bgqa
-      JWT_SECRET: a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2
-      INVENTORY_SERVICE_URL: http://inventory-service:8087
-      INTERNAL_API_KEY: dev-internal-key
+      SPRING_DATASOURCE_URL: ${INVENTORY_DB_URL}
+      SPRING_DATASOURCE_USERNAME: ${INVENTORY_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${INVENTORY_DB_PASSWORD}
     networks:
       - axiserp-network
 
@@ -62,13 +51,12 @@ services:
     restart: unless-stopped
     ports:
       - "8084:8084"
+    env_file:
+      - .env
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://ep-misty-waterfall-apbais5g-pooler.c-7.us-east-1.aws.neon.tech:5432/neondb?sslmode=require
-      SPRING_DATASOURCE_USERNAME: neondb_owner
-      SPRING_DATASOURCE_PASSWORD: npg_qtvUFx6Ol8Ve
-      JWT_SECRET: a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2
-      INVENTORY_SERVICE_URL: http://inventory-service:8087
-      INTERNAL_API_KEY: dev-internal-key
+      SPRING_DATASOURCE_URL: ${SALES_DB_URL}
+      SPRING_DATASOURCE_USERNAME: ${SALES_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${SALES_DB_PASSWORD}
     networks:
       - axiserp-network
 
@@ -78,13 +66,12 @@ services:
     restart: unless-stopped
     ports:
       - "8086:8086"
+    env_file:
+      - .env
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://ep-quiet-union-aqsh56i9-pooler.c-8.us-east-1.aws.neon.tech:5432/neondb?sslmode=require
-      SPRING_DATASOURCE_USERNAME: neondb_owner
-      SPRING_DATASOURCE_PASSWORD: npg_xTB0s1gojVbU
-      JWT_SECRET: a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2
-      INVENTORY_SERVICE_URL: http://inventory-service:8087
-      INTERNAL_API_KEY: dev-internal-key
+      SPRING_DATASOURCE_URL: ${PURCHASE_DB_URL}
+      SPRING_DATASOURCE_USERNAME: ${PURCHASE_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${PURCHASE_DB_PASSWORD}
     networks:
       - axiserp-network
 
@@ -94,16 +81,12 @@ services:
     restart: unless-stopped
     ports:
       - "8085:8085"
+    env_file:
+      - .env
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://ep-flat-dream-aphtqln9-pooler.c-7.us-east-1.aws.neon.tech:5432/neondb?sslmode=require
-      SPRING_DATASOURCE_USERNAME: neondb_owner
-      SPRING_DATASOURCE_PASSWORD: npg_hnYTb4BIov5X
-      JWT_SECRET: a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2
-      INVENTORY_SERVICE_URL: http://inventory-service:8087
-      CATALOG_SERVICE_URL: http://catalog-service:8082
-      SALES_SERVICE_URL: http://sales-service:8084
-      PURCHASE_SERVICE_URL: http://purchase-service:8086
-      AUTH_SERVICE_URL: http://auth-service:8081
+      SPRING_DATASOURCE_URL: ${REPORT_DB_URL}
+      SPRING_DATASOURCE_USERNAME: ${REPORT_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${REPORT_DB_PASSWORD}
     networks:
       - axiserp-network
 

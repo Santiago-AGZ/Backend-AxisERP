@@ -57,12 +57,15 @@ class FirstLoginFilterTest {
                 .build();
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(pendingUser));
+        when(userRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         filter.doFilterInternal(new MockHttpServletRequest(), new MockHttpServletResponse(),
                 (req, res) -> {});
 
         verify(userRepository).findById(userId);
-        verify(userRepository).save(argThat(user -> user.getStatus() == UserStatus.ACTIVO));
+        verify(userRepository).save(argThat(user ->
+                user.getStatus() == UserStatus.ACTIVO &&
+                user.getLastLoginAt() != null));
     }
 
     @Test

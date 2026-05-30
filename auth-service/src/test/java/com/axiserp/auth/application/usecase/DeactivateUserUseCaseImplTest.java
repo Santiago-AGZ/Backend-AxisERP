@@ -46,6 +46,6 @@ class DeactivateUserUseCaseImplTest {
         when(userRepositoryPort.findById(deletedUser.getId())).thenReturn(Optional.of(deletedUser));
 
         assertThrows(IllegalStateException.class,
-                () -> deactivateUserUseCase.deactivate(deletedUser.getId()));
+                () -> deactivateUserUseCase.deactivate(deletedUser.getId(), UUID.randomUUID()));
     }
 }

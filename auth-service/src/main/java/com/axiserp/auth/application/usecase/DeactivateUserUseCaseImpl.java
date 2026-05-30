@@ -31,7 +31,7 @@ public class DeactivateUserUseCaseImpl implements DeactivateUserUseCase {
 
     @Override
     @Transactional
-    public UserResponse deactivate(UUID id) {
+    public UserResponse deactivate(UUID id, UUID updatedBy) {
         User user = userRepositoryPort.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
 
@@ -43,7 +43,7 @@ public class DeactivateUserUseCaseImpl implements DeactivateUserUseCase {
             throw new IllegalStateException("El usuario ya está eliminado");
         }
 
-        User deactivated = UserFactory.deactivate(user);
+        User deactivated = UserFactory.deactivate(user, updatedBy);
         User saved = userRepositoryPort.save(deactivated);
 
         String roleName = roleRepositoryPort.findById(user.getRoleId())

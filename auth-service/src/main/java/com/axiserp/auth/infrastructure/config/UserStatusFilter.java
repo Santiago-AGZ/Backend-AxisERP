@@ -22,8 +22,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 
 @Component
+@Order(Ordered.LOWEST_PRECEDENCE - 98)
 @RequiredArgsConstructor
 public class UserStatusFilter extends OncePerRequestFilter {
 

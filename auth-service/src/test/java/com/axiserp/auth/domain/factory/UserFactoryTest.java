@@ -25,11 +25,9 @@ class UserFactoryTest {
         assertEquals(id, user.getId());
         assertEquals("Test", user.getName());
         assertEquals("test@axiserp.com", user.getEmail());
-        assertEquals("", user.getPasswordHash());
         assertEquals(roleId, user.getRoleId());
         assertEquals(UserStatus.PENDIENTE, user.getStatus());
         assertEquals(adminId, user.getCreatedBy());
-        assertEquals(0, user.getFailedLoginAttempts());
         assertNull(user.getLastLoginAt());
         assertNull(user.getDeletedAt());
         assertNotNull(user.getCreatedAt());
@@ -42,14 +40,14 @@ class UserFactoryTest {
         User existing = UserFactory.createNew(UUID.randomUUID(), "Old", "old@axiserp.com", roleId, adminId);
         UUID newRoleId = UUID.randomUUID();
 
-        User updated = UserFactory.update(existing, "New Name", "new@axiserp.com", newRoleId);
+        User updated = UserFactory.update(existing, "New Name", "new@axiserp.com", newRoleId, adminId);
 
         assertEquals("New Name", updated.getName());
         assertEquals("new@axiserp.com", updated.getEmail());
         assertEquals(newRoleId, updated.getRoleId());
-        assertEquals("", updated.getPasswordHash());
         assertEquals(existing.getId(), updated.getId());
         assertEquals(existing.getCreatedBy(), updated.getCreatedBy());
+        assertEquals(adminId, updated.getUpdatedBy());
         assertEquals(existing.getStatus(), updated.getStatus());
         assertNotNull(updated.getUpdatedAt());
     }
@@ -59,63 +57,25 @@ class UserFactoryTest {
     void deactivate_success() {
         User existing = UserFactory.createNew(UUID.randomUUID(), "Test", "test@axiserp.com", roleId, adminId);
 
-        User deactivated = UserFactory.deactivate(existing);
+        User deactivated = UserFactory.deactivate(existing, adminId);
 
         assertEquals(UserStatus.INACTIVO, deactivated.getStatus());
         assertNotNull(deactivated.getDeletedAt());
         assertEquals(existing.getId(), deactivated.getId());
         assertEquals(existing.getName(), deactivated.getName());
-        assertEquals(existing.getPasswordHash(), deactivated.getPasswordHash());
+        assertEquals(adminId, deactivated.getUpdatedBy());
     }
 
     @Test
-    @DisplayName("Should update password and reset failed attempts")
-    void withNewPassword_success() {
+    @DisplayName("Should update lastLoginAt on successful login")
+    void withSuccessfulLogin_updatesLastLogin() {
         User existing = UserFactory.createNew(UUID.randomUUID(), "Test", "test@axiserp.com", roleId, adminId);
 
-        User updated = UserFactory.withNewPassword(existing, "newHash");
+        User afterLogin = UserFactory.withSuccessfulLogin(existing);
 
-        assertEquals("newHash", updated.getPasswordHash());
-        assertEquals(0, updated.getFailedLoginAttempts());
-        assertEquals(existing.getId(), updated.getId());
-        assertEquals(existing.getEmail(), updated.getEmail());
-    }
-
-    @Test
-    @DisplayName("Should increment failed attempts and lock at 5")
-    void withFailedAttempt_locksAtFive() {
-        User user = UserFactory.createNew(UUID.randomUUID(), "Test", "test@axiserp.com", roleId, adminId);
-
-        for (int i = 1; i <= 5; i++) {
-            user = UserFactory.withFailedAttempt(user);
-            assertEquals(i, user.getFailedLoginAttempts());
-        }
-
-        assertEquals(UserStatus.INACTIVO, user.getStatus());
-    }
-
-    @Test
-    @DisplayName("Should not lock user before 5 attempts")
-    void withFailedAttempt_notLockedBeforeFive() {
-        User user = UserFactory.createNew(UUID.randomUUID(), "Test", "test@axiserp.com", roleId, adminId);
-
-        for (int i = 1; i <= 4; i++) {
-            user = UserFactory.withFailedAttempt(user);
-            assertEquals(UserStatus.PENDIENTE, user.getStatus());
-        }
-    }
-
-    @Test
-    @DisplayName("Should reset failed attempts on successful login")
-    void withSuccessfulLogin_resetsAttempts() {
-        User user = UserFactory.createNew(UUID.randomUUID(), "Test", "test@axiserp.com", roleId, adminId);
-        user = UserFactory.withFailedAttempt(user);
-        user = UserFactory.withFailedAttempt(user);
-        assertEquals(2, user.getFailedLoginAttempts());
-
-        User afterLogin = UserFactory.withSuccessfulLogin(user);
-
-        assertEquals(0, afterLogin.getFailedLoginAttempts());
         assertNotNull(afterLogin.getLastLoginAt());
+        assertEquals(existing.getId(), afterLogin.getUpdatedBy());
+        assertEquals(existing.getId(), afterLogin.getId());
+        assertEquals(existing.getStatus(), afterLogin.getStatus());
     }
 }

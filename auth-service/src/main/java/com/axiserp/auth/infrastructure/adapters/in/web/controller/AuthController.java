@@ -14,10 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.axiserp.auth.application.dto.request.PasswordResetRequest;
 import com.axiserp.auth.application.dto.response.UserInfoResponse;
+import com.axiserp.auth.infrastructure.adapters.in.web.response.ApiResponse;
 import com.axiserp.auth.ports.input.GetUserInfoUseCase;
 import com.axiserp.auth.ports.output.SupabaseAuthPort;
-
-import java.util.Map;
 
 import lombok.RequiredArgsConstructor;
 
@@ -31,17 +30,17 @@ public class AuthController {
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/me")
-    public ResponseEntity<UserInfoResponse> me(Authentication authentication) {
+    public ResponseEntity<ApiResponse<UserInfoResponse>> me(Authentication authentication) {
         String userId = (String) authentication.getPrincipal();
         UserInfoResponse response = getUserInfoUseCase.getUserInfo(userId);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
     @PostMapping("/password-reset")
-    public ResponseEntity<Map<String, Object>> passwordReset(
+    public ResponseEntity<ApiResponse<Void>> passwordReset(
             @Valid @RequestBody PasswordResetRequest request) {
         supabaseAuthPort.sendPasswordReset(request.email());
-        return ResponseEntity.ok(Map.of(
-                "message", "Si el correo existe, recibirás un enlace de recuperación"));
+        return ResponseEntity.ok(ApiResponse.ok(null,
+                "Si el correo existe, recibirás un enlace de recuperación"));
     }
 }

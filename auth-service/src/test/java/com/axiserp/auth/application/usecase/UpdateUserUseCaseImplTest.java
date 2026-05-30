@@ -51,6 +51,6 @@ class UpdateUserUseCaseImplTest {
         when(userRepositoryPort.findById(userId)).thenReturn(Optional.of(deletedUser));
 
         assertThrows(UserNotFoundException.class,
-                () -> updateUserUseCase.update(userId, request));
+                () -> updateUserUseCase.update(userId, request, UUID.randomUUID()));
     }
 }

@@ -2,12 +2,12 @@ package com.axiserp.auth.application.usecase;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
 import com.axiserp.auth.application.dto.response.AuditLogResponse;
 import com.axiserp.auth.domain.model.AuditLog;
+import com.axiserp.auth.domain.model.PageResult;
 import com.axiserp.auth.ports.input.GetAuditLogUseCase;
 import com.axiserp.auth.ports.output.AuditLogRepositoryPort;
 
@@ -20,11 +20,12 @@ public class GetAuditLogUseCaseImpl implements GetAuditLogUseCase {
     private final AuditLogRepositoryPort auditLogRepositoryPort;
 
     @Override
-    public List<AuditLogResponse> getAuditLogs(UUID userId, String action, String entityType, int page, int size) {
-        List<AuditLog> logs = auditLogRepositoryPort.findByFilters(userId, action, entityType, page, size);
-        return logs.stream()
+    public PageResult<AuditLogResponse> getAuditLogs(UUID userId, String action, String entityType, int page, int size) {
+        PageResult<AuditLog> result = auditLogRepositoryPort.findByFilters(userId, action, entityType, page, size);
+        List<AuditLogResponse> content = result.getContent().stream()
                 .map(this::toResponse)
-                .collect(Collectors.toList());
+                .toList();
+        return new PageResult<>(content, result.getPage(), result.getSize(), result.getTotalElements());
     }
 
     private AuditLogResponse toResponse(AuditLog log) {

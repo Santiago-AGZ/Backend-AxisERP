@@ -5,6 +5,8 @@ import java.util.UUID;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.PrePersist;
@@ -15,6 +17,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Token blacklist entity para gestionar tokens revocados.
+ * Previene reutilización de tokens después de logout o reauth.
+ * Se limpia automáticamente después de expiración.
+ */
 @Entity
 @Table(name = "token_blacklist", indexes = {
     @Index(name = "idx_token_jti", columnList = "token_jti", unique = true),
@@ -29,6 +36,7 @@ import lombok.Setter;
 public class TokenBlacklistEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(name = "token_jti", nullable = false, unique = true)
@@ -43,8 +51,14 @@ public class TokenBlacklistEntity {
     @Column(name = "expires_at", nullable = false)
     private LocalDateTime expiresAt;
 
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
     @PrePersist
     protected void onCreate() {
+        if (this.createdAt == null) {
+            this.createdAt = LocalDateTime.now();
+        }
         if (this.revokedAt == null) {
             this.revokedAt = LocalDateTime.now();
         }

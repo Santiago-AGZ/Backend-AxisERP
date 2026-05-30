@@ -88,6 +88,7 @@ public class SupabaseAdminAdapter implements SupabaseAuthPort {
             JsonNode idNode = response.get("id");
             JsonNode emailNode = response.get("email");
             JsonNode invitedAtNode = response.get("invited_at");
+            JsonNode createdAtNode = response.get("created_at");
 
             if (idNode == null || idNode.isNull()) {
                 throw new RuntimeException("Missing 'id' in Supabase response: " + response);
@@ -95,14 +96,17 @@ public class SupabaseAdminAdapter implements SupabaseAuthPort {
             if (emailNode == null || emailNode.isNull()) {
                 throw new RuntimeException("Missing 'email' in Supabase response: " + response);
             }
-            if (invitedAtNode == null || invitedAtNode.isNull()) {
-                throw new RuntimeException("Missing 'invited_at' in Supabase response: " + response);
-            }
+
+            Instant invitedAt = (invitedAtNode != null && !invitedAtNode.isNull())
+                    ? Instant.parse(invitedAtNode.asText())
+                    : (createdAtNode != null && !createdAtNode.isNull()
+                            ? Instant.parse(createdAtNode.asText())
+                            : Instant.now());
 
             SupabaseUser supabaseUser = new SupabaseUser(
                     UUID.fromString(idNode.asText()),
                     emailNode.asText(),
-                    Instant.parse(invitedAtNode.asText()));
+                    invitedAt);
 
             log.debug("Supabase user created: id={} email={}", supabaseUser.id(), supabaseUser.email());
             return supabaseUser;

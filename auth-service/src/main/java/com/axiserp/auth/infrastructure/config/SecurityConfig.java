@@ -20,11 +20,16 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.axiserp.auth.infrastructure.adapters.in.web.response.ApiResponse;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -41,6 +46,9 @@ public class SecurityConfig {
     private final UserStatusFilter userStatusFilter;
     private final RateLimitingFilter rateLimitingFilter;
 
+    @Value("${spring.security.oauth2.resourceserver.jwt.jwk-set-uri}")
+    private String jwkSetUri;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
@@ -52,16 +60,24 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/actuator/health",
-                                "/actuator/info"
+                                "/actuator/info",
+                                "/api/v1/auth/password-reset"
                         ).permitAll()
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt
                                 .jwtAuthenticationConverter(jwtAuthenticationConverter()))
                         .authenticationEntryPoint(this::handleUnauthorized))
-                .addFilterBefore(rateLimitingFilter, FirstLoginFilter.class)
-                .addFilterBefore(firstLoginFilter, BearerTokenAuthenticationFilter.class)
                 .addFilterBefore(userStatusFilter, BearerTokenAuthenticationFilter.class)
+                .addFilterBefore(firstLoginFilter, BearerTokenAuthenticationFilter.class)
+                .addFilterBefore(rateLimitingFilter, BearerTokenAuthenticationFilter.class)
+                .build();
+    }
+
+    @Bean
+    public JwtDecoder jwtDecoder() {
+        return NimbusJwtDecoder.withJwkSetUri(jwkSetUri)
+                .jwsAlgorithm(SignatureAlgorithm.ES256)
                 .build();
     }
 
@@ -93,12 +109,8 @@ public class SecurityConfig {
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("error", "Unauthorized");
-        body.put("message", "Se requiere autenticación para acceder a este recurso");
-        body.put("status", 401);
-        body.put("timestamp", Instant.now().toString());
-
+        ApiResponse<Void> body = ApiResponse.error(401, "UNAUTHORIZED",
+                "Se requiere autenticación para acceder a este recurso");
         objectMapper.writeValue(response.getOutputStream(), body);
     }
 }

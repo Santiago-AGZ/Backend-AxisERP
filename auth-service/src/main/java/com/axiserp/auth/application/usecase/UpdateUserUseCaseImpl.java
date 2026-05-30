@@ -33,7 +33,7 @@ public class UpdateUserUseCaseImpl implements UpdateUserUseCase {
 
     @Override
     @Transactional
-    public UserResponse update(UUID id, UpdateUserRequest request) {
+    public UserResponse update(UUID id, UpdateUserRequest request, UUID updatedBy) {
         User user = userRepositoryPort.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
 
@@ -49,7 +49,7 @@ public class UpdateUserUseCaseImpl implements UpdateUserUseCase {
         var role = roleRepositoryPort.findByName(request.getRole())
                 .orElseThrow(() -> new IllegalArgumentException("Rol no válido: " + request.getRole()));
 
-        User updated = UserFactory.update(user, request.getName(), request.getEmail(), role.getId());
+        User updated = UserFactory.update(user, request.getName(), request.getEmail(), role.getId(), updatedBy);
         User saved = userRepositoryPort.save(updated);
 
         auditService.log(AuditAction.UPDATE, "USER", saved.getId(),

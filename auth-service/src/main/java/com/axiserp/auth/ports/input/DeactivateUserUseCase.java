@@ -6,5 +6,5 @@ import com.axiserp.auth.application.dto.response.UserResponse;
 
 public interface DeactivateUserUseCase {
 
-    UserResponse deactivate(UUID id);
+    UserResponse deactivate(UUID id, UUID updatedBy);
 }
