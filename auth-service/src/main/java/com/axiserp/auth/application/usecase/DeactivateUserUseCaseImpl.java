@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.axiserp.auth.application.dto.response.UserResponse;
 import com.axiserp.auth.application.service.AuditService;
+import com.axiserp.auth.domain.exception.UserNotFoundException;
 import com.axiserp.auth.domain.factory.UserFactory;
 import com.axiserp.auth.domain.model.AuditLog.AuditAction;
 import com.axiserp.auth.domain.model.User;
@@ -32,7 +33,7 @@ public class DeactivateUserUseCaseImpl implements DeactivateUserUseCase {
     @Transactional
     public UserResponse deactivate(UUID id) {
         User user = userRepositoryPort.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
 
         if (user.getStatus() == User.UserStatus.INACTIVO) {
             throw new IllegalStateException("El usuario ya está desactivado");

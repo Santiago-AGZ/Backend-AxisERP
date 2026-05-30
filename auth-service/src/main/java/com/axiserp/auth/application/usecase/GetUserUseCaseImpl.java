@@ -23,7 +23,7 @@ public class GetUserUseCaseImpl implements GetUserUseCase {
     @Override
     public UserResponse getById(UUID id) {
         User user = userRepositoryPort.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
 
         if (user.getStatus() == User.UserStatus.ELIMINADO) {
             throw new UserNotFoundException("Usuario no encontrado");

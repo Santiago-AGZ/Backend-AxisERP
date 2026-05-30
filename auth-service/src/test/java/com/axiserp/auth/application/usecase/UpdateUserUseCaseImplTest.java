@@ -14,14 +14,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.axiserp.auth.application.dto.request.UpdateUserRequest;
 import com.axiserp.auth.application.service.AuditService;
+import com.axiserp.auth.domain.exception.UserNotFoundException;
 import com.axiserp.auth.domain.model.User;
 import com.axiserp.auth.domain.model.User.UserStatus;
 import com.axiserp.auth.ports.output.RoleRepositoryPort;
 import com.axiserp.auth.ports.output.UserRepositoryPort;
 
 @ExtendWith(MockitoExtension.class)
-class DeactivateUserUseCaseImplTest {
+class UpdateUserUseCaseImplTest {
 
     @Mock
     private UserRepositoryPort userRepositoryPort;
@@ -33,19 +35,22 @@ class DeactivateUserUseCaseImplTest {
     private AuditService auditService;
 
     @InjectMocks
-    private DeactivateUserUseCaseImpl deactivateUserUseCase;
+    private UpdateUserUseCaseImpl updateUserUseCase;
 
     @Test
-    @DisplayName("Should throw IllegalStateException when user is already ELIMINADO")
-    void deactivate_alreadyDeleted() {
+    @DisplayName("Should throw UserNotFoundException when user is ELIMINADO")
+    void update_deletedUser() {
+        UUID userId = UUID.randomUUID();
+        UpdateUserRequest request = new UpdateUserRequest("Test", "test@test.com", "ADMIN");
         User deletedUser = User.builder()
-                .id(UUID.randomUUID())
+                .id(userId)
                 .status(UserStatus.ELIMINADO)
                 .deletedAt(LocalDateTime.now())
                 .build();
-        when(userRepositoryPort.findById(deletedUser.getId())).thenReturn(Optional.of(deletedUser));
 
-        assertThrows(IllegalStateException.class,
-                () -> deactivateUserUseCase.deactivate(deletedUser.getId()));
+        when(userRepositoryPort.findById(userId)).thenReturn(Optional.of(deletedUser));
+
+        assertThrows(UserNotFoundException.class,
+                () -> updateUserUseCase.update(userId, request));
     }
 }

@@ -13,6 +13,7 @@ import com.axiserp.auth.application.dto.response.UserResponse;
 import com.axiserp.auth.application.service.AuditService;
 import com.axiserp.auth.domain.exception.DuplicateEmailException;
 import com.axiserp.auth.domain.exception.UserInactiveException;
+import com.axiserp.auth.domain.exception.UserNotFoundException;
 import com.axiserp.auth.domain.factory.UserFactory;
 import com.axiserp.auth.domain.model.AuditLog.AuditAction;
 import com.axiserp.auth.domain.model.User;
@@ -43,7 +44,7 @@ public class CreateUserUseCaseImpl implements CreateUserUseCase {
         }
 
         User admin = userRepositoryPort.findById(createdBy)
-                .orElseThrow(() -> new RuntimeException("Usuario administrador no encontrado"));
+                .orElseThrow(() -> new UserNotFoundException("Usuario administrador no encontrado"));
         if (!admin.isActive()) {
             throw new UserInactiveException(
                     "El usuario administrador no puede crear usuarios porque está " +

@@ -35,7 +35,7 @@ public class UpdateUserUseCaseImpl implements UpdateUserUseCase {
     @Transactional
     public UserResponse update(UUID id, UpdateUserRequest request) {
         User user = userRepositoryPort.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
 
         if (user.getStatus() == User.UserStatus.ELIMINADO) {
             throw new UserNotFoundException("Usuario no encontrado");
