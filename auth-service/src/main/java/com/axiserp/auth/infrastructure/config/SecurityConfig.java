@@ -38,6 +38,7 @@ public class SecurityConfig {
 
     private final ObjectMapper objectMapper;
     private final FirstLoginFilter firstLoginFilter;
+    private final UserStatusFilter userStatusFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -58,6 +59,7 @@ public class SecurityConfig {
                                 .jwtAuthenticationConverter(jwtAuthenticationConverter()))
                         .authenticationEntryPoint(this::handleUnauthorized))
                 .addFilterBefore(firstLoginFilter, BearerTokenAuthenticationFilter.class)
+                .addFilterBefore(userStatusFilter, BearerTokenAuthenticationFilter.class)
                 .build();
     }
 
