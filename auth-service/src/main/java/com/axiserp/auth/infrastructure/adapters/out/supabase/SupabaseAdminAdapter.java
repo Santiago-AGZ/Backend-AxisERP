@@ -52,13 +52,39 @@ public class SupabaseAdminAdapter implements SupabaseAuthPort {
             "email_confirm", false
         );
 
-        JsonNode response;
         try {
-            response = restClient.post()
+            JsonNode response = restClient.post()
                     .uri("/users")
                     .body(body)
                     .retrieve()
                     .body(JsonNode.class);
+
+            if (response == null) {
+                throw new RuntimeException("Supabase returned empty response for user creation: email=" + email);
+            }
+
+            JsonNode idNode = response.get("id");
+            JsonNode emailNode = response.get("email");
+            JsonNode invitedAtNode = response.get("invited_at");
+
+            if (idNode == null || idNode.isNull()) {
+                throw new RuntimeException("Missing 'id' in Supabase response: " + response);
+            }
+            if (emailNode == null || emailNode.isNull()) {
+                throw new RuntimeException("Missing 'email' in Supabase response: " + response);
+            }
+            if (invitedAtNode == null || invitedAtNode.isNull()) {
+                throw new RuntimeException("Missing 'invited_at' in Supabase response: " + response);
+            }
+
+            SupabaseUser supabaseUser = new SupabaseUser(
+                    UUID.fromString(idNode.asText()),
+                    emailNode.asText(),
+                    Instant.parse(invitedAtNode.asText()));
+
+            log.debug("Supabase user created: id={} email={}", supabaseUser.id(), supabaseUser.email());
+            return supabaseUser;
+
         } catch (HttpStatusCodeException e) {
             log.error("Supabase API error creating user: email={} status={} body={}",
                     email, e.getStatusCode(), e.getResponseBodyAsString());
@@ -69,31 +95,5 @@ public class SupabaseAdminAdapter implements SupabaseAuthPort {
             log.error("Supabase API call failed: email={}", email, e);
             throw new RuntimeException("Error de comunicación con Supabase al crear usuario", e);
         }
-
-        if (response == null) {
-            throw new RuntimeException("Supabase returned empty response for user creation: email=" + email);
-        }
-
-        JsonNode idNode = response.get("id");
-        JsonNode emailNode = response.get("email");
-        JsonNode invitedAtNode = response.get("invited_at");
-
-        if (idNode == null || idNode.isNull()) {
-            throw new RuntimeException("Missing 'id' in Supabase response: " + response);
-        }
-        if (emailNode == null || emailNode.isNull()) {
-            throw new RuntimeException("Missing 'email' in Supabase response: " + response);
-        }
-        if (invitedAtNode == null || invitedAtNode.isNull()) {
-            throw new RuntimeException("Missing 'invited_at' in Supabase response: " + response);
-        }
-
-        SupabaseUser supabaseUser = new SupabaseUser(
-                UUID.fromString(idNode.asText()),
-                emailNode.asText(),
-                Instant.parse(invitedAtNode.asText()));
-
-        log.debug("Supabase user created: id={} email={}", supabaseUser.id(), supabaseUser.email());
-        return supabaseUser;
     }
 }

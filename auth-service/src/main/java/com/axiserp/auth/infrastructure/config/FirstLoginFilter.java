@@ -26,6 +26,12 @@ public class FirstLoginFilter extends OncePerRequestFilter {
     private final UserRepositoryPort userRepository;
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return path.startsWith("/actuator/");
+    }
+
+    @Override
     protected void doFilterInternal(HttpServletRequest request,
             HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
