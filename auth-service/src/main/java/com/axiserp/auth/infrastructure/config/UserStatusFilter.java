@@ -4,6 +4,7 @@ import com.axiserp.auth.domain.exception.UserInactiveException;
 import com.axiserp.auth.domain.factory.UserFactory;
 import com.axiserp.auth.domain.model.User;
 import com.axiserp.auth.infrastructure.config.dto.JitProvisionResult;
+import com.axiserp.auth.application.service.TokenBlacklistService;
 import com.axiserp.auth.ports.output.RoleRepositoryPort;
 import com.axiserp.auth.ports.output.UserRepositoryPort;
 import jakarta.servlet.FilterChain;
@@ -34,6 +35,7 @@ public class UserStatusFilter extends OncePerRequestFilter {
 
     private final UserRepositoryPort userRepository;
     private final RoleRepositoryPort roleRepository;
+    private final TokenBlacklistService tokenBlacklistService;
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
@@ -49,6 +51,14 @@ public class UserStatusFilter extends OncePerRequestFilter {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof String userId) {
+            // Validar si el token ha sido revocado
+            if (auth.getCredentials() instanceof Jwt jwt) {
+                String tokenJti = jwt.getId();
+                if (tokenBlacklistService.isRevoked(tokenJti)) {
+                    throw new UserInactiveException("Token ha sido revocado. Inicie sesión nuevamente.");
+                }
+            }
+
             UUID uuid = UUID.fromString(userId);
             JitProvisionResult result = findOrProvision(uuid, auth);
 
