@@ -22,10 +22,12 @@ public interface JpaAuditLogRepository extends JpaRepository<AuditLogEntity, UUI
             spec = spec.and((root, query, cb) -> cb.equal(root.get("userId"), userId));
         }
         if (action != null) {
-            spec = spec.and((root, query, cb) -> cb.equal(root.get("action"), action));
+            spec = spec.and((root, query, cb) ->
+                cb.equal(cb.lower(root.get("action")), action.name().toLowerCase()));
         }
-        if (entityType != null) {
-            spec = spec.and((root, query, cb) -> cb.equal(root.get("entityType"), entityType));
+        if (entityType != null && !entityType.isBlank()) {
+            spec = spec.and((root, query, cb) ->
+                cb.equal(cb.lower(root.get("entityType")), entityType.toLowerCase()));
         }
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "timestamp"));

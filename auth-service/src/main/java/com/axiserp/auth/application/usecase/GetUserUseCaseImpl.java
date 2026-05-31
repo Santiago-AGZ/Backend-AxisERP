@@ -25,7 +25,8 @@ public class GetUserUseCaseImpl implements GetUserUseCase {
         User user = userRepositoryPort.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
 
-        if (user.getStatus() == User.UserStatus.ELIMINADO) {
+        if (user.getStatus() == User.UserStatus.ELIMINADO
+                || user.getStatus() == User.UserStatus.INACTIVO) {
             throw new UserNotFoundException("Usuario no encontrado");
         }
 

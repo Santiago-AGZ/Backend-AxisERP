@@ -35,6 +35,9 @@ class UserStatusFilterTest {
     @Mock
     private RoleRepositoryPort roleRepository;
 
+    @Mock
+    private com.axiserp.auth.application.service.TokenBlacklistService tokenBlacklistService;
+
     @InjectMocks
     private UserStatusFilter filter;
 

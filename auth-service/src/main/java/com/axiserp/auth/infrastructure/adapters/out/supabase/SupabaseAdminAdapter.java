@@ -69,6 +69,7 @@ public class SupabaseAdminAdapter implements SupabaseAuthPort {
             "app_metadata", Map.of("role", roleName),
             "user_metadata", Map.of(
                 "name", name,
+                "nombre", name,
                 "createdBy", createdBy.toString()
             ),
             "email_confirm", false
