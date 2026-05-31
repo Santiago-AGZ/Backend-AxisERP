@@ -225,6 +225,53 @@ This session produced comprehensive artifacts:
 
 ---
 
+## AUTH-SERVICE AUDIT (2026-05-31)
+
+### REGLAS DE NEGOCIO: IMPLEMENTADAS vs DELEGADAS
+
+| Reglas | Responsable | Detalle |
+|--------|-------------|---------|
+| R1-R15 (Usuarios) | **auth-service** | CRUD, validación, soft-delete, auditoría, created_by/updated_by |
+| R16-R22 (Políticas password) | **Supabase Auth** | Longitud, mayúsculas, números, especiales, no espacios |
+| R23 (No exponer password) | **auth-service** | Verificado en /auth/me y /usuarios/me |
+| R24-R25 (No reutilizar) | **Supabase Auth** | Restricción de historial de contraseñas |
+| R26 (Recuperación) | **auth-service** | POST /auth/password-reset -> delega a Supabase |
+| R27-R29 (Reset seguro) | **Supabase Auth** | Tokens, expiración, un solo uso |
+| R30-R32 (Credenciales) | **Supabase Auth** | Login, validación, generación JWT |
+| R33-R34 (Expiración token) | **Supabase Auth** | JWT exp claim, JWKS validation en auth-service |
+| R35-R38 (Logout/refresh) | **auth-service** | token_blacklist table, refresh_tokens table |
+| R39-R40 (Integridad JWT) | **auth-service** | Spring Security + Supabase JWKS |
+| R41-R42 (Permisos) | **auth-service** | @PreAuthorize hasRole, 403 FORBIDDEN |
+| R43-R44 (Rate limiting) | **auth-service** | Caffeine cache rate-limit-buckets |
+| R45 (Intentos fallidos) | **Supabase Auth** | Supabase maneja login failures |
+| R46 (Reautenticación) | **NO IMPLEMENTADO** | Pendiente para futura iteración |
+| R47-R48 (Acceso restringido) | **auth-service** | @PreAuthorize en controllers, 401/403 |
+| R49 (Revocar sesiones) | **auth-service** | token_blacklist + logout endpoint |
+| R50 (Actividad sospechosa) | **PARCIAL** | Audit log registra LOGIN pero no patrones |
+| R51-R55 (Auditoría) | **auth-service** | audit_log table, CREATE/UPDATE/DEACTIVATE/LOGIN/LOGOUT |
+
+### PARA EL FRONTEND
+- Login: directo a Supabase REST API (NO pasa por gateway)
+- CRUD usuarios: via gateway `/api/v1/usuarios/*`
+- Password reset: via gateway `/api/v1/auth/password-reset` (público)
+- Perfil: via gateway `/api/v1/auth/me` y `/api/v1/usuarios/me`
+- Auditoría: via gateway `/api/v1/audit-log` (solo ADMIN)
+- Roles: ADMIN, VENDEDOR, INVENTARIO
+- Password policies: manejadas por Supabase, el frontend solo muestra errores de Supabase
+
+### FIXES APLICADOS ESTA SESIÓN
+1. HikariCP config para Neon serverless (max-lifetime=240000, keepalive=60000)
+2. user_metadata.nombre para trigger de Supabase
+3. @GeneratedValue removido de UserEntity.id (conflicto con IDs pre-asignados)
+4. GET/PUT usuarios inactivos -> 404 (antes 200)
+5. updated_by se registra en update, deactivate y login
+
+### ARQUITECTURA
+- Hexagonal: domain -> ports -> adapters -> infrastructure ✅
+- Database per service: auth-service usa Neon AUTH_DB ✅
+- Identity Provider Separation: Supabase (auth) + Neon (datos negocio) ✅
+- API Response Format: ApiResponse<T> con success/data/message/timestamp/error/pagination ✅
+
 ## Conclusion
 
 AxisERP has progressed from **PARTIALLY READY** to **MOSTLY READY FOR TESTING**. All critical entity mapping issues have been resolved. The system is now ready for:
