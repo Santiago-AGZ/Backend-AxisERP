@@ -24,4 +24,6 @@ public interface UserRepositoryPort {
     User save(User user);
 
     List<User> findAll();
+
+    List<User> findAll(String status, String search);
 }

@@ -53,6 +53,13 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
                 .toList();
     }
 
+    @Override
+    public List<User> findAll(String status, String search) {
+        return jpaUserRepository.findByFilters(status, search).stream()
+                .map(this::toDomain)
+                .toList();
+    }
+
     private User toDomain(UserEntity entity) {
         return User.builder()
                 .id(entity.getId())
