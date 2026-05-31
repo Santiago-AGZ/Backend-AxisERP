@@ -5,6 +5,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 import com.axiserp.auth.application.dto.response.UserResponse;
+import com.axiserp.auth.domain.exception.UserNotFoundException;
 import com.axiserp.auth.domain.model.User;
 import com.axiserp.auth.ports.input.GetUserUseCase;
 import com.axiserp.auth.ports.output.RoleRepositoryPort;
@@ -22,7 +23,12 @@ public class GetUserUseCaseImpl implements GetUserUseCase {
     @Override
     public UserResponse getById(UUID id) {
         User user = userRepositoryPort.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
+
+        if (user.getStatus() == User.UserStatus.ELIMINADO
+                || user.getStatus() == User.UserStatus.INACTIVO) {
+            throw new UserNotFoundException("Usuario no encontrado");
+        }
 
         String roleName = roleRepositoryPort.findById(user.getRoleId())
                 .map(role -> role.getName())

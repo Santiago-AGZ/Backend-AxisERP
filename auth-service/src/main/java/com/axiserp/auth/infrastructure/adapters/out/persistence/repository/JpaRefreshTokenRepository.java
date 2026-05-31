@@ -1,23 +1,30 @@
 package com.axiserp.auth.infrastructure.adapters.out.persistence.repository;
 
-import java.util.List;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import com.axiserp.auth.infrastructure.adapters.out.persistence.entity.RefreshTokenEntity;
 
+@Repository
 public interface JpaRefreshTokenRepository extends JpaRepository<RefreshTokenEntity, UUID> {
-
     Optional<RefreshTokenEntity> findByToken(String token);
-
-    List<RefreshTokenEntity> findByUserIdAndStatus(UUID userId, RefreshTokenEntity.TokenStatus status);
+    Optional<RefreshTokenEntity> findByUserIdAndToken(UUID userId, String token);
 
     @Modifying
-    @Query("UPDATE RefreshTokenEntity r SET r.status = 'REVOKED', r.revokedAt = CURRENT_TIMESTAMP WHERE r.userId = :userId AND r.status = 'ACTIVE'")
-    void revokeByUserId(@Param("userId") UUID userId);
+    @Query("DELETE FROM RefreshTokenEntity r WHERE r.token = :token")
+    void deleteByToken(String token);
+
+    @Modifying
+    @Query("DELETE FROM RefreshTokenEntity r WHERE r.userId = :userId")
+    void deleteByUserId(UUID userId);
+
+    @Modifying
+    @Query("DELETE FROM RefreshTokenEntity r WHERE r.expiresAt < CURRENT_TIMESTAMP")
+    void deleteExpired();
 }

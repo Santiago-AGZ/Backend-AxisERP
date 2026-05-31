@@ -6,5 +6,5 @@ import com.axiserp.auth.application.dto.response.UserResponse;
 
 public interface ListUsersUseCase {
 
-    List<UserResponse> listAll();
+    List<UserResponse> listAll(String role, String status, String search);
 }

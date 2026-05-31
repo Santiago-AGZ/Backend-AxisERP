@@ -13,8 +13,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,7 +20,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "users")
+@Table(name = "profiles")
 @Getter
 @Setter
 @Builder
@@ -31,7 +29,6 @@ import lombok.Setter;
 public class UserEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(nullable = false)
@@ -40,25 +37,21 @@ public class UserEntity {
     @Column(nullable = false, unique = true, columnDefinition = "CITEXT")
     private String email;
 
-    @Column(name = "password_hash", nullable = false, length = 255)
-    private String passwordHash;
-
     @Column(name = "role_id", nullable = false)
     private UUID roleId;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "user_status")
-    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(nullable = false, length = 20, columnDefinition = "VARCHAR(20)")
     private UserStatus status;
 
     @Column(name = "created_by")
     private UUID createdBy;
 
+    @Column(name = "updated_by")
+    private UUID updatedBy;
+
     @Column(name = "last_login_at")
     private LocalDateTime lastLoginAt;
-
-    @Column(name = "failed_login_attempts", nullable = false)
-    private Integer failedLoginAttempts;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -74,10 +67,7 @@ public class UserEntity {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
         if (this.status == null) {
-            this.status = UserStatus.ACTIVO;
-        }
-        if (this.failedLoginAttempts == null) {
-            this.failedLoginAttempts = 0;
+            this.status = UserStatus.PENDIENTE;
         }
     }
 
@@ -87,6 +77,6 @@ public class UserEntity {
     }
 
     public enum UserStatus {
-        ACTIVO, INACTIVO
+        PENDIENTE, ACTIVO, INACTIVO, ELIMINADO
     }
 }

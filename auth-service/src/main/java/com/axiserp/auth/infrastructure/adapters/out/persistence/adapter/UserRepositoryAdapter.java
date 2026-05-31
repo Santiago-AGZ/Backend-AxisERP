@@ -53,17 +53,23 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
                 .toList();
     }
 
+    @Override
+    public List<User> findAll(String status, String search) {
+        return jpaUserRepository.findByFilters(status, search).stream()
+                .map(this::toDomain)
+                .toList();
+    }
+
     private User toDomain(UserEntity entity) {
         return User.builder()
                 .id(entity.getId())
                 .name(entity.getName())
                 .email(entity.getEmail())
-                .passwordHash(entity.getPasswordHash())
                 .roleId(entity.getRoleId())
                 .status(User.UserStatus.valueOf(entity.getStatus().name()))
                 .createdBy(entity.getCreatedBy())
+                .updatedBy(entity.getUpdatedBy())
                 .lastLoginAt(entity.getLastLoginAt())
-                .failedLoginAttempts(entity.getFailedLoginAttempts())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .deletedAt(entity.getDeletedAt())
@@ -75,12 +81,11 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
                 .id(domain.getId())
                 .name(domain.getName())
                 .email(domain.getEmail())
-                .passwordHash(domain.getPasswordHash())
                 .roleId(domain.getRoleId())
                 .status(UserEntity.UserStatus.valueOf(domain.getStatus().name()))
                 .createdBy(domain.getCreatedBy())
+                .updatedBy(domain.getUpdatedBy())
                 .lastLoginAt(domain.getLastLoginAt())
-                .failedLoginAttempts(domain.getFailedLoginAttempts())
                 .createdAt(domain.getCreatedAt())
                 .updatedAt(domain.getUpdatedAt())
                 .deletedAt(domain.getDeletedAt())

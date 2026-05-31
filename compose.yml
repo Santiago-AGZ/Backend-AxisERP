@@ -1,31 +1,17 @@
 services:
 
-  postgres:
-    image: postgres:16
-    container_name: axiserp-postgres
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: axiserp
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - axiserp-network
-
   auth-service:
     build: ./auth-service
     container_name: auth-service
     restart: unless-stopped
     ports:
       - "8081:8081"
+    env_file:
+      - .env
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/axiserp
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
-    depends_on:
-      - postgres
+      SPRING_DATASOURCE_URL: ${AUTH_DB_URL}
+      SPRING_DATASOURCE_USERNAME: ${AUTH_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${AUTH_DB_PASSWORD}
     networks:
       - axiserp-network
 
@@ -33,15 +19,14 @@ services:
     build: ./catalog-service
     container_name: catalog-service
     restart: unless-stopped
-    
     ports:
       - "8082:8082"
+    env_file:
+      - .env
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/axiserp
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
-    depends_on:
-      - postgres
+      SPRING_DATASOURCE_URL: ${CATALOG_DB_URL}
+      SPRING_DATASOURCE_USERNAME: ${CATALOG_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${CATALOG_DB_PASSWORD}
     networks:
       - axiserp-network
 
@@ -50,28 +35,43 @@ services:
     container_name: inventory-service
     restart: unless-stopped
     ports:
-      - "8083:8083"
+      - "8087:8087"
+    env_file:
+      - .env
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/axiserp
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
-    depends_on:
-      - postgres
+      SPRING_DATASOURCE_URL: ${INVENTORY_DB_URL}
+      SPRING_DATASOURCE_USERNAME: ${INVENTORY_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${INVENTORY_DB_PASSWORD}
     networks:
       - axiserp-network
 
-  commerce-service:
-    build: ./commerce-service
-    container_name: commerce-service
+  sales-service:
+    build: ./sales-service
+    container_name: sales-service
     restart: unless-stopped
     ports:
       - "8084:8084"
+    env_file:
+      - .env
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/axiserp
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
-    depends_on:
-      - postgres
+      SPRING_DATASOURCE_URL: ${SALES_DB_URL}
+      SPRING_DATASOURCE_USERNAME: ${SALES_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${SALES_DB_PASSWORD}
+    networks:
+      - axiserp-network
+
+  purchase-service:
+    build: ./purchase-service
+    container_name: purchase-service
+    restart: unless-stopped
+    ports:
+      - "8086:8086"
+    env_file:
+      - .env
+    environment:
+      SPRING_DATASOURCE_URL: ${PURCHASE_DB_URL}
+      SPRING_DATASOURCE_USERNAME: ${PURCHASE_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${PURCHASE_DB_PASSWORD}
     networks:
       - axiserp-network
 
@@ -81,12 +81,12 @@ services:
     restart: unless-stopped
     ports:
       - "8085:8085"
+    env_file:
+      - .env
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/axiserp
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
-    depends_on:
-      - postgres
+      SPRING_DATASOURCE_URL: ${REPORT_DB_URL}
+      SPRING_DATASOURCE_USERNAME: ${REPORT_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${REPORT_DB_PASSWORD}
     networks:
       - axiserp-network
 
@@ -100,13 +100,11 @@ services:
       - auth-service
       - catalog-service
       - inventory-service
-      - commerce-service
+      - sales-service
+      - purchase-service
       - report-service
     networks:
       - axiserp-network
 
 networks:
   axiserp-network:
-
-volumes:
-  postgres_data:

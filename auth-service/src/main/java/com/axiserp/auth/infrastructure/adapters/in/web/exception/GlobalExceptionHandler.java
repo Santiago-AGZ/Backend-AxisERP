@@ -1,94 +1,79 @@
 package com.axiserp.auth.infrastructure.adapters.in.web.exception;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.axiserp.auth.domain.exception.DuplicateEmailException;
-import com.axiserp.auth.domain.exception.InvalidCredentialsException;
-import com.axiserp.auth.domain.exception.TokenExpiredException;
 import com.axiserp.auth.domain.exception.UserInactiveException;
-import com.axiserp.auth.domain.exception.UserLockedException;
+import com.axiserp.auth.domain.exception.UserNotFoundException;
+import com.axiserp.auth.infrastructure.adapters.in.web.response.ApiResponse;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidationExceptions(
-            MethodArgumentNotValidException ex) {
+    public ResponseEntity<ApiResponse<Void>> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach(error -> {
             String fieldName = ((FieldError) error).getField();
-            String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
+            errors.put(fieldName, error.getDefaultMessage());
         });
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("status", HttpStatus.BAD_REQUEST.value());
-        response.put("error", "Bad Request");
-        response.put("message", "Error de validacion");
-        response.put("errors", errors);
-        response.put("timestamp", LocalDateTime.now().toString());
-
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        return ResponseEntity.badRequest()
+                .body(ApiResponse.error(400, "VALIDATION_ERROR", "Error de validación", errors));
     }
 
-    @ExceptionHandler(InvalidCredentialsException.class)
-    public ResponseEntity<Map<String, Object>> handleInvalidCredentials(
-            InvalidCredentialsException ex) {
-        return buildErrorResponse(HttpStatus.UNAUTHORIZED, "Unauthorized", ex.getMessage());
-    }
-
-    @ExceptionHandler(IllegalStateException.class)
-    public ResponseEntity<Map<String, Object>> handleIllegalState(IllegalStateException ex) {
-        return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error", ex.getMessage());
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAccessDenied(AccessDeniedException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(ApiResponse.error(403, "FORBIDDEN", "No tiene permisos para realizar esta operación"));
     }
 
     @ExceptionHandler(UserInactiveException.class)
-    public ResponseEntity<Map<String, Object>> handleUserInactive(UserInactiveException ex) {
-        return buildErrorResponse(HttpStatus.FORBIDDEN, "Forbidden", ex.getMessage());
+    public ResponseEntity<ApiResponse<Void>> handleUserInactive(UserInactiveException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(ApiResponse.error(403, "FORBIDDEN", ex.getMessage()));
     }
 
-    @ExceptionHandler(UserLockedException.class)
-    public ResponseEntity<Map<String, Object>> handleUserLocked(UserLockedException ex) {
-        return buildErrorResponse(HttpStatus.LOCKED, "Locked", ex.getMessage());
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleUserNotFound(UserNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(404, "NOT_FOUND", ex.getMessage()));
     }
 
     @ExceptionHandler(DuplicateEmailException.class)
-    public ResponseEntity<Map<String, Object>> handleDuplicateEmail(DuplicateEmailException ex) {
-        return buildErrorResponse(HttpStatus.CONFLICT, "Conflict", ex.getMessage());
-    }
-
-    @ExceptionHandler(TokenExpiredException.class)
-    public ResponseEntity<Map<String, Object>> handleTokenExpired(TokenExpiredException ex) {
-        return buildErrorResponse(HttpStatus.UNAUTHORIZED, "Unauthorized", ex.getMessage());
+    public ResponseEntity<ApiResponse<Void>> handleDuplicateEmail(DuplicateEmailException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error(409, "CONFLICT", ex.getMessage()));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Map<String, Object>> handleIllegalArgument(IllegalArgumentException ex) {
-        return buildErrorResponse(HttpStatus.BAD_REQUEST, "Bad Request", ex.getMessage());
+    public ResponseEntity<ApiResponse<Void>> handleIllegalArgument(IllegalArgumentException ex) {
+        return ResponseEntity.badRequest()
+                .body(ApiResponse.error(400, "BAD_REQUEST", ex.getMessage()));
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ApiResponse<Void>> handleIllegalState(IllegalStateException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error(409, "CONFLICT", ex.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex) {
-        return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error",
-                ex.getMessage());
-    }
-
-    private ResponseEntity<Map<String, Object>> buildErrorResponse(
-            HttpStatus status, String error, String message) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("status", status.value());
-        response.put("error", error);
-        response.put("message", message);
-        response.put("timestamp", LocalDateTime.now().toString());
-        return ResponseEntity.status(status).body(response);
+    public ResponseEntity<ApiResponse<Void>> handleGenericException(Exception ex) {
+        log.error("Error no controlado: {}", ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error(500, "INTERNAL_ERROR", "Error interno del servidor"));
     }
 }
