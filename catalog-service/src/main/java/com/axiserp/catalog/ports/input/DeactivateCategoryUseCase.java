@@ -5,5 +5,5 @@ import java.util.UUID;
 import com.axiserp.catalog.application.dto.response.CategoryResponse;
 
 public interface DeactivateCategoryUseCase {
-    CategoryResponse deactivate(UUID id);
+    CategoryResponse deactivate(UUID id, UUID updatedBy);
 }

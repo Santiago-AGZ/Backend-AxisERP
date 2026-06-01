@@ -63,7 +63,7 @@ class DeactivateCategoryUseCaseImplTest {
         when(productRepositoryPort.countActiveByCategoryId(categoryId)).thenReturn(0);
         when(categoryRepositoryPort.save(any(Category.class))).thenReturn(deactivated);
 
-        CategoryResponse response = deactivateCategoryUseCase.deactivate(categoryId);
+        CategoryResponse response = deactivateCategoryUseCase.deactivate(categoryId, UUID.randomUUID());
 
         assertNotNull(response);
         assertEquals("INACTIVA", response.getStatus());
@@ -86,7 +86,7 @@ class DeactivateCategoryUseCaseImplTest {
         when(categoryRepositoryPort.findById(categoryId)).thenReturn(Optional.of(existing));
         when(productRepositoryPort.countActiveByCategoryId(categoryId)).thenReturn(3);
 
-        CategoryHasProductsException exception = assertThrows(CategoryHasProductsException.class, () -> deactivateCategoryUseCase.deactivate(categoryId));
+        CategoryHasProductsException exception = assertThrows(CategoryHasProductsException.class, () -> deactivateCategoryUseCase.deactivate(categoryId, UUID.randomUUID()));
 
         assertTrue(exception.getMessage().contains("3 producto(s) activo(s)"));
         verify(categoryRepositoryPort, never()).save(any());
@@ -98,7 +98,7 @@ class DeactivateCategoryUseCaseImplTest {
         categoryId = UUID.randomUUID();
         when(categoryRepositoryPort.findById(categoryId)).thenReturn(Optional.empty());
 
-        assertThrows(CategoryNotFoundException.class, () -> deactivateCategoryUseCase.deactivate(categoryId));
+        assertThrows(CategoryNotFoundException.class, () -> deactivateCategoryUseCase.deactivate(categoryId, UUID.randomUUID()));
         verify(categoryRepositoryPort, never()).save(any());
     }
 
@@ -116,7 +116,7 @@ class DeactivateCategoryUseCaseImplTest {
 
         when(categoryRepositoryPort.findById(categoryId)).thenReturn(Optional.of(existing));
 
-        assertThrows(IllegalStateException.class, () -> deactivateCategoryUseCase.deactivate(categoryId));
+        assertThrows(IllegalStateException.class, () -> deactivateCategoryUseCase.deactivate(categoryId, UUID.randomUUID()));
         verify(categoryRepositoryPort, never()).save(any());
     }
 }

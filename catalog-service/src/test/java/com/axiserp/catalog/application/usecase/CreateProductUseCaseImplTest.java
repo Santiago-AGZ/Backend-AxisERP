@@ -54,7 +54,7 @@ class CreateProductUseCaseImplTest {
                 "Test Product", "TEST001", categoryId,
                 new BigDecimal("10.00"), new BigDecimal("20.00"));
 
-        Category category = Category.builder().id(categoryId).name("Test Category").build();
+        Category category = Category.builder().id(categoryId).name("Test Category").status(Category.CategoryStatus.ACTIVA).build();
         Product saved = Product.builder()
                 .id(UUID.randomUUID())
                 .name("Test Product")

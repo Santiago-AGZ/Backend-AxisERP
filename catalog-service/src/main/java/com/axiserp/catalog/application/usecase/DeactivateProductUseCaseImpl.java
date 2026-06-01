@@ -37,6 +37,10 @@ public class DeactivateProductUseCaseImpl implements DeactivateProductUseCase {
             throw new IllegalStateException("El producto ya esta eliminado");
         }
 
+        if (!existing.isActive()) {
+            throw new IllegalStateException("El producto ya esta inactivo");
+        }
+
         Product deleted = ProductFactory.softDelete(existing);
         Product saved = productRepositoryPort.save(deleted);
 

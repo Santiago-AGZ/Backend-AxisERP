@@ -14,6 +14,7 @@ public final class ProductFactory {
     public static Product createNew(String name, String codigo, UUID categoryId,
             BigDecimal purchasePrice, BigDecimal salePrice, UUID createdBy) {
         return Product.builder()
+                .id(UUID.randomUUID())
                 .name(name)
                 .codigo(codigo)
                 .categoryId(categoryId)
