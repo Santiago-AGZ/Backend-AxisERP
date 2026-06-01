@@ -65,6 +65,8 @@ public class CategoryRepositoryAdapter implements CategoryRepositoryPort {
                 .description(entity.getDescription())
                 .parentId(entity.getParentId())
                 .status(Category.CategoryStatus.valueOf(entity.getStatus().name()))
+                .createdBy(entity.getCreatedBy())
+                .updatedBy(entity.getUpdatedBy())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .build();
@@ -77,6 +79,8 @@ public class CategoryRepositoryAdapter implements CategoryRepositoryPort {
                 .description(domain.getDescription())
                 .parentId(domain.getParentId())
                 .status(CategoryEntity.CategoryStatus.valueOf(domain.getStatus().name()))
+                .createdBy(domain.getCreatedBy())
+                .updatedBy(domain.getUpdatedBy())
                 .createdAt(domain.getCreatedAt())
                 .updatedAt(domain.getUpdatedAt())
                 .build();

@@ -5,6 +5,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 import com.axiserp.catalog.application.dto.request.CreateCategoryRequest;
 import com.axiserp.catalog.application.dto.response.CategoryResponse;
 import com.axiserp.catalog.domain.exception.CategoryNotFoundException;
@@ -26,7 +28,7 @@ public class CreateCategoryUseCaseImpl implements CreateCategoryUseCase {
 
     @Override
     @Transactional
-    public CategoryResponse create(CreateCategoryRequest request) {
+    public CategoryResponse create(CreateCategoryRequest request, UUID createdBy) {
         if (categoryRepositoryPort.existsByName(request.getName())) {
             throw new DuplicateCategoryException();
         }
@@ -36,10 +38,10 @@ public class CreateCategoryUseCaseImpl implements CreateCategoryUseCase {
                     .orElseThrow(() -> new CategoryNotFoundException("Categoria padre no encontrada"));
         }
 
-        Category category = CategoryFactory.createNew(request.getName(), request.getDescription(), request.getParentId());
+        Category category = CategoryFactory.createNew(request.getName(), request.getDescription(), request.getParentId(), createdBy);
         Category saved = categoryRepositoryPort.save(category);
 
-        log.info("category_created id={} name={} parentId={}", saved.getId(), saved.getName(), saved.getParentId());
+        log.info("category_created id={} name={} parentId={} createdBy={}", saved.getId(), saved.getName(), saved.getParentId(), createdBy);
 
         return toResponse(saved);
     }
