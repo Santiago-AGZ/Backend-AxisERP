@@ -18,6 +18,8 @@ public interface ProductRepositoryPort {
 
     List<Product> findByFilters(String search, String codigo, UUID categoryId, boolean includeInactive, int page, int size);
 
+    long countByFilters(String search, String codigo, UUID categoryId, boolean includeInactive);
+
     int countByCategoryId(UUID categoryId);
 
     int countActiveByCategoryId(UUID categoryId);

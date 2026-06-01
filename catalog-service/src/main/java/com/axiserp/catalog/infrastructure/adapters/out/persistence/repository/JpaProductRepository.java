@@ -23,7 +23,7 @@ public interface JpaProductRepository extends JpaRepository<ProductEntity, UUID>
 
     @Query(value = """
             SELECT * FROM products
-            WHERE (:search IS NULL OR LOWER(name) LIKE LOWER(CONCAT('%', :search, '%')))
+            WHERE (:search IS NULL OR to_tsvector('spanish', name) @@ plainto_tsquery('spanish', :search))
               AND (:codigo IS NULL OR codigo = :codigo)
               AND (:categoryId IS NULL OR CAST(category_id AS VARCHAR) = :categoryId)
               AND (:includeInactive = true OR status = 'ACTIVO')
@@ -37,4 +37,17 @@ public interface JpaProductRepository extends JpaRepository<ProductEntity, UUID>
             @Param("includeInactive") boolean includeInactive,
             @Param("size") int size,
             @Param("offset") int offset);
+
+    @Query(value = """
+            SELECT COUNT(*) FROM products
+            WHERE (:search IS NULL OR to_tsvector('spanish', name) @@ plainto_tsquery('spanish', :search))
+              AND (:codigo IS NULL OR codigo = :codigo)
+              AND (:categoryId IS NULL OR CAST(category_id AS VARCHAR) = :categoryId)
+              AND (:includeInactive = true OR status = 'ACTIVO')
+            """, nativeQuery = true)
+    long countByFilters(
+            @Param("search") String search,
+            @Param("codigo") String codigo,
+            @Param("categoryId") String categoryId,
+            @Param("includeInactive") boolean includeInactive);
 }

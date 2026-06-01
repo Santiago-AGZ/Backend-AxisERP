@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.axiserp.catalog.application.dto.request.CreateProductRequest;
 import com.axiserp.catalog.application.dto.request.UpdateProductRequest;
 import com.axiserp.catalog.application.dto.response.ProductResponse;
+import com.axiserp.catalog.domain.model.PageResult;
 import com.axiserp.catalog.infrastructure.adapters.in.web.dto.ApiResponse;
 import com.axiserp.catalog.infrastructure.adapters.in.web.dto.ApiResponse.PaginationMeta;
 import com.axiserp.catalog.ports.input.CreateProductUseCase;
@@ -70,10 +71,10 @@ public class ProductController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size) {
 
-        List<ProductResponse> data = listProductsUseCase.list(search, codigo, categoryId, includeInactive, page - 1, size);
+        PageResult<ProductResponse> result = listProductsUseCase.list(search, codigo, categoryId, includeInactive, page - 1, size);
         return ResponseEntity.ok(ApiResponse.paged(
-                data, "Productos recuperados exitosamente",
-                PaginationMeta.of(page, size, data.size())));
+                result.content(), "Productos recuperados exitosamente",
+                PaginationMeta.of(page, size, result.totalElements())));
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'INVENTARIO')")

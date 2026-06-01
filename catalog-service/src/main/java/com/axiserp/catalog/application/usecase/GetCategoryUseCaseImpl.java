@@ -34,8 +34,12 @@ public class GetCategoryUseCaseImpl implements GetCategoryUseCase {
                 .name(category.getName())
                 .description(category.getDescription())
                 .status(category.getStatus().name())
+                .createdBy(category.getCreatedBy())
+                .updatedBy(category.getUpdatedBy())
                 .createdAt(category.getCreatedAt())
                 .updatedAt(category.getUpdatedAt())
                 .build();
     }
 }
+
+

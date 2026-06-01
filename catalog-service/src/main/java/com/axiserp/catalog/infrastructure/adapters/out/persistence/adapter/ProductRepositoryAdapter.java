@@ -53,6 +53,12 @@ public class ProductRepositoryAdapter implements ProductRepositoryPort {
     }
 
     @Override
+    public long countByFilters(String search, String codigo, UUID categoryId, boolean includeInactive) {
+        String categoryIdStr = categoryId != null ? categoryId.toString() : null;
+        return jpaProductRepository.countByFilters(search, codigo, categoryIdStr, includeInactive);
+    }
+
+    @Override
     public int countByCategoryId(UUID categoryId) {
         return jpaProductRepository.countByCategoryId(categoryId);
     }
