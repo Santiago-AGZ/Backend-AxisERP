@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.axiserp.inventory.application.dto.request.AdjustmentRequest;
 import com.axiserp.inventory.application.dto.response.MovementResponse;
+import com.axiserp.inventory.application.service.AuditService;
 import com.axiserp.inventory.domain.exception.InsufficientStockException;
 import com.axiserp.inventory.domain.exception.InventoryNotFoundException;
 import com.axiserp.inventory.domain.exception.NegativeQuantityException;
@@ -27,6 +28,7 @@ public class RegisterAdjustmentUseCaseImpl implements RegisterAdjustmentUseCase 
     private static final Logger log = LoggerFactory.getLogger(RegisterAdjustmentUseCaseImpl.class);
 
     private final InventoryRepositoryPort inventoryRepositoryPort;
+    private final AuditService auditService;
 
     @Override
     @Transactional
@@ -71,6 +73,8 @@ public class RegisterAdjustmentUseCaseImpl implements RegisterAdjustmentUseCase 
                 .build();
 
         InventoryMovement savedMovement = inventoryRepositoryPort.saveMovement(movement);
+
+        auditService.logStockEntry(productId, createdBy, request.getQuantity(), previousStock, saved.getCurrentStock());
 
         log.info("inventory_adjustment productId={} type={} quantity={} previousStock={} newStock={}", productId, movementType, request.getQuantity(), previousStock, saved.getCurrentStock());
 

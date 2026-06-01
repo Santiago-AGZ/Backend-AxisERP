@@ -11,6 +11,7 @@ import com.axiserp.inventory.application.dto.request.InitializeInventoryRequest;
 import com.axiserp.inventory.application.dto.response.InventoryResponse;
 import com.axiserp.inventory.domain.exception.InventoryAlreadyInitializedException;
 import com.axiserp.inventory.domain.exception.InvalidStockConfigException;
+import com.axiserp.inventory.application.service.AuditService;
 import com.axiserp.inventory.domain.model.Inventory;
 import com.axiserp.inventory.domain.model.InventoryMovement;
 import com.axiserp.inventory.domain.model.MovementType;
@@ -26,6 +27,7 @@ public class InitializeInventoryUseCaseImpl implements InitializeInventoryUseCas
     private static final Logger log = LoggerFactory.getLogger(InitializeInventoryUseCaseImpl.class);
 
     private final InventoryRepositoryPort inventoryRepositoryPort;
+    private final AuditService auditService;
 
     @Override
     @Transactional
@@ -40,13 +42,17 @@ public class InitializeInventoryUseCaseImpl implements InitializeInventoryUseCas
         }
 
         Inventory inventory = Inventory.builder()
+                .id(UUID.randomUUID())
                 .productId(request.getProductId())
                 .currentStock(request.getInitialStock())
                 .minStock(request.getMinStock())
                 .maxStock(request.getMaxStock())
+                .createdBy(createdBy)
                 .build();
 
         Inventory saved = inventoryRepositoryPort.save(inventory);
+
+        auditService.logInitialize(saved.getProductId(), createdBy, request.getInitialStock());
 
         if (request.getInitialStock() > 0) {
             InventoryMovement movement = InventoryMovement.builder()

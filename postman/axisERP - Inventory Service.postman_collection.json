@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "ce987e20-2d40-4837-8b21-86c61d72c936",
     "name": "axisERP - Inventory Service",
-    "description": "Endpoints de inventario via API Gateway (puerto 8080). Generado desde codigo fuente.",
+    "description": "Endpoints de inventario via API Gateway (puerto 8080).\n\nFLUJO:\n1. Obtener authToken desde la coleccion Auth Service\n2. Copiar authToken a esta coleccion\n3. Inicializar inventario del producto (POST /initialize)\n4. Operar: entry/exit/adjust/return/reverse\n\nREGLAS IMPLEMENTADAS:\n- R1: Unico registro por producto (initialize)\n- R2-R5: Stock >= 0, max > min (validacion + DB constraints)\n- R6: Inicial solo una vez\n- R7: Entradas aumentan stock\n- R8: Salidas disminuyen stock\n- R9: Salidas no exceden disponible (InsufficientStockException)\n- R10: Cantidad > 0 (NegativeQuantityException)\n- R11: Movimiento registra anterior/nuevo/usuario/fecha\n- R12: Tipos validos (INVENTARIO_INICIAL, ENTRADA, SALIDA, AJUSTE_POSITIVO/NEGATIVO, DEVOLUCION, ANULACION)\n- R13: Ajustes requieren justificacion\n- R14: Anulaciones generan movimiento de reversion\n- R15: Historicos no se modifican\n- R16: Alertas stock bajo (isLowStock)\n- R17: Alertas agotamiento (isDepleted)\n- R18-R19: Control concurrencia con @Version\n- R20: Auditoria (STOCK_ENTRY, STOCK_EXIT, REVERSAL, CREATE)\n\nRESPUESTA: ApiResponse<T> con success/code/data/message/meta/pagination. Null values ocultos via @JsonInclude(NON_NULL).",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [

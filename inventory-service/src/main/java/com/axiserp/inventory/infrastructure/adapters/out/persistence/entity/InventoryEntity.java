@@ -28,7 +28,6 @@ import lombok.Setter;
 public class InventoryEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(name = "product_id", nullable = false, unique = true)

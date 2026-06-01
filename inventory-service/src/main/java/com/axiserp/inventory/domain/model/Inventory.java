@@ -20,8 +20,12 @@ public class Inventory {
     private UUID productId;
     private int currentStock;
     private int minStock;
-    private int maxStock;
+    private Integer maxStock;
+    private int reservedStock;
     private Long version;
+    private UUID createdBy;
+    private UUID updatedBy;
+    private LocalDateTime lastMovementAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 

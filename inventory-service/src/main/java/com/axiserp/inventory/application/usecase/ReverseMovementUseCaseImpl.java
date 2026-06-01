@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.axiserp.inventory.application.dto.response.MovementResponse;
+import com.axiserp.inventory.application.service.AuditService;
 import com.axiserp.inventory.domain.exception.InsufficientStockException;
 import com.axiserp.inventory.domain.exception.InventoryNotFoundException;
 import com.axiserp.inventory.domain.model.Inventory;
@@ -25,6 +26,7 @@ public class ReverseMovementUseCaseImpl implements ReverseMovementUseCase {
     private static final Logger log = LoggerFactory.getLogger(ReverseMovementUseCaseImpl.class);
 
     private final InventoryRepositoryPort inventoryRepositoryPort;
+    private final AuditService auditService;
 
     @Override
     @Transactional
@@ -73,6 +75,8 @@ public class ReverseMovementUseCaseImpl implements ReverseMovementUseCase {
                 .build();
 
         InventoryMovement savedReversal = inventoryRepositoryPort.saveMovement(reversal);
+
+        auditService.logReversal(saved.getProductId(), createdBy, movementId, original.getQuantity());
 
         log.info("inventory_reversal movementId={} productId={} originalType={} previousStock={} newStock={}", movementId, saved.getProductId(), originalType, previousStock, saved.getCurrentStock());
 
