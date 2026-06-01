@@ -112,11 +112,11 @@ public class TokenController {
         } catch (IllegalArgumentException e) {
             log.warn("refresh_token_validation_failed error={}", e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponse.error(401, "INVALID_TOKEN", "El refresh token es inválido o ha expirado"));
+                    .body(ApiResponse.error("INVALID_TOKEN", "El refresh token es invalido o ha expirado"));
         } catch (Exception e) {
             log.error("refresh_token_error error={}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponse.error(401, "TOKEN_ERROR", "Error al renovar el token"));
+                    .body(ApiResponse.error("TOKEN_ERROR", "Error al renovar el token"));
         }
     }
 
@@ -144,11 +144,11 @@ public class TokenController {
             log.warn("reauth_otp_request_failed user_id={} error={}",
                     authentication.getPrincipal(), e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.error(400, "INVALID_USER", e.getMessage()));
+                    .body(ApiResponse.error("INVALID_USER", e.getMessage()));
         } catch (Exception e) {
             log.error("reauth_otp_request_error error={}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error(500, "OTP_ERROR", "Error al solicitar el código OTP"));
+                    .body(ApiResponse.error("OTP_ERROR", "Error al solicitar el codigo OTP"));
         }
     }
 
@@ -172,8 +172,7 @@ public class TokenController {
             if (otpToken == null || otpToken.isBlank()) {
                 log.warn("reauth_otp_verify_failed missing_otp_token");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(ApiResponse.error(401, "MISSING_OTP_TOKEN",
-                                "Token OTP requerido en header X-OTP-Token"));
+                        .body(ApiResponse.error("MISSING_OTP_TOKEN", "Token OTP requerido en header X-OTP-Token"));
             }
 
             // La implementación completa requiere decodificar otpToken para obtener userId
@@ -191,11 +190,11 @@ public class TokenController {
         } catch (IllegalArgumentException e) {
             log.warn("otp_verification_failed error={}", e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponse.error(401, "INVALID_OTP", e.getMessage()));
+                    .body(ApiResponse.error("INVALID_OTP", e.getMessage()));
         } catch (Exception e) {
             log.error("otp_verification_error error={}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponse.error(401, "OTP_ERROR", "Error al verificar el código OTP"));
+                    .body(ApiResponse.error("OTP_ERROR", "Error al verificar el código OTP"));
         }
     }
 
@@ -232,3 +231,4 @@ public class TokenController {
         }
     }
 }
+

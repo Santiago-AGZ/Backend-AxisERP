@@ -1,7 +1,7 @@
 package com.axiserp.auth.infrastructure.adapters.in.web.exception;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +17,7 @@ import com.axiserp.auth.domain.exception.DuplicateEmailException;
 import com.axiserp.auth.domain.exception.UserInactiveException;
 import com.axiserp.auth.domain.exception.UserNotFoundException;
 import com.axiserp.auth.infrastructure.adapters.in.web.response.ApiResponse;
+import com.axiserp.auth.infrastructure.adapters.in.web.response.ApiResponse.ApiError;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -24,56 +25,58 @@ public class GlobalExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<Void>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach(error -> {
-            String fieldName = ((FieldError) error).getField();
-            errors.put(fieldName, error.getDefaultMessage());
-        });
+    public ResponseEntity<ApiResponse<Void>> handleValidation(MethodArgumentNotValidException ex) {
+        List<ApiError> errors = ex.getBindingResult().getFieldErrors().stream()
+                .map(e -> ApiError.builder()
+                        .field(e.getField())
+                        .message(e.getDefaultMessage())
+                        .rejectedValue(e.getRejectedValue())
+                        .build())
+                .collect(Collectors.toList());
         return ResponseEntity.badRequest()
-                .body(ApiResponse.error(400, "VALIDATION_ERROR", "Error de validación", errors));
+                .body(ApiResponse.error("VALIDATION_ERROR", "Error de validacion", errors));
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiResponse<Void>> handleAccessDenied(AccessDeniedException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(ApiResponse.error(403, "FORBIDDEN", "No tiene permisos para realizar esta operación"));
+                .body(ApiResponse.error("FORBIDDEN", "No tiene permisos para realizar esta operacion"));
     }
 
     @ExceptionHandler(UserInactiveException.class)
     public ResponseEntity<ApiResponse<Void>> handleUserInactive(UserInactiveException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(ApiResponse.error(403, "FORBIDDEN", ex.getMessage()));
+                .body(ApiResponse.error("FORBIDDEN", ex.getMessage()));
     }
 
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleUserNotFound(UserNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(ApiResponse.error(404, "NOT_FOUND", ex.getMessage()));
+                .body(ApiResponse.error("NOT_FOUND", ex.getMessage()));
     }
 
     @ExceptionHandler(DuplicateEmailException.class)
     public ResponseEntity<ApiResponse<Void>> handleDuplicateEmail(DuplicateEmailException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(ApiResponse.error(409, "CONFLICT", ex.getMessage()));
+                .body(ApiResponse.error("CONFLICT", ex.getMessage()));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiResponse<Void>> handleIllegalArgument(IllegalArgumentException ex) {
         return ResponseEntity.badRequest()
-                .body(ApiResponse.error(400, "BAD_REQUEST", ex.getMessage()));
+                .body(ApiResponse.error("BAD_REQUEST", ex.getMessage()));
     }
 
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<ApiResponse<Void>> handleIllegalState(IllegalStateException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(ApiResponse.error(409, "CONFLICT", ex.getMessage()));
+                .body(ApiResponse.error("CONFLICT", ex.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<Void>> handleGenericException(Exception ex) {
+    public ResponseEntity<ApiResponse<Void>> handleGeneric(Exception ex) {
         log.error("Error no controlado: {}", ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error(500, "INTERNAL_ERROR", "Error interno del servidor"));
+                .body(ApiResponse.error("INTERNAL_ERROR", "Error interno del servidor"));
     }
 }

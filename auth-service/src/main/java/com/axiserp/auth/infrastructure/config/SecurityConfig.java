@@ -109,8 +109,8 @@ public class SecurityConfig {
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-        ApiResponse<Void> body = ApiResponse.error(401, "UNAUTHORIZED",
-                "Se requiere autenticación para acceder a este recurso");
+        ApiResponse<Void> body = ApiResponse.error("UNAUTHORIZED", "Se requiere autenticación para acceder a este recurso");
         objectMapper.writeValue(response.getOutputStream(), body);
     }
 }
+
