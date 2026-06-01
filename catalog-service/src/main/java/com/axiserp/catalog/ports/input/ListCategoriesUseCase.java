@@ -6,4 +6,6 @@ import com.axiserp.catalog.application.dto.response.CategoryResponse;
 
 public interface ListCategoriesUseCase {
     List<CategoryResponse> listAll();
+    List<CategoryResponse> listAll(int page, int size);
+    long countAll();
 }

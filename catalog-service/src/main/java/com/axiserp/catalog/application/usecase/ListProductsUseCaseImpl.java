@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.axiserp.catalog.application.dto.response.ProductResponse;
 import com.axiserp.catalog.domain.model.Category;
+import com.axiserp.catalog.domain.model.PageResult;
 import com.axiserp.catalog.domain.model.Product;
 import com.axiserp.catalog.ports.input.ListProductsUseCase;
 import com.axiserp.catalog.ports.output.CategoryRepositoryPort;
@@ -30,8 +31,9 @@ public class ListProductsUseCaseImpl implements ListProductsUseCase {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ProductResponse> list(String search, String codigo, UUID categoryId, boolean includeInactive, int page, int size) {
+    public PageResult<ProductResponse> list(String search, String codigo, UUID categoryId, boolean includeInactive, int page, int size) {
         List<Product> products = productRepositoryPort.findByFilters(search, codigo, categoryId, includeInactive, page, size);
+        long total = productRepositoryPort.countByFilters(search, codigo, categoryId, includeInactive);
 
         List<UUID> categoryIds = products.stream()
                 .map(Product::getCategoryId)
@@ -43,9 +45,11 @@ public class ListProductsUseCaseImpl implements ListProductsUseCase {
                 .filter(c -> c != null)
                 .collect(Collectors.toMap(Category::getId, c -> c));
 
-        return products.stream()
+        List<ProductResponse> responses = products.stream()
                 .map(p -> toResponse(p, categoryMap.get(p.getCategoryId())))
                 .toList();
+
+        return new PageResult<>(responses, total);
     }
 
     private ProductResponse toResponse(Product product, Category category) {

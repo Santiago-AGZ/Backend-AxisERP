@@ -58,8 +58,8 @@ public class CategoryController {
     public ResponseEntity<ApiResponse<List<CategoryResponse>>> listCategories(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size) {
-        List<CategoryResponse> data = listCategoriesUseCase.listAll();
-        long total = data.size();
+        List<CategoryResponse> data = listCategoriesUseCase.listAll(page - 1, size);
+        long total = listCategoriesUseCase.countAll();
         return ResponseEntity.ok(ApiResponse.paged(
                 data, "Categorias recuperadas exitosamente",
                 PaginationMeta.of(page, size, total)));

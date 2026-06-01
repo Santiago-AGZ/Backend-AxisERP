@@ -53,6 +53,8 @@ public class CreateCategoryUseCaseImpl implements CreateCategoryUseCase {
                 .description(category.getDescription())
                 .parentId(category.getParentId())
                 .status(category.getStatus().name())
+                .createdBy(category.getCreatedBy())
+                .updatedBy(category.getUpdatedBy())
                 .createdAt(category.getCreatedAt())
                 .updatedAt(category.getUpdatedAt())
                 .build();

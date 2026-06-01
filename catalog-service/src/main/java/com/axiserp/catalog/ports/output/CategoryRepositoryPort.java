@@ -18,5 +18,7 @@ public interface CategoryRepositoryPort {
 
     List<Category> findAllOrderedByName();
 
-    List<Category> findAllActiveOrderedByName();
+    List<Category> findAllOrderedByName(int page, int size);
+
+    long countAll();
 }

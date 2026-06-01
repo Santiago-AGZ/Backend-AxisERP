@@ -21,9 +21,22 @@ public class ListCategoriesUseCaseImpl implements ListCategoriesUseCase {
     @Override
     @Transactional(readOnly = true)
     public List<CategoryResponse> listAll() {
-        return categoryRepositoryPort.findAllActiveOrderedByName().stream()
+        return categoryRepositoryPort.findAllOrderedByName().stream()
                 .map(this::toResponse)
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CategoryResponse> listAll(int page, int size) {
+        return categoryRepositoryPort.findAllOrderedByName(page, size).stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    @Override
+    public long countAll() {
+        return categoryRepositoryPort.countAll();
     }
 
     private CategoryResponse toResponse(Category category) {
@@ -31,7 +44,10 @@ public class ListCategoriesUseCaseImpl implements ListCategoriesUseCase {
                 .id(category.getId())
                 .name(category.getName())
                 .description(category.getDescription())
+                .parentId(category.getParentId())
                 .status(category.getStatus().name())
+                .createdBy(category.getCreatedBy())
+                .updatedBy(category.getUpdatedBy())
                 .createdAt(category.getCreatedAt())
                 .updatedAt(category.getUpdatedAt())
                 .build();

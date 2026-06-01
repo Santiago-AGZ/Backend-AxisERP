@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 import com.axiserp.catalog.domain.model.Category;
@@ -50,12 +52,16 @@ public class CategoryRepositoryAdapter implements CategoryRepositoryPort {
     }
 
     @Override
-    public List<Category> findAllActiveOrderedByName() {
-        return jpaCategoryRepository.findByStatusOrderByStatusAscNameAsc(
-                        CategoryEntity.CategoryStatus.ACTIVA)
+    public List<Category> findAllOrderedByName(int page, int size) {
+        return jpaCategoryRepository.findAll(PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "name")))
                 .stream()
                 .map(this::toDomain)
                 .toList();
+    }
+
+    @Override
+    public long countAll() {
+        return jpaCategoryRepository.count();
     }
 
     private Category toDomain(CategoryEntity entity) {
