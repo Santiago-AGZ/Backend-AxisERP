@@ -24,3 +24,7 @@ axisERP-db-scripts/
 docker-build.log
 commerce-service/
 *.log
+ARCHITECTURE.md
+BUSINESS_RULES.md
+DEVELOPMENT_STANDARDS.md
+MICROSERVICE_INTERACTIONS.md
