@@ -46,10 +46,17 @@ public class SupplierController {
                 .body(ApiResponse.created(response, "Proveedor creado exitosamente"));
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN')")
-    @GetMapping("/{codigo}")
-    public ResponseEntity<ApiResponse<SupplierResponse>> getSupplier(@PathVariable String codigo) {
+    @PreAuthorize("hasAnyRole('ADMIN', 'INVENTARIO', 'VENDEDOR')")
+    @GetMapping("/codigo/{codigo}")
+    public ResponseEntity<ApiResponse<SupplierResponse>> getSupplierByCodigo(@PathVariable String codigo) {
         SupplierResponse response = getSupplierUseCase.executeByCodigo(codigo);
+        return ResponseEntity.ok(ApiResponse.ok(response, "Proveedor encontrado"));
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'INVENTARIO', 'VENDEDOR')")
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<SupplierResponse>> getSupplierById(@PathVariable UUID id) {
+        SupplierResponse response = getSupplierUseCase.execute(id);
         return ResponseEntity.ok(ApiResponse.ok(response, "Proveedor encontrado"));
     }
 
