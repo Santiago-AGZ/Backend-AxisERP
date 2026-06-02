@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="7b49de5d-138d-4414-92c2-9641973cbde3" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/../Frontend-AxisERP" beforeDir="false" afterPath="$PROJECT_DIR$/../Frontend-AxisERP" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../api-gateway/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/../api-gateway/Dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../api-gateway/mvnw.cmd" beforeDir="false" afterPath="$PROJECT_DIR$/../api-gateway/mvnw.cmd" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../api-gateway/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../api-gateway/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../api-gateway/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/../api-gateway/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../api-gateway/src/test/java/com/axiserp/gateway/ApiGatewayApplicationTests.java" beforeDir="false" afterPath="$PROJECT_DIR$/../api-gateway/src/test/java/com/axiserp/gateway/ApiGatewayApplicationTests.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/.run/auth-login-env.run.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/.run/auth-login-env.run.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/AxisERP-Auth-Service.postman_collection.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/Dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/mvnw.cmd" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/mvnw.cmd" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/application/dto/request/CreateUserRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/application/dto/request/LoginRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/application/dto/request/LogoutRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/application/dto/request/PasswordResetRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/application/dto/request/RefreshTokenRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/application/dto/request/ResetPasswordRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/application/dto/request/UpdateUserRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/application/dto/response/AuditLogResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/application/dto/response/LoginResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/application/dto/response/UserInfoResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/application/dto/response/UserResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/application/service/AuditService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/application/service/AuditService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/application/service/JwtService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/application/usecase/AuthenticateUserService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/application/usecase/CreateUserUseCaseImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/application/usecase/CreateUserUseCaseImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/application/usecase/DeactivateUserUseCaseImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/application/usecase/DeactivateUserUseCaseImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/application/usecase/GetAuditLogUseCaseImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/application/usecase/GetAuditLogUseCaseImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/application/usecase/GetProfileUseCaseImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/application/usecase/GetProfileUseCaseImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/application/usecase/GetUserInfoUseCaseImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/application/usecase/GetUserInfoUseCaseImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/application/usecase/GetUserUseCaseImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/application/usecase/GetUserUseCaseImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/application/usecase/ListUsersUseCaseImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/application/usecase/ListUsersUseCaseImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/application/usecase/LogoutUseCaseImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/application/usecase/LogoutUseCaseImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/application/usecase/RefreshTokenUseCaseImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/application/usecase/RefreshTokenUseCaseImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/application/usecase/RequestPasswordResetUseCaseImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/application/usecase/RequestPasswordResetUseCaseImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/application/usecase/ResetPasswordUseCaseImpl.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/application/usecase/UpdateUserUseCaseImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/application/usecase/UpdateUserUseCaseImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/domain/exception/UserInactiveException.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/domain/exception/UserInactiveException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/domain/factory/UserFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/domain/factory/UserFactory.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/domain/model/AuditLog.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/domain/model/AuditLog.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/domain/model/PasswordResetToken.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/domain/model/RefreshToken.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/domain/model/Role.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/domain/model/Role.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/domain/model/TokenBlacklist.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/domain/model/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/domain/model/User.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/domain/service/FailedAttemptRateLimitStrategy.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/domain/service/LoginRateLimitStrategy.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/infrastructure/adapters/in/web/controller/AuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/infrastructure/adapters/in/web/controller/AuthController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/infrastructure/adapters/in/web/controller/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/infrastructure/adapters/in/web/controller/UserController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/infrastructure/adapters/in/web/exception/GlobalExceptionHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/infrastructure/adapters/in/web/exception/GlobalExceptionHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/infrastructure/adapters/out/external/ResendEmailSenderAdapter.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/infrastructure/adapters/out/persistence/adapter/AuditLogRepositoryAdapter.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/infrastructure/adapters/out/persistence/adapter/AuditLogRepositoryAdapter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/infrastructure/adapters/out/persistence/adapter/PasswordResetTokenRepositoryAdapter.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/infrastructure/adapters/out/persistence/adapter/RefreshTokenRepositoryAdapter.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/infrastructure/adapters/out/persistence/adapter/RoleRepositoryAdapter.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/infrastructure/adapters/out/persistence/adapter/RoleRepositoryAdapter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/infrastructure/adapters/out/persistence/adapter/TokenBlacklistRepositoryAdapter.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/infrastructure/adapters/out/persistence/adapter/UserRepositoryAdapter.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/infrastructure/adapters/out/persistence/adapter/UserRepositoryAdapter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/infrastructure/adapters/out/persistence/entity/AuditLogEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/infrastructure/adapters/out/persistence/entity/AuditLogEntity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/infrastructure/adapters/out/persistence/entity/PasswordResetTokenEntity.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/infrastructure/adapters/out/persistence/entity/RefreshTokenEntity.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/infrastructure/adapters/out/persistence/entity/RoleEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/infrastructure/adapters/out/persistence/entity/RoleEntity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/infrastructure/adapters/out/persistence/entity/TokenBlacklistEntity.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/infrastructure/adapters/out/persistence/entity/UserEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/infrastructure/adapters/out/persistence/entity/UserEntity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/infrastructure/adapters/out/persistence/repository/JpaAuditLogRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/infrastructure/adapters/out/persistence/repository/JpaAuditLogRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/infrastructure/adapters/out/persistence/repository/JpaPasswordResetTokenRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/infrastructure/adapters/out/persistence/repository/JpaRefreshTokenRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/infrastructure/adapters/out/persistence/repository/JpaRoleRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/infrastructure/adapters/out/persistence/repository/JpaRoleRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/infrastructure/adapters/out/persistence/repository/JpaTokenBlacklistRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/infrastructure/adapters/out/persistence/repository/JpaUserRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/infrastructure/adapters/out/persistence/repository/JpaUserRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/infrastructure/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/infrastructure/config/SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/infrastructure/security/JwtAuthenticationFilter.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/infrastructure/security/JwtAuthenticationFilter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/ports/input/AuthenticateUserUseCase.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/ports/input/CreateUserUseCase.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/ports/input/CreateUserUseCase.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/ports/input/DeactivateUserUseCase.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/ports/input/DeactivateUserUseCase.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/ports/input/GetAuditLogUseCase.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/ports/input/GetAuditLogUseCase.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/ports/input/GetProfileUseCase.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/ports/input/GetProfileUseCase.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/ports/input/GetUserInfoUseCase.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/ports/input/GetUserInfoUseCase.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/ports/input/GetUserUseCase.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/ports/input/GetUserUseCase.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/ports/input/ListUsersUseCase.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/ports/input/ListUsersUseCase.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/ports/input/LogoutUseCase.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/ports/input/LogoutUseCase.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/ports/input/RefreshTokenUseCase.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/ports/input/RefreshTokenUseCase.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/ports/input/RequestPasswordResetUseCase.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/ports/input/RequestPasswordResetUseCase.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/ports/input/ResetPasswordUseCase.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/ports/input/UpdateUserUseCase.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/ports/input/UpdateUserUseCase.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/ports/output/AuditLogRepositoryPort.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/ports/output/AuditLogRepositoryPort.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/ports/output/EmailSenderPort.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/ports/output/PasswordResetTokenRepositoryPort.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/ports/output/RefreshTokenRepositoryPort.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/ports/output/RoleRepositoryPort.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/ports/output/RoleRepositoryPort.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/ports/output/TokenBlacklistRepositoryPort.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/ports/output/UserRepositoryPort.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/main/java/com/axiserp/auth/ports/output/UserRepositoryPort.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/test/java/com/axiserp/auth/application/usecase/CreateUserUseCaseImplTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/test/java/com/axiserp/auth/application/usecase/CreateUserUseCaseImplTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/test/java/com/axiserp/auth/application/usecase/DeactivateUserUseCaseImplTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/test/java/com/axiserp/auth/application/usecase/DeactivateUserUseCaseImplTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/test/java/com/axiserp/auth/application/usecase/GetUserUseCaseImplTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/test/java/com/axiserp/auth/application/usecase/GetUserUseCaseImplTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/test/java/com/axiserp/auth/application/usecase/LogoutUseCaseImplTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/test/java/com/axiserp/auth/application/usecase/RequestPasswordResetUseCaseImplTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/test/java/com/axiserp/auth/application/usecase/ResetPasswordUseCaseImplTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/test/java/com/axiserp/auth/domain/factory/UserFactoryTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/../auth-service/src/test/java/com/axiserp/auth/domain/factory/UserFactoryTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../auth-service/src/test/java/com/axiserp/auth/domain/service/FailedAttemptRateLimitStrategyTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../axisERP-db-scripts/catalog-service/database.sql" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/Dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/mvnw.cmd" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/mvnw.cmd" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/postman/catalog-service.postman_collection.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/application/dto/request/CreateCategoryRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/application/dto/request/CreateProductRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/application/dto/request/UpdateCategoryRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/application/dto/request/UpdateProductRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/application/dto/response/CategoryResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/application/dto/response/ProductResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/application/usecase/CreateCategoryUseCaseImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/application/usecase/CreateCategoryUseCaseImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/application/usecase/CreateProductUseCaseImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/application/usecase/CreateProductUseCaseImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/application/usecase/DeactivateCategoryUseCaseImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/application/usecase/DeactivateCategoryUseCaseImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/application/usecase/DeactivateProductUseCaseImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/application/usecase/DeactivateProductUseCaseImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/application/usecase/GetCategoryUseCaseImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/application/usecase/GetCategoryUseCaseImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/application/usecase/GetProductUseCaseImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/application/usecase/GetProductUseCaseImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/application/usecase/ListCategoriesUseCaseImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/application/usecase/ListCategoriesUseCaseImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/application/usecase/ListProductsUseCaseImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/application/usecase/ListProductsUseCaseImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/application/usecase/UpdateCategoryUseCaseImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/application/usecase/UpdateCategoryUseCaseImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/application/usecase/UpdateProductUseCaseImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/application/usecase/UpdateProductUseCaseImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/domain/factory/CategoryFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/domain/factory/CategoryFactory.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/domain/factory/ProductFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/domain/factory/ProductFactory.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/domain/model/Category.java" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/domain/model/Category.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/domain/model/Product.java" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/domain/model/Product.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/domain/model/ProductBarcode.java" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/domain/model/ProductBarcode.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/infrastructure/adapters/in/web/controller/CategoryController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/infrastructure/adapters/in/web/controller/CategoryController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/infrastructure/adapters/in/web/controller/ProductController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/infrastructure/adapters/in/web/controller/ProductController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/infrastructure/adapters/in/web/exception/GlobalExceptionHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/infrastructure/adapters/in/web/exception/GlobalExceptionHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/infrastructure/adapters/out/persistence/adapter/CategoryRepositoryAdapter.java" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/infrastructure/adapters/out/persistence/adapter/CategoryRepositoryAdapter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/infrastructure/adapters/out/persistence/adapter/ProductRepositoryAdapter.java" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/infrastructure/adapters/out/persistence/adapter/ProductRepositoryAdapter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/infrastructure/adapters/out/persistence/entity/CategoryEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/infrastructure/adapters/out/persistence/entity/CategoryEntity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/infrastructure/adapters/out/persistence/entity/ProductBarcodeEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/infrastructure/adapters/out/persistence/entity/ProductBarcodeEntity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/infrastructure/adapters/out/persistence/entity/ProductEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/infrastructure/adapters/out/persistence/entity/ProductEntity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/infrastructure/adapters/out/persistence/repository/JpaCategoryRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/infrastructure/adapters/out/persistence/repository/JpaCategoryRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/infrastructure/adapters/out/persistence/repository/JpaProductRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/infrastructure/adapters/out/persistence/repository/JpaProductRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/infrastructure/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/infrastructure/config/SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/infrastructure/security/JwtAuthenticationFilter.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/ports/input/CreateCategoryUseCase.java" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/ports/input/CreateCategoryUseCase.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/ports/input/CreateProductUseCase.java" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/ports/input/CreateProductUseCase.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/ports/input/DeactivateCategoryUseCase.java" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/ports/input/DeactivateCategoryUseCase.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/ports/input/DeactivateProductUseCase.java" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/ports/input/DeactivateProductUseCase.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/ports/input/GetCategoryUseCase.java" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/ports/input/GetCategoryUseCase.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/ports/input/GetProductUseCase.java" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/ports/input/GetProductUseCase.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/ports/input/ListCategoriesUseCase.java" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/ports/input/ListCategoriesUseCase.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/ports/input/ListProductsUseCase.java" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/ports/input/ListProductsUseCase.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/ports/input/UpdateCategoryUseCase.java" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/ports/input/UpdateCategoryUseCase.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/ports/input/UpdateProductUseCase.java" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/ports/input/UpdateProductUseCase.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/ports/output/CategoryRepositoryPort.java" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/ports/output/CategoryRepositoryPort.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/ports/output/ProductRepositoryPort.java" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/main/java/com/axiserp/catalog/ports/output/ProductRepositoryPort.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/test/java/com/axiserp/catalog/application/usecase/CreateCategoryUseCaseImplTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/test/java/com/axiserp/catalog/application/usecase/CreateCategoryUseCaseImplTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/test/java/com/axiserp/catalog/application/usecase/CreateProductUseCaseImplTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/test/java/com/axiserp/catalog/application/usecase/CreateProductUseCaseImplTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/test/java/com/axiserp/catalog/application/usecase/DeactivateCategoryUseCaseImplTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/test/java/com/axiserp/catalog/application/usecase/DeactivateCategoryUseCaseImplTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/test/java/com/axiserp/catalog/application/usecase/DeactivateProductUseCaseImplTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/test/java/com/axiserp/catalog/application/usecase/DeactivateProductUseCaseImplTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/test/java/com/axiserp/catalog/application/usecase/GetCategoryUseCaseImplTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/test/java/com/axiserp/catalog/application/usecase/GetCategoryUseCaseImplTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/test/java/com/axiserp/catalog/application/usecase/GetProductUseCaseImplTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/test/java/com/axiserp/catalog/application/usecase/GetProductUseCaseImplTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/test/java/com/axiserp/catalog/application/usecase/UpdateCategoryUseCaseImplTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/test/java/com/axiserp/catalog/application/usecase/UpdateCategoryUseCaseImplTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../catalog-service/src/test/java/com/axiserp/catalog/application/usecase/UpdateProductUseCaseImplTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/../catalog-service/src/test/java/com/axiserp/catalog/application/usecase/UpdateProductUseCaseImplTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../commerce-service/.gitattributes" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../commerce-service/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../commerce-service/.mvn/wrapper/maven-wrapper.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../commerce-service/Dockerfile" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../commerce-service/mvnw" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../commerce-service/mvnw.cmd" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../commerce-service/pom.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../commerce-service/src/main/java/com/axiserp/commerce/CommerceServiceApplication.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../commerce-service/src/main/resources/application.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../commerce-service/src/test/java/com/axiserp/commerce/CommerceServiceApplicationTests.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/../compose.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../inventory-service/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/../inventory-service/Dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../inventory-service/mvnw.cmd" beforeDir="false" afterPath="$PROJECT_DIR$/../inventory-service/mvnw.cmd" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../inventory-service/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../inventory-service/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../inventory-service/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/../inventory-service/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../inventory-service/src/test/java/com/axiserp/inventory/InventoryServiceApplicationTests.java" beforeDir="false" afterPath="$PROJECT_DIR$/../inventory-service/src/test/java/com/axiserp/inventory/InventoryServiceApplicationTests.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../report-service/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/../report-service/Dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../report-service/mvnw.cmd" beforeDir="false" afterPath="$PROJECT_DIR$/../report-service/mvnw.cmd" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../report-service/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../report-service/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../report-service/src/main/java/com/axiserp/report/ReportServiceApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/../report-service/src/main/java/com/axiserp/report/ReportServiceApplication.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../report-service/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/../report-service/src/main/resources/application.properties" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="mavenHomeTypeForPersistence" value="WRAPPER" />
+      </MavenGeneralSettings>
+    </option>
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 3,
+  &quot;fromUser&quot;: false
+}</component>
+  <component name="ProjectId" id="3DheD0SOav8FIfA7f4FaRFF9OR0" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.commerce-service-env.executor&quot;: &quot;Run&quot;,
+    &quot;Application.sales-service-env.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;Spring Boot.CommerceServiceApplication.executor&quot;: &quot;Run&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;feat/catalog-service&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Santiago/Desktop/axisERP-platform/sales-service&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RunManager" selected="Application.sales-service-env">
+    <configuration name="sales-service-env" type="Application" factoryName="Application">
+      <envs>
+        <env name="AUTH_SERVICE_URL" value="https://auth-service-bmdi.onrender.com" />
+        <env name="CATALOG_SERVICE_URL" value="https://catalog-service-wm9a.onrender.com" />
+        <env name="INTERNAL_API_KEY" value="7JK99YpkxLUPAEOnhg4SzOti4yAwiT6mgNLqo3weJ3Q=" />
+        <env name="INVENTORY_SERVICE_URL" value="https://inventory-service-ieoy.onrender.com" />
+        <env name="RABBIT_HOST" value="raccoon-01.lmq.cloudamqp.com" />
+        <env name="RABBIT_PASSWORD" value="xRwieRigxBpFDYlgqEGu3p5qTp2b_Peg" />
+        <env name="RABBIT_PORT" value="5671" />
+        <env name="RABBIT_SSL" value="true" />
+        <env name="RABBIT_USERNAME" value="pfdudlre" />
+        <env name="RABBIT_VHOST" value="pfdudlre" />
+        <env name="SPRING_DATASOURCE_PASSWORD" value="npg_qtvUFx6Ol8Ve" />
+        <env name="SPRING_DATASOURCE_URL" value="jdbc:postgresql://ep-misty-waterfall-apbais5g-pooler.c-7.us-east-1.aws.neon.tech/neondb?sslmode=require&amp;user=neondb_owner&amp;password=npg_qtvUFx6Ol8Ve" />
+        <env name="SPRING_DATASOURCE_USERNAME" value="neondb_owner" />
+      </envs>
+      <option name="MAIN_CLASS_NAME" value="com.axiserp.commerce.CommerceServiceApplication" />
+      <module name="commerce-service" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="CommerceServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <module name="commerce-service" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.axiserp.commerce.CommerceServiceApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <list>
+      <item itemvalue="Application.sales-service-env" />
+      <item itemvalue="Spring Boot.CommerceServiceApplication" />
+    </list>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="7b49de5d-138d-4414-92c2-9641973cbde3" name="Changes" comment="" />
+      <created>1778738606149</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1778738606149</updated>
+      <workItem from="1778738607208" duration="488000" />
+      <workItem from="1778739758367" duration="7000" />
+      <workItem from="1778741949113" duration="200000" />
+      <workItem from="1778747402937" duration="5000" />
+      <workItem from="1778747416170" duration="10000" />
+      <workItem from="1778801363721" duration="2006000" />
+      <workItem from="1778804993343" duration="435000" />
+      <workItem from="1778812457897" duration="52000" />
+      <workItem from="1778834952745" duration="6000" />
+      <workItem from="1779583028140" duration="666000" />
+      <workItem from="1779590978128" duration="1720000" />
+      <workItem from="1779662846651" duration="4257000" />
+      <workItem from="1779683783075" duration="2000" />
+      <workItem from="1779692984986" duration="6101000" />
+      <workItem from="1779743224350" duration="68000" />
+      <workItem from="1779743859227" duration="453000" />
+      <workItem from="1779778133633" duration="1280000" />
+      <workItem from="1779782173157" duration="748000" />
+      <workItem from="1779826845459" duration="1167000" />
+      <workItem from="1779840865867" duration="5000" />
+      <workItem from="1779866743037" duration="977000" />
+      <workItem from="1780013344598" duration="610000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>
