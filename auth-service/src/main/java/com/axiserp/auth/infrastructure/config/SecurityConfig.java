@@ -45,6 +45,7 @@ public class SecurityConfig {
     private final FirstLoginFilter firstLoginFilter;
     private final UserStatusFilter userStatusFilter;
     private final RateLimitingFilter rateLimitingFilter;
+    private final InternalApiKeyFilter internalApiKeyFilter;
 
     @Value("${spring.security.oauth2.resourceserver.jwt.jwk-set-uri}")
     private String jwkSetUri;
@@ -68,6 +69,7 @@ public class SecurityConfig {
                         .jwt(jwt -> jwt
                                 .jwtAuthenticationConverter(jwtAuthenticationConverter()))
                         .authenticationEntryPoint(this::handleUnauthorized))
+                .addFilterBefore(internalApiKeyFilter, BearerTokenAuthenticationFilter.class)
                 .addFilterBefore(userStatusFilter, BearerTokenAuthenticationFilter.class)
                 .addFilterBefore(firstLoginFilter, BearerTokenAuthenticationFilter.class)
                 .addFilterBefore(rateLimitingFilter, BearerTokenAuthenticationFilter.class)
