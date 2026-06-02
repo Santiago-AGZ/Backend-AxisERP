@@ -60,21 +60,6 @@ services:
     networks:
       - axiserp-network
 
-  commerce-service:
-    build: ./commerce-service
-    container_name: commerce-service
-    restart: unless-stopped
-    ports:
-      - "8084:8084"
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/axiserp
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
-    depends_on:
-      - postgres
-    networks:
-      - axiserp-network
-
   report-service:
     build: ./report-service
     container_name: report-service
@@ -100,7 +85,6 @@ services:
       - auth-service
       - catalog-service
       - inventory-service
-      - commerce-service
       - report-service
     networks:
       - axiserp-network
