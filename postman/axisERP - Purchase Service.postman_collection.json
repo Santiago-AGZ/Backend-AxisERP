@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "346f28e4-4883-4293-b8c3-bbc5ccacb535",
     "name": "axisERP - Purchase Service",
-    "description": "Endpoints de proveedores y compras via API Gateway (puerto 8080).\n\nFLUJO:\n1. Obtener authToken desde la coleccion Auth Service\n2. Copiar authToken a esta coleccion\n3. Crear proveedor (POST /suppliers)\n4. Crear compra con items (POST /purchases)\n\nREGLAS IMPLEMENTADAS:\n- R1-R5 Proveedores: nombre, NIT unico, estado ACTIVO/INACTIVO/ELIMINADO, soft-delete\n- R6-R22 Compras: proveedor valido, items no duplicados, subtotal/tax/total automaticos\n- R17-R18: Compras canceladas/pagadas no modificables\n- R19: Recepcion actualiza inventario\n- R20: Recepciones parciales con saldo pendiente\n- R21: Cancelacion revierte movimientos de inventario\n- R22: Auditoria de operaciones criticas\n- Identificadores: PROV- para proveedores, PO- para compras\n\nRESPUESTA: ApiResponse<T> con success/code/data/message/meta/pagination.",
+    "description": "Endpoints de proveedores y compras via API Gateway (puerto 8080).\n\nFLUJO:\n1. Obtener authToken desde Auth Service\n2. Copiar authToken\n3. Crear proveedor (auto-setea supplierId)\n4. Crear compra con items (incluye productName)\n\nREGLAS: R1-R22 (proveedores + compras), SupplierStatus=ACTIVO/INACTIVO/ELIMINADO",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -11,6 +11,10 @@
       "item": [
         {
           "name": "Create Supplier",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": ["var d = pm.response.json(); if(d.success && d.data) { pm.collectionVariables.set('supplierId', d.data.id); pm.collectionVariables.set('supplierCodigo', d.data.codigo); console.log('Supplier: ' + d.data.codigo); }"], "type": "text/javascript" }
+          }],
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
@@ -19,54 +23,42 @@
               "raw": "{\n  \"codigo\": \"PROV-000001\",\n  \"name\": \"Distribuidora ABC SAS\",\n  \"nit\": \"900123456-1\",\n  \"phone\": \"+57 1 2345678\",\n  \"email\": \"contacto@abc.com\",\n  \"address\": \"Cra 30 #45-12, Bogota\"\n}",
               "options": { "raw": { "language": "json" } }
             },
-            "url": {
-              "raw": "{{baseUrl}}/suppliers",
-              "host": ["{{baseUrl}}"],
-              "path": ["suppliers"]
-            },
-            "description": "Crear proveedor. Solo ADMIN. Codigo formato PROV-000001."
+            "url": { "raw": "{{baseUrl}}/suppliers", "host": ["{{baseUrl}}"], "path": ["suppliers"] },
+            "description": "Crear proveedor. Auto-setea supplierId y supplierCodigo. Roles: ADMIN, INVENTARIO."
           },
           "response": []
         },
         {
           "name": "List Suppliers",
           "request": {
-            "method": "GET",
-            "header": [],
+            "method": "GET", "header": [],
             "url": {
-              "raw": "{{baseUrl}}/suppliers",
-              "host": ["{{baseUrl}}"],
-              "path": ["suppliers"]
+              "raw": "{{baseUrl}}/suppliers?search=&page=1&size=20",
+              "host": ["{{baseUrl}}"], "path": ["suppliers"],
+              "query": [
+                { "key": "search", "value": "", "description": "Buscar por nombre, codigo o NIT" },
+                { "key": "page", "value": "1" },
+                { "key": "size", "value": "20" }
+              ]
             },
-            "description": "Listar todos los proveedores. Solo ADMIN."
+            "description": "Listar proveedores con filtro search (nombre, codigo, NIT) y paginacion."
           },
           "response": []
         },
         {
-          "name": "Get Supplier by Codigo",
+          "name": "Get Supplier by ID",
           "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/suppliers/{{supplierCodigo}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["suppliers", "{{supplierCodigo}}"]
-            },
-            "description": "Obtener proveedor por codigo de negocio (PROV-000001). Solo ADMIN."
+            "method": "GET", "header": [],
+            "url": { "raw": "{{baseUrl}}/suppliers/{{supplierId}}", "host": ["{{baseUrl}}"], "path": ["suppliers", "{{supplierId}}"] }
           },
           "response": []
         },
         {
           "name": "Deactivate Supplier",
           "request": {
-            "method": "PATCH",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/suppliers/{{supplierId}}/deactivate",
-              "host": ["{{baseUrl}}"],
-              "path": ["suppliers", "{{supplierId}}", "deactivate"]
-            },
-            "description": "Desactivar proveedor por UUID. Solo ADMIN."
+            "method": "PATCH", "header": [],
+            "url": { "raw": "{{baseUrl}}/suppliers/{{supplierId}}/deactivate", "host": ["{{baseUrl}}"], "path": ["suppliers", "{{supplierId}}", "deactivate"] },
+            "description": "Desactivar proveedor (soft-delete -> ELIMINADO). Roles: ADMIN."
           },
           "response": []
         }
@@ -77,98 +69,55 @@
       "item": [
         {
           "name": "Create Purchase",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": ["var d = pm.response.json(); if(d.success && d.data) { pm.collectionVariables.set('purchaseId', d.data.id); console.log('Purchase: ' + d.data.purchaseNumber); }"], "type": "text/javascript" }
+          }],
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"supplierId\": \"{{supplierId}}\",\n  \"items\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"quantity\": 10,\n      \"unitPrice\": 150.00\n    }\n  ],\n  \"notes\": \"Orden de compra mensual\"\n}",
+              "raw": "{\n  \"supplierId\": \"{{supplierId}}\",\n  \"items\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"productName\": \"Monitor Samsung 27 pulgadas\",\n      \"quantity\": 10,\n      \"unitPrice\": 150.00\n    }\n  ],\n  \"notes\": \"Orden de compra mensual\"\n}",
               "options": { "raw": { "language": "json" } }
             },
-            "url": {
-              "raw": "{{baseUrl}}/purchases",
-              "host": ["{{baseUrl}}"],
-              "path": ["purchases"]
-            },
-            "description": "Crear orden de compra en estado BORRADOR. Roles autenticados."
+            "url": { "raw": "{{baseUrl}}/purchases", "host": ["{{baseUrl}}"], "path": ["purchases"] },
+            "description": "Crear compra con items. productName es obligatorio. Auto-setea purchaseId. Roles: ADMIN, INVENTARIO."
           },
           "response": []
         },
         {
           "name": "List Purchases",
           "request": {
-            "method": "GET",
-            "header": [],
+            "method": "GET", "header": [],
             "url": {
-              "raw": "{{baseUrl}}/purchases",
-              "host": ["{{baseUrl}}"],
-              "path": ["purchases"]
+              "raw": "{{baseUrl}}/purchases?search=&status=&page=1&size=20",
+              "host": ["{{baseUrl}}"], "path": ["purchases"],
+              "query": [
+                { "key": "search", "value": "", "description": "Buscar por numero de compra" },
+                { "key": "status", "value": "", "description": "BORRADOR|PENDIENTE|RECIBIDA|PAGADA|CANCELADA" },
+                { "key": "page", "value": "1" },
+                { "key": "size", "value": "20" }
+              ]
             },
-            "description": "Listar todas las compras. Roles autenticados."
+            "description": "Listar compras con filtros y paginacion."
           },
           "response": []
         },
         {
           "name": "Get Purchase by ID",
           "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/purchases/{{purchaseId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["purchases", "{{purchaseId}}"]
-            },
-            "description": "Obtener compra por UUID. Roles autenticados."
-          },
-          "response": []
-        },
-        {
-          "name": "Update Purchase Status",
-          "request": {
-            "method": "PATCH",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/purchases/{{purchaseId}}/status?status=PENDIENTE",
-              "host": ["{{baseUrl}}"],
-              "path": ["purchases", "{{purchaseId}}", "status"],
-              "query": [
-                { "key": "status", "value": "PENDIENTE", "description": "Estados: BORRADOR, PENDIENTE, RECIBIDA, PAGADA, CANCELADA" }
-              ]
-            },
-            "description": "Cambiar estado de compra via query param. Transiciones: BORRADOR->PENDIENTE->RECIBIDA->PAGADA. Roles autenticados."
-          },
-          "response": []
-        },
-        {
-          "name": "Receive Purchase",
-          "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"items\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"receivedQty\": 10\n    }\n  ]\n}",
-              "options": { "raw": { "language": "json" } }
-            },
-            "url": {
-              "raw": "{{baseUrl}}/purchases/{{purchaseId}}/receive",
-              "host": ["{{baseUrl}}"],
-              "path": ["purchases", "{{purchaseId}}", "receive"]
-            },
-            "description": "Registrar recepcion de mercancia. Cambia estado a RECIBIDA. Roles autenticados."
+            "method": "GET", "header": [],
+            "url": { "raw": "{{baseUrl}}/purchases/{{purchaseId}}", "host": ["{{baseUrl}}"], "path": ["purchases", "{{purchaseId}}"] }
           },
           "response": []
         },
         {
           "name": "Cancel Purchase",
           "request": {
-            "method": "PATCH",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/purchases/{{purchaseId}}/cancel",
-              "host": ["{{baseUrl}}"],
-              "path": ["purchases", "{{purchaseId}}", "cancel"]
-            },
-            "description": "Cancelar orden de compra. Roles autenticados."
+            "method": "PATCH", "header": [],
+            "url": { "raw": "{{baseUrl}}/purchases/{{purchaseId}}/cancel", "host": ["{{baseUrl}}"], "path": ["purchases", "{{purchaseId}}", "cancel"] },
+            "description": "Cancelar compra. Revierte movimientos de inventario si tenia items recibidos. Roles: ADMIN."
           },
           "response": []
         }
@@ -183,7 +132,7 @@
     { "key": "baseUrl", "value": "http://localhost:8080/api/v1" },
     { "key": "authToken", "value": "" },
     { "key": "supplierId", "value": "" },
-    { "key": "supplierCodigo", "value": "PROV-000001" },
+    { "key": "supplierCodigo", "value": "" },
     { "key": "purchaseId", "value": "" },
     { "key": "productId", "value": "" }
   ]
