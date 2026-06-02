@@ -20,10 +20,8 @@ services:
     restart: unless-stopped
     ports:
       - "8081:8081"
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/axiserp
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
+    env_file:
+      - .env
     depends_on:
       - postgres
     networks:
@@ -33,13 +31,10 @@ services:
     build: ./catalog-service
     container_name: catalog-service
     restart: unless-stopped
-    
     ports:
       - "8082:8082"
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/axiserp
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
+    env_file:
+      - .env
     depends_on:
       - postgres
     networks:
@@ -51,10 +46,34 @@ services:
     restart: unless-stopped
     ports:
       - "8083:8083"
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/axiserp
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+    networks:
+      - axiserp-network
+
+  purchase-service:
+    build: ./purchase-service
+    container_name: purchase-service
+    restart: unless-stopped
+    ports:
+      - "8086:8086"
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+    networks:
+      - axiserp-network
+
+  sales-service:
+    build: ./sales-service
+    container_name: sales-service
+    restart: unless-stopped
+    ports:
+      - "8084:8084"
+    env_file:
+      - .env
     depends_on:
       - postgres
     networks:
@@ -66,10 +85,8 @@ services:
     restart: unless-stopped
     ports:
       - "8085:8085"
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/axiserp
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
+    env_file:
+      - .env
     depends_on:
       - postgres
     networks:
@@ -85,6 +102,8 @@ services:
       - auth-service
       - catalog-service
       - inventory-service
+      - purchase-service
+      - sales-service
       - report-service
     networks:
       - axiserp-network
