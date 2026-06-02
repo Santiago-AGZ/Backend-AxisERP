@@ -10,10 +10,13 @@ import org.springframework.web.client.RestClient;
 
 import com.axiserp.purchase.ports.output.CatalogServicePort;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+
 @Component
 public class CatalogServiceAdapter implements CatalogServicePort {
 
     private static final Logger log = LoggerFactory.getLogger(CatalogServiceAdapter.class);
+    private static final String CB_NAME = "catalogService";
 
     private final RestClient restClient;
     private final String internalApiKey;
@@ -30,16 +33,18 @@ public class CatalogServiceAdapter implements CatalogServicePort {
     }
 
     @Override
+    @CircuitBreaker(name = CB_NAME, fallbackMethod = "productExistsFallback")
     public boolean productExists(UUID productId) {
-        try {
-            restClient.get()
-                    .uri("/api/v1/productos/{id}", productId)
-                    .retrieve()
-                    .toBodilessEntity();
-            return true;
-        } catch (Exception e) {
-            log.debug("product_not_found productId={}", productId);
-            return false;
-        }
+        restClient.get()
+                .uri("/api/v1/productos/{id}", productId)
+                .retrieve()
+                .toBodilessEntity();
+        return true;
+    }
+
+    @SuppressWarnings("unused")
+    private boolean productExistsFallback(UUID productId, Throwable t) {
+        log.warn("circuit_breaker_fallback catalogService productId={} error={}", productId, t.getMessage());
+        return true; // fail-open: si catalog esta caido, permitir la compra
     }
 }
