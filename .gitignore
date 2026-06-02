@@ -1,47 +1,26 @@
-# ============================================================================
-# AxisERP Platform - Root .gitignore
-# ============================================================================
 
-# === Java / Maven ===
-**/target/
-**/*.class
-**/*.jar
-**/*.war
-**/*.ear
-**/HELP.md
-
-# === IDE ===
-**/.idea/
-**/*.iml
-**/*.iws
-**/*.ipr
-**/.classpath
-**/.project
-**/.settings/
-**/.factorypath
-**/.springBeans
-**/.sts4-cache
-**/.apt_generated
-
-# === VS Code ===
+.claude/
+.agents/
+.idea/
 .vscode/
-
-# === OS ===
-.DS_Store
-Thumbs.db
-desktop.ini
-
-# === Opencode / AI tools ===
-**/.agents/
-**/skills-lock.json
-**/.junie/
-
-# === Removed submodule ===
+docs/
+postman/
 Frontend-AxisERP/
-
-# === Environment / Secrets ===
-**/.env
-**/.env.local
-**/.env.*.local
-**/*.pem
-**/*.key
+API_RESPONSE_FORMAT.md
+AUDIT_REPORT.md
+audit-neon.ps1
+audit_neon.py
+init-databases.sql
+PROMPT_BUSINESS_IDENTIFIERS.md
+SESSION_SUMMARY.md
+SETUP_COMPLETE.md
+skills-lock.json
+test_crud_neon.ps1
+scaffold_*.py
+check_neon_schema.py
+**/HELP.md
+.env
+axisERP-db-scripts/
+docker-build.log
+commerce-service/
+*.log
