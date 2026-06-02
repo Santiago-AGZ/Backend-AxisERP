@@ -23,6 +23,7 @@ import com.axiserp.auth.application.dto.response.AuditLogResponse;
 import com.axiserp.auth.application.dto.response.UserResponse;
 import com.axiserp.auth.domain.model.PageResult;
 import com.axiserp.auth.infrastructure.adapters.in.web.response.ApiResponse;
+import com.axiserp.auth.infrastructure.adapters.in.web.response.ApiResponse.PaginationMeta;
 import com.axiserp.auth.ports.input.CreateUserUseCase;
 import com.axiserp.auth.ports.input.DeactivateUserUseCase;
 import com.axiserp.auth.ports.input.GetAuditLogUseCase;
@@ -109,8 +110,8 @@ public class UserController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         PageResult<AuditLogResponse> result = getAuditLogUseCase.getAuditLogs(userId, action, entityType, page, size);
-        ApiResponse<List<AuditLogResponse>> response = ApiResponse.ok(result.getContent());
-        response.setPagination(result.getPage(), result.getSize(), result.getTotalElements(), result.getTotalPages());
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.paged(
+                result.getContent(), "Auditoria recuperada exitosamente",
+                PaginationMeta.of(result.getPage() + 1, result.getSize(), result.getTotalElements())));
     }
 }

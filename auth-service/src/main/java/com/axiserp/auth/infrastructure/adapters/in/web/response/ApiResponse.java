@@ -1,130 +1,87 @@
 package com.axiserp.auth.infrastructure.adapters.in.web.response;
 
 import java.time.Instant;
-import java.util.Map;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import lombok.Builder;
+import lombok.Getter;
+
+@Getter
+@Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiResponse<T> {
 
-    private boolean success;
-    private T data;
-    private String message;
-    private String timestamp;
-    private ErrorDetail error;
-    private Pagination pagination;
-
-    public ApiResponse() {
-        this.timestamp = Instant.now().toString();
-    }
+    private final boolean success;
+    private final String code;
+    private final String message;
+    private final T data;
+    private final List<ApiError> errors;
+    private final ApiMeta meta;
+    private final PaginationMeta pagination;
 
     public static <T> ApiResponse<T> ok(T data) {
-        ApiResponse<T> response = new ApiResponse<>();
-        response.success = true;
-        response.data = data;
-        response.message = "Operación exitosa";
-        return response;
+        return ApiResponse.<T>builder().success(true).code("SUCCESS").message("Operacion exitosa").data(data).meta(ApiMeta.now()).build();
     }
 
     public static <T> ApiResponse<T> ok(T data, String message) {
-        ApiResponse<T> response = new ApiResponse<>();
-        response.success = true;
-        response.data = data;
-        response.message = message;
-        return response;
+        return ApiResponse.<T>builder().success(true).code("SUCCESS").message(message).data(data).meta(ApiMeta.now()).build();
     }
 
     public static <T> ApiResponse<T> created(T data) {
-        ApiResponse<T> response = new ApiResponse<>();
-        response.success = true;
-        response.data = data;
-        response.message = "Recurso creado exitosamente";
-        return response;
-    }
-
-    public static <T> ApiResponse<T> error(int status, String error, String message) {
-        ApiResponse<T> response = new ApiResponse<>();
-        response.success = false;
-        response.error = new ErrorDetail(status, error, message);
-        response.message = message;
-        return response;
-    }
-
-    public static <T> ApiResponse<T> error(int status, String error, String message, Map<String, String> details) {
-        ApiResponse<T> response = new ApiResponse<>();
-        response.success = false;
-        response.error = new ErrorDetail(status, error, message, details);
-        response.message = message;
-        return response;
+        return ApiResponse.<T>builder().success(true).code("CREATED").message("Recurso creado exitosamente").data(data).meta(ApiMeta.now()).build();
     }
 
     public static <T> ApiResponse<T> created(T data, String message) {
-        ApiResponse<T> response = new ApiResponse<>();
-        response.success = true;
-        response.data = data;
-        response.message = message;
-        return response;
+        return ApiResponse.<T>builder().success(true).code("CREATED").message(message).data(data).meta(ApiMeta.now()).build();
     }
 
-    public boolean isSuccess() { return success; }
-    public T getData() { return data; }
-    public String getMessage() { return message; }
-    public String getTimestamp() { return timestamp; }
-    public ErrorDetail getError() { return error; }
-    public Pagination getPagination() { return pagination; }
-
-    public void setPagination(int page, int size, long totalElements, int totalPages) {
-        this.pagination = new Pagination(page, size, totalElements, totalPages);
+    public static <T> ApiResponse<T> paged(T data, String message, PaginationMeta pagination) {
+        return ApiResponse.<T>builder().success(true).code("SUCCESS").message(message).data(data).pagination(pagination).meta(ApiMeta.now()).build();
     }
 
+    public static <T> ApiResponse<T> error(String code, String message) {
+        return ApiResponse.<T>builder().success(false).code(code).message(message).meta(ApiMeta.now()).build();
+    }
+
+    public static <T> ApiResponse<T> error(String code, String message, List<ApiError> errors) {
+        return ApiResponse.<T>builder().success(false).code(code).message(message).errors(errors).meta(ApiMeta.now()).build();
+    }
+
+    @Getter
+    @Builder
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    public static class ErrorDetail {
-        private int status;
-        private String error;
-        private String message;
-        private Map<String, String> details;
-
-        ErrorDetail() {}
-
-        ErrorDetail(int status, String error, String message) {
-            this.status = status;
-            this.error = error;
-            this.message = message;
-        }
-
-        ErrorDetail(int status, String error, String message, Map<String, String> details) {
-            this.status = status;
-            this.error = error;
-            this.message = message;
-            this.details = details;
-        }
-
-        public int getStatus() { return status; }
-        public String getError() { return error; }
-        public String getMessage() { return message; }
-        public Map<String, String> getDetails() { return details; }
+    public static class ApiError {
+        private final String field;
+        private final String message;
+        private final Object rejectedValue;
     }
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    public static class Pagination {
-        private int page;
-        private int size;
-        private long totalElements;
-        private int totalPages;
+    @Getter
+    @Builder
+    public static class ApiMeta {
+        private final Instant timestamp;
+        private final String requestId;
 
-        Pagination() {}
-
-        Pagination(int page, int size, long totalElements, int totalPages) {
-            this.page = page;
-            this.size = size;
-            this.totalElements = totalElements;
-            this.totalPages = totalPages;
+        public static ApiMeta now() {
+            return ApiMeta.builder().timestamp(Instant.now()).requestId(java.util.UUID.randomUUID().toString()).build();
         }
+    }
 
-        public int getPage() { return page; }
-        public int getSize() { return size; }
-        public long getTotalElements() { return totalElements; }
-        public int getTotalPages() { return totalPages; }
+    @Getter
+    @Builder
+    public static class PaginationMeta {
+        private final int page;
+        private final int pageSize;
+        private final long totalRecords;
+        private final int totalPages;
+        private final boolean hasNext;
+        private final boolean hasPrevious;
+
+        public static PaginationMeta of(int page, int pageSize, long total) {
+            int tp = pageSize > 0 ? (int) Math.ceil((double) total / pageSize) : 0;
+            return PaginationMeta.builder().page(page).pageSize(pageSize).totalRecords(total).totalPages(tp).hasNext(page < tp).hasPrevious(page > 1).build();
+        }
     }
 }
