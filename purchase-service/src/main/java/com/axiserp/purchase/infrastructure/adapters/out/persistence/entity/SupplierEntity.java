@@ -27,7 +27,7 @@ import lombok.Setter;
 public class SupplierEntity {
 
     public enum SupplierStatus {
-        ACTIVO, INACTIVO
+        ACTIVO, INACTIVO, ELIMINADO
     }
 
     @Id

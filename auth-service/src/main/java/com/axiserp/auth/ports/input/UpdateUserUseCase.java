@@ -7,5 +7,5 @@ import com.axiserp.auth.application.dto.response.UserResponse;
 
 public interface UpdateUserUseCase {
 
-    UserResponse update(UUID id, UpdateUserRequest request, UUID updatedBy);
+    UserResponse update(UUID id, UpdateUserRequest request);
 }

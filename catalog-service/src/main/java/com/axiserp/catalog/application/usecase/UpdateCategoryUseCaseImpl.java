@@ -28,7 +28,7 @@ public class UpdateCategoryUseCaseImpl implements UpdateCategoryUseCase {
 
     @Override
     @Transactional
-    public CategoryResponse update(UUID id, UpdateCategoryRequest request) {
+    public CategoryResponse update(UUID id, UpdateCategoryRequest request, UUID updatedBy) {
         Category existing = categoryRepositoryPort.findById(id)
                 .orElseThrow(CategoryNotFoundException::new);
 
@@ -46,16 +46,40 @@ public class UpdateCategoryUseCaseImpl implements UpdateCategoryUseCase {
             if (request.getParentId().equals(id)) {
                 throw new IllegalArgumentException("Una categoria no puede ser padre de si misma");
             }
-            categoryRepositoryPort.findById(request.getParentId())
+            if (isCyclicDependency(id, request.getParentId())) {
+                throw new IllegalArgumentException("No se permiten ciclos jerarquicos: la categoria padre generaria un ciclo");
+            }
+            var parent = categoryRepositoryPort.findById(request.getParentId())
                     .orElseThrow(() -> new CategoryNotFoundException("Categoria padre no encontrada"));
+            if (parent.isDeleted()) {
+                throw new IllegalArgumentException("No se puede asignar una categoria padre eliminada");
+            }
         }
 
-        Category updated = CategoryFactory.update(existing, request.getName(), request.getDescription(), request.getParentId());
+        Category updated = CategoryFactory.update(existing, request.getName(), request.getDescription(), request.getParentId(), updatedBy);
         Category saved = categoryRepositoryPort.save(updated);
 
-        log.info("category_updated id={} name={}", saved.getId(), saved.getName());
+        log.info("category_updated id={} name={} updatedBy={}", saved.getId(), saved.getName(), updatedBy);
 
         return toResponse(saved);
+    }
+
+    private boolean isCyclicDependency(UUID categoryId, UUID newParentId) {
+        UUID currentParentId = newParentId;
+        int maxDepth = 100;
+        int depth = 0;
+        while (currentParentId != null && depth < maxDepth) {
+            if (currentParentId.equals(categoryId)) {
+                return true;
+            }
+            var parent = categoryRepositoryPort.findById(currentParentId);
+            if (parent.isEmpty()) {
+                break;
+            }
+            currentParentId = parent.get().getParentId();
+            depth++;
+        }
+        return false;
     }
 
     private CategoryResponse toResponse(Category category) {
@@ -65,8 +89,12 @@ public class UpdateCategoryUseCaseImpl implements UpdateCategoryUseCase {
                 .description(category.getDescription())
                 .parentId(category.getParentId())
                 .status(category.getStatus().name())
+                .createdBy(category.getCreatedBy())
+                .updatedBy(category.getUpdatedBy())
                 .createdAt(category.getCreatedAt())
                 .updatedAt(category.getUpdatedAt())
                 .build();
     }
 }
+
+

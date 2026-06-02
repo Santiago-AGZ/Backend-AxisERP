@@ -1,7 +1,5 @@
 package com.axiserp.auth.infrastructure.adapters.out.persistence.adapter;
 
-import java.util.Optional;
-
 import org.springframework.stereotype.Component;
 
 import com.axiserp.auth.domain.model.TokenBlacklist;
@@ -11,56 +9,45 @@ import com.axiserp.auth.ports.output.TokenBlacklistRepositoryPort;
 
 import lombok.RequiredArgsConstructor;
 
-/**
- * Adapter para TokenBlacklistRepositoryPort.
- * Implementa persistencia de tokens revocados usando JPA.
- */
 @Component
 @RequiredArgsConstructor
 public class TokenBlacklistRepositoryAdapter implements TokenBlacklistRepositoryPort {
 
-    private final JpaTokenBlacklistRepository jpaRepository;
+    private final JpaTokenBlacklistRepository jpaTokenBlacklistRepository;
+
+    @Override
+    public boolean isTokenBlacklisted(String token) {
+        return jpaTokenBlacklistRepository.existsByToken(token);
+    }
 
     @Override
     public TokenBlacklist save(TokenBlacklist tokenBlacklist) {
-        TokenBlacklistEntity entity = TokenBlacklistEntity.builder()
-            .id(tokenBlacklist.getId())
-            .tokenJti(tokenBlacklist.getTokenJti())
-            .userId(tokenBlacklist.getUserId())
-            .expiresAt(tokenBlacklist.getExpiresAt())
-            .createdAt(tokenBlacklist.getCreatedAt())
-            .build();
-
-        TokenBlacklistEntity saved = jpaRepository.save(entity);
+        TokenBlacklistEntity entity = toEntity(tokenBlacklist);
+        TokenBlacklistEntity saved = jpaTokenBlacklistRepository.save(entity);
         return toDomain(saved);
     }
 
-    @Override
-    public Optional<TokenBlacklist> findByTokenJti(String tokenJti) {
-        return jpaRepository.findByTokenJti(tokenJti)
-            .map(this::toDomain);
-    }
-
-    @Override
-    public boolean existsByTokenJti(String tokenJti) {
-        return jpaRepository.existsByTokenJti(tokenJti);
-    }
-
-    @Override
-    public void deleteExpired() {
-        jpaRepository.deleteExpired();
-    }
-
-    /**
-     * Mapea TokenBlacklistEntity a TokenBlacklist domain model.
-     */
     private TokenBlacklist toDomain(TokenBlacklistEntity entity) {
-        return new TokenBlacklist(
-            entity.getId(),
-            entity.getTokenJti(),
-            entity.getUserId(),
-            entity.getExpiresAt(),
-            entity.getCreatedAt()
-        );
+        return TokenBlacklist.builder()
+                .id(entity.getId())
+                .token(entity.getToken())
+                .tokenType(entity.getTokenType())
+                .userId(entity.getUserId())
+                .reason(entity.getReason())
+                .expiresAt(entity.getExpiresAt())
+                .blacklistedAt(entity.getBlacklistedAt())
+                .build();
+    }
+
+    private TokenBlacklistEntity toEntity(TokenBlacklist domain) {
+        return TokenBlacklistEntity.builder()
+                .id(domain.getId())
+                .token(domain.getToken())
+                .tokenType(domain.getTokenType())
+                .userId(domain.getUserId())
+                .reason(domain.getReason())
+                .expiresAt(domain.getExpiresAt())
+                .blacklistedAt(domain.getBlacklistedAt())
+                .build();
     }
 }

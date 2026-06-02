@@ -11,6 +11,9 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 
 import com.axiserp.purchase.domain.exception.DuplicateNitException;
 import com.axiserp.purchase.domain.exception.DuplicateProductInPurchaseException;
@@ -36,7 +39,7 @@ public class GlobalExceptionHandler {
                         .build())
                 .collect(Collectors.toList());
         return ResponseEntity.badRequest()
-                .body(ApiResponse.error("VALIDATION_ERROR", "Error de validación en los datos enviados", errors));
+                .body(ApiResponse.error("VALIDATION_ERROR", "Error de validacion en los datos enviados", errors));
     }
 
     @ExceptionHandler({SupplierNotFoundException.class, PurchaseNotFoundException.class})
@@ -47,7 +50,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({
         SupplierInactiveException.class, DuplicateNitException.class,
-        DuplicateProductInPurchaseException.class, PurchaseNotModifiableException.class
+        DuplicateProductInPurchaseException.class, PurchaseNotModifiableException.class,
+        IllegalStateException.class
     })
     public ResponseEntity<ApiResponse<Void>> handleConflict(RuntimeException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
@@ -63,13 +67,38 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiResponse<Void>> handleAccessDenied(AccessDeniedException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(ApiResponse.error("FORBIDDEN", "No tiene permisos para realizar esta operación"));
+                .body(ApiResponse.error("FORBIDDEN", "No tiene permisos para realizar esta operacion"));
+    }
+
+    @ExceptionHandler(ResourceAccessException.class)
+    public ResponseEntity<ApiResponse<Void>> handleServiceUnavailable(ResourceAccessException ex) {
+        log.error("Servicio externo no disponible: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(ApiResponse.error("SERVICE_UNAVAILABLE", "Servicio externo no disponible: " + ex.getMessage()));
+    }
+
+    @ExceptionHandler(HttpClientErrorException.class)
+    public ResponseEntity<ApiResponse<Void>> handleHttpClientError(HttpClientErrorException ex) {
+        log.error("Error en llamada externa: status={} body={}", ex.getStatusCode(), ex.getResponseBodyAsString());
+        return ResponseEntity.status(ex.getStatusCode())
+                .body(ApiResponse.error("EXTERNAL_ERROR", "Error en servicio externo: " + ex.getMessage()));
+    }
+
+    @ExceptionHandler(HttpServerErrorException.class)
+    public ResponseEntity<ApiResponse<Void>> handleHttpServerError(HttpServerErrorException ex) {
+        log.error("Error en servidor externo: status={} body={}", ex.getStatusCode(), ex.getResponseBodyAsString());
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+                .body(ApiResponse.error("EXTERNAL_SERVER_ERROR", "Error en servidor externo: " + ex.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleGeneric(Exception ex) {
         log.error("Error no controlado: {}", ex.getMessage(), ex);
+        String detail = ex.getMessage() != null ? ex.getMessage() : "Error desconocido";
+        if (ex.getCause() != null && ex.getCause().getMessage() != null) {
+            detail = ex.getCause().getMessage();
+        }
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("INTERNAL_ERROR", "Error interno del servidor"));
+                .body(ApiResponse.error("INTERNAL_ERROR", detail));
     }
 }

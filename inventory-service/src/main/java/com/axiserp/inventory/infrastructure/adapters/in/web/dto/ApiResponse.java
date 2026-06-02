@@ -21,37 +21,63 @@ public class ApiResponse<T> {
     private final ApiMeta meta;
     private final PaginationMeta pagination;
 
+    // ── Factories ────────────────────────────────────────────────────────────
+
     public static <T> ApiResponse<T> ok(T data, String message) {
         return ApiResponse.<T>builder()
-                .success(true).code("SUCCESS").message(message)
-                .data(data).meta(ApiMeta.now()).build();
+                .success(true)
+                .code("SUCCESS")
+                .message(message)
+                .data(data)
+                .meta(ApiMeta.now())
+                .build();
     }
 
     public static <T> ApiResponse<T> created(T data, String message) {
         return ApiResponse.<T>builder()
-                .success(true).code("CREATED").message(message)
-                .data(data).meta(ApiMeta.now()).build();
+                .success(true)
+                .code("CREATED")
+                .message(message)
+                .data(data)
+                .meta(ApiMeta.now())
+                .build();
     }
 
     public static <T> ApiResponse<T> paged(T data, String message, PaginationMeta pagination) {
         return ApiResponse.<T>builder()
-                .success(true).code("SUCCESS").message(message)
-                .data(data).pagination(pagination).meta(ApiMeta.now()).build();
+                .success(true)
+                .code("SUCCESS")
+                .message(message)
+                .data(data)
+                .pagination(pagination)
+                .meta(ApiMeta.now())
+                .build();
     }
 
     public static ApiResponse<Void> error(String code, String message) {
         return ApiResponse.<Void>builder()
-                .success(false).code(code).message(message)
-                .meta(ApiMeta.now()).build();
+                .success(false)
+                .code(code)
+                .message(message)
+                .meta(ApiMeta.now())
+                .build();
     }
 
     public static ApiResponse<Void> error(String code, String message, List<ApiError> errors) {
         return ApiResponse.<Void>builder()
-                .success(false).code(code).message(message)
-                .errors(errors).meta(ApiMeta.now()).build();
+                .success(false)
+                .code(code)
+                .message(message)
+                .errors(errors)
+                .meta(ApiMeta.now())
+                .build();
     }
 
-    @Getter @Builder @JsonInclude(JsonInclude.Include.NON_NULL)
+    // ── Nested types ─────────────────────────────────────────────────────────
+
+    @Getter
+    @Builder
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class ApiError {
         private final String field;
         private final String message;
@@ -63,27 +89,17 @@ public class ApiResponse<T> {
     public static class ApiMeta {
         private final Instant timestamp;
         private final String requestId;
-        private final String path;
-        private final String method;
 
         public static ApiMeta now() {
-            String requestPath = null;
-            String requestMethod = null;
-            var attrs = org.springframework.web.context.request.RequestContextHolder.getRequestAttributes();
-            if (attrs instanceof org.springframework.web.context.request.ServletRequestAttributes servlet) {
-                requestPath = servlet.getRequest().getRequestURI();
-                requestMethod = servlet.getRequest().getMethod();
-            }
             return ApiMeta.builder()
                     .timestamp(Instant.now())
                     .requestId(java.util.UUID.randomUUID().toString())
-                    .path(requestPath)
-                    .method(requestMethod)
                     .build();
         }
     }
 
-    @Getter @Builder
+    @Getter
+    @Builder
     public static class PaginationMeta {
         private final int page;
         private final int pageSize;
@@ -95,9 +111,12 @@ public class ApiResponse<T> {
         public static PaginationMeta of(int page, int pageSize, long total) {
             int totalPages = pageSize > 0 ? (int) Math.ceil((double) total / pageSize) : 0;
             return PaginationMeta.builder()
-                    .page(page).pageSize(pageSize).totalRecords(total)
+                    .page(page)
+                    .pageSize(pageSize)
+                    .totalRecords(total)
                     .totalPages(totalPages)
-                    .hasNext(page < totalPages).hasPrevious(page > 1)
+                    .hasNext(page < totalPages)
+                    .hasPrevious(page > 1)
                     .build();
         }
     }

@@ -33,12 +33,14 @@ class CreateCategoryUseCaseImplTest {
     @Test
     @DisplayName("Should create category successfully")
     void create_success() {
+        UUID adminId = UUID.randomUUID();
         CreateCategoryRequest request = new CreateCategoryRequest("Electronics", "Electronic devices", null);
         Category saved = Category.builder()
                 .id(UUID.randomUUID())
                 .name("Electronics")
                 .description("Electronic devices")
                 .status(CategoryStatus.ACTIVA)
+                .createdBy(adminId)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
@@ -46,7 +48,7 @@ class CreateCategoryUseCaseImplTest {
         when(categoryRepositoryPort.existsByName("Electronics")).thenReturn(false);
         when(categoryRepositoryPort.save(any(Category.class))).thenReturn(saved);
 
-        CategoryResponse response = createCategoryUseCase.create(request);
+        CategoryResponse response = createCategoryUseCase.create(request, adminId);
 
         assertNotNull(response);
         assertEquals("Electronics", response.getName());
@@ -58,11 +60,12 @@ class CreateCategoryUseCaseImplTest {
     @Test
     @DisplayName("Should throw DuplicateCategoryException when name exists")
     void create_duplicateName() {
+        UUID adminId = UUID.randomUUID();
         CreateCategoryRequest request = new CreateCategoryRequest("Existing", null, null);
 
         when(categoryRepositoryPort.existsByName("Existing")).thenReturn(true);
 
-        assertThrows(DuplicateCategoryException.class, () -> createCategoryUseCase.create(request));
+        assertThrows(DuplicateCategoryException.class, () -> createCategoryUseCase.create(request, adminId));
         verify(categoryRepositoryPort, never()).save(any());
     }
 }

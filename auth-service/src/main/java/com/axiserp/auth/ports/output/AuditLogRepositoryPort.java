@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.UUID;
 
 import com.axiserp.auth.domain.model.AuditLog;
-import com.axiserp.auth.domain.model.PageResult;
 
 /**
  * Port de salida para operaciones de persistencia del log de auditoría.
@@ -29,5 +28,5 @@ public interface AuditLogRepositoryPort {
      * @param size       tamaño de página
      * @return lista de registros de auditoría
      */
-    PageResult<AuditLog> findByFilters(UUID userId, String action, String entityType, int page, int size);
+    List<AuditLog> findByFilters(UUID userId, String action, String entityType, int page, int size);
 }

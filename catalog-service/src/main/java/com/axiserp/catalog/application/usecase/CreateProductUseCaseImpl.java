@@ -45,6 +45,11 @@ public class CreateProductUseCaseImpl implements CreateProductUseCase {
         Category category = categoryRepositoryPort.findById(request.getCategoryId())
                 .orElseThrow(() -> new IllegalArgumentException("Categoria no encontrada"));
 
+        if (!category.isActive()) {
+            throw new IllegalStateException(
+                    "No se pueden crear productos en una categoria " + category.getStatus().name().toLowerCase());
+        }
+
         Product product = ProductFactory.createNew(
                 request.getName(),
                 request.getCodigo(),

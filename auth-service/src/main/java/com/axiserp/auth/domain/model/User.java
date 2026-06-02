@@ -19,11 +19,12 @@ public class User {
     private UUID id;
     private String name;
     private String email;
+    private String passwordHash;
     private UUID roleId;
     private UserStatus status;
     private UUID createdBy;
-    private UUID updatedBy;
     private LocalDateTime lastLoginAt;
+    private Integer failedLoginAttempts;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime deletedAt;

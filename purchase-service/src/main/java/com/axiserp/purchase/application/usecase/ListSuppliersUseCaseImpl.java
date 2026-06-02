@@ -28,9 +28,27 @@ public class ListSuppliersUseCaseImpl implements ListSuppliersUseCase {
         return suppliers.stream().map(this::toResponse).toList();
     }
 
+    @Override
+    public List<SupplierResponse> execute(String search, int page, int size) {
+        List<Supplier> suppliers = supplierRepositoryPort.findAllActive(search, page, size);
+        log.info("suppliers_list search={} count={}", search, suppliers.size());
+        return suppliers.stream().map(this::toResponse).toList();
+    }
+
+    @Override
+    public long countAll() {
+        return supplierRepositoryPort.countAllActive();
+    }
+
+    @Override
+    public long countBySearch(String search) {
+        return supplierRepositoryPort.countActiveBySearch(search);
+    }
+
     private SupplierResponse toResponse(Supplier supplier) {
         return SupplierResponse.builder()
                 .id(supplier.getId())
+                .codigo(supplier.getCodigo())
                 .name(supplier.getName())
                 .nit(supplier.getNit())
                 .phone(supplier.getPhone())

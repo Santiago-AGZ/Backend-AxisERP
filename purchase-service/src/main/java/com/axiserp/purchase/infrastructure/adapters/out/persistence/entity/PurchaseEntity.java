@@ -18,7 +18,6 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
-import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -66,9 +65,6 @@ public class PurchaseEntity {
     private BigDecimal total;
 
     private String notes;
-
-    @Version
-    private Long version;
 
     @Column(name = "created_by")
     private UUID createdBy;

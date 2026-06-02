@@ -38,6 +38,7 @@ class UpdateCategoryUseCaseImplTest {
     @DisplayName("Should update category successfully")
     void update_success() {
         categoryId = UUID.randomUUID();
+        UUID updatedBy = UUID.randomUUID();
         Category existing = Category.builder()
                 .id(categoryId)
                 .name("Old Name")
@@ -61,7 +62,7 @@ class UpdateCategoryUseCaseImplTest {
         when(categoryRepositoryPort.findById(categoryId)).thenReturn(Optional.of(existing));
         when(categoryRepositoryPort.save(any(Category.class))).thenReturn(saved);
 
-        CategoryResponse response = updateCategoryUseCase.update(categoryId, request);
+        CategoryResponse response = updateCategoryUseCase.update(categoryId, request, updatedBy);
 
         assertNotNull(response);
         assertEquals("New Name", response.getName());
@@ -76,7 +77,7 @@ class UpdateCategoryUseCaseImplTest {
         when(categoryRepositoryPort.findById(categoryId)).thenReturn(Optional.empty());
 
         assertThrows(CategoryNotFoundException.class,
-                () -> updateCategoryUseCase.update(categoryId, new UpdateCategoryRequest()));
+                () -> updateCategoryUseCase.update(categoryId, new UpdateCategoryRequest(), UUID.randomUUID()));
     }
 
     @Test
@@ -97,6 +98,6 @@ class UpdateCategoryUseCaseImplTest {
 
         UpdateCategoryRequest request = new UpdateCategoryRequest("Existing Name", null, null);
 
-        assertThrows(DuplicateCategoryException.class, () -> updateCategoryUseCase.update(categoryId, request));
+        assertThrows(DuplicateCategoryException.class, () -> updateCategoryUseCase.update(categoryId, request, UUID.randomUUID()));
     }
 }

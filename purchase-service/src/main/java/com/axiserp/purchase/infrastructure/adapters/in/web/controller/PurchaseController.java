@@ -59,11 +59,23 @@ public class PurchaseController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<PurchaseResponse>>> listPurchases() {
-        List<PurchaseResponse> data = listPurchasesUseCase.execute();
+    public ResponseEntity<ApiResponse<List<PurchaseResponse>>> listPurchases(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        List<PurchaseResponse> data;
+        long total;
+        if ((search != null && !search.isBlank()) || (status != null && !status.isBlank())) {
+            data = listPurchasesUseCase.execute(search, status, page - 1, size);
+            total = listPurchasesUseCase.countByFilters(search, status);
+        } else {
+            data = listPurchasesUseCase.execute();
+            total = listPurchasesUseCase.countAll();
+        }
         return ResponseEntity.ok(ApiResponse.paged(
                 data, "Compras recuperadas exitosamente",
-                PaginationMeta.of(1, data.size(), data.size())));
+                PaginationMeta.of(page, size, total)));
     }
 
     @PatchMapping("/{id}/status")

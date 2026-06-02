@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.axiserp.purchase.application.dto.request.CreateSupplierRequest;
@@ -45,20 +46,31 @@ public class SupplierController {
                 .body(ApiResponse.created(response, "Proveedor creado exitosamente"));
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN')")
-    @GetMapping("/{codigo}")
-    public ResponseEntity<ApiResponse<SupplierResponse>> getSupplier(@PathVariable String codigo) {
-        SupplierResponse response = getSupplierUseCase.executeByCodigo(codigo);
+    @PreAuthorize("hasAnyRole('ADMIN', 'INVENTARIO', 'VENDEDOR')")
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<SupplierResponse>> getSupplier(@PathVariable UUID id) {
+        SupplierResponse response = getSupplierUseCase.execute(id);
         return ResponseEntity.ok(ApiResponse.ok(response, "Proveedor encontrado"));
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'INVENTARIO', 'VENDEDOR')")
     @GetMapping
-    public ResponseEntity<ApiResponse<List<SupplierResponse>>> listSuppliers() {
-        List<SupplierResponse> data = listSuppliersUseCase.execute();
+    public ResponseEntity<ApiResponse<List<SupplierResponse>>> listSuppliers(
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        List<SupplierResponse> data;
+        long total;
+        if (search != null && !search.isBlank()) {
+            data = listSuppliersUseCase.execute(search, page - 1, size);
+            total = listSuppliersUseCase.countBySearch(search);
+        } else {
+            data = listSuppliersUseCase.execute();
+            total = listSuppliersUseCase.countAll();
+        }
         return ResponseEntity.ok(ApiResponse.paged(
                 data, "Proveedores recuperados exitosamente",
-                PaginationMeta.of(1, data.size(), data.size())));
+                PaginationMeta.of(page, size, total)));
     }
 
     @PreAuthorize("hasRole('ADMIN')")

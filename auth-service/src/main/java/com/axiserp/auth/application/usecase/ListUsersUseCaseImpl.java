@@ -20,29 +20,15 @@ public class ListUsersUseCaseImpl implements ListUsersUseCase {
     private final RoleRepositoryPort roleRepositoryPort;
 
     @Override
-    public List<UserResponse> listAll(String role, String status, String search) {
-        var users = userRepositoryPort.findAll(status, search);
-
-        if (role != null && !role.isBlank()) {
-            var roleEntity = roleRepositoryPort.findByName(role.toUpperCase());
-            if (roleEntity.isPresent()) {
-                var roleId = roleEntity.get().getId();
-                users = users.stream()
-                        .filter(u -> roleId.equals(u.getRoleId()))
-                        .toList();
-            } else {
-                return List.of();
-            }
-        }
-
-        return users.stream()
+    public List<UserResponse> listAll() {
+        return userRepositoryPort.findAll().stream()
                 .map(this::toResponse)
                 .toList();
     }
 
     private UserResponse toResponse(User user) {
         String roleName = roleRepositoryPort.findById(user.getRoleId())
-                .map(r -> r.getName())
+                .map(role -> role.getName())
                 .orElse("UNKNOWN");
 
         return UserResponse.builder()

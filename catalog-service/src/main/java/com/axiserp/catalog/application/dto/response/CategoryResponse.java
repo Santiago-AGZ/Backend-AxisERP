@@ -19,6 +19,8 @@ public class CategoryResponse {
     private String description;
     private UUID parentId;
     private String status;
+    private UUID createdBy;
+    private UUID updatedBy;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

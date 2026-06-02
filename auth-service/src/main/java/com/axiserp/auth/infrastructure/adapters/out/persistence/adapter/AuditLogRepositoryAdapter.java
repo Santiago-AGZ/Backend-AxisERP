@@ -2,12 +2,11 @@ package com.axiserp.auth.infrastructure.adapters.out.persistence.adapter;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 import com.axiserp.auth.domain.model.AuditLog;
-import com.axiserp.auth.domain.model.PageResult;
 import com.axiserp.auth.infrastructure.adapters.out.persistence.entity.AuditLogEntity;
 import com.axiserp.auth.infrastructure.adapters.out.persistence.repository.JpaAuditLogRepository;
 import com.axiserp.auth.ports.output.AuditLogRepositoryPort;
@@ -31,20 +30,12 @@ public class AuditLogRepositoryAdapter implements AuditLogRepositoryPort {
     }
 
     @Override
-    public PageResult<AuditLog> findByFilters(UUID userId, String action, String entityType, int page, int size) {
-        AuditLogEntity.AuditAction actionEnum = null;
-        if (action != null && !action.isBlank()) {
-            try {
-                actionEnum = AuditLogEntity.AuditAction.valueOf(action.toUpperCase());
-            } catch (IllegalArgumentException e) {
-                // ignore invalid action filter
-            }
-        }
-        Page<AuditLogEntity> result = jpaAuditLogRepository.findByFilters(userId, actionEnum, entityType, page, size);
-        List<AuditLog> content = result.getContent().stream()
+    public List<AuditLog> findByFilters(UUID userId, String action, String entityType, int page, int size) {
+        AuditLogEntity.AuditAction actionEnum = action != null ? AuditLogEntity.AuditAction.valueOf(action) : null;
+        return jpaAuditLogRepository.findByFilters(userId, actionEnum, entityType, page, size)
+                .stream()
                 .map(this::toDomain)
-                .toList();
-        return new PageResult<>(content, page, size, result.getTotalElements());
+                .collect(Collectors.toList());
     }
 
     private AuditLog toDomain(AuditLogEntity entity) {

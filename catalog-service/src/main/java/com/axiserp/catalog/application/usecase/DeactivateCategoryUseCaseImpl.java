@@ -29,7 +29,7 @@ public class DeactivateCategoryUseCaseImpl implements DeactivateCategoryUseCase 
 
     @Override
     @Transactional
-    public CategoryResponse deactivate(UUID id) {
+    public CategoryResponse deactivate(UUID id, UUID updatedBy) {
         Category existing = categoryRepositoryPort.findById(id)
                 .orElseThrow(CategoryNotFoundException::new);
 
@@ -37,15 +37,19 @@ public class DeactivateCategoryUseCaseImpl implements DeactivateCategoryUseCase 
             throw new IllegalStateException("La categoria ya esta eliminada");
         }
 
+        if (!existing.isActive()) {
+            throw new IllegalStateException("La categoria ya esta inactiva");
+        }
+
         int activeProductCount = productRepositoryPort.countActiveByCategoryId(id);
         if (activeProductCount > 0) {
             throw new CategoryHasProductsException(activeProductCount);
         }
 
-        Category deleted = CategoryFactory.softDelete(existing);
+        Category deleted = CategoryFactory.softDelete(existing, updatedBy);
         Category saved = categoryRepositoryPort.save(deleted);
 
-        log.info("category_deleted id={} name={}", saved.getId(), saved.getName());
+        log.info("category_deleted id={} name={} updatedBy={}", saved.getId(), saved.getName(), updatedBy);
 
         return toResponse(saved);
     }
@@ -57,8 +61,11 @@ public class DeactivateCategoryUseCaseImpl implements DeactivateCategoryUseCase 
                 .description(category.getDescription())
                 .parentId(category.getParentId())
                 .status(category.getStatus().name())
+                .createdBy(category.getCreatedBy())
+                .updatedBy(category.getUpdatedBy())
                 .createdAt(category.getCreatedAt())
                 .updatedAt(category.getUpdatedAt())
                 .build();
     }
 }
+

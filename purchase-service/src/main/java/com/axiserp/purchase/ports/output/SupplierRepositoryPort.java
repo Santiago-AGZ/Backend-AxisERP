@@ -14,5 +14,8 @@ public interface SupplierRepositoryPort {
     boolean existsByNit(String nit);
     Supplier save(Supplier supplier);
     List<Supplier> findAllActive();
+    List<Supplier> findAllActive(String search, int page, int size);
+    long countAllActive();
+    long countActiveBySearch(String search);
     List<Supplier> findAll();
 }

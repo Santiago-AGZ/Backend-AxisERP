@@ -29,7 +29,6 @@ import lombok.Setter;
 public class CategoryEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(nullable = false, unique = true, length = 100)
@@ -45,7 +44,13 @@ public class CategoryEntity {
     @Column(nullable = false, length = 20)
     private CategoryStatus status;
 
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_by")
+    private UUID createdBy;
+
+    @Column(name = "updated_by")
+    private UUID updatedBy;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at", nullable = false)

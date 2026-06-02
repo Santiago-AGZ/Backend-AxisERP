@@ -1,0 +1,126 @@
+{
+  "info": {
+    "_postman_id": "346f28e4-4883-4293-b8c3-bbc5ccacb535",
+    "name": "axisERP - Purchase Service",
+    "description": "Endpoints de proveedores y compras via API Gateway (puerto 8080).\n\nFLUJO:\n1. Obtener authToken desde Auth Service\n2. Crear proveedor (auto-setea supplierId)\n3. Crear compra con items (auto-setea purchaseId)\n4. Recibir compra (actualiza inventario)\n5. Cancelar si es necesario\n\nREGLAS: R1-R22 (22/22 implementadas). Errores descriptivos (causa real, no 'Error interno').",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Proveedores",
+      "item": [
+        {
+          "name": "Create Supplier",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": ["var d = pm.response.json(); if(d.success && d.data) { pm.collectionVariables.set('supplierId', d.data.id); pm.collectionVariables.set('supplierCodigo', d.data.codigo); }"], "type": "text/javascript" }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"codigo\": \"PROV-000001\",\n  \"name\": \"Distribuidora ABC SAS\",\n  \"nit\": \"900123456-1\",\n  \"phone\": \"+57 1 2345678\",\n  \"email\": \"contacto@abc.com\",\n  \"address\": \"Cra 30 #45-12, Bogota\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": { "raw": "{{baseUrl}}/suppliers", "host": ["{{baseUrl}}"], "path": ["suppliers"] },
+            "description": "Crear proveedor. Auto-setea supplierId y supplierCodigo."
+          }
+        },
+        {
+          "name": "List Suppliers",
+          "request": {
+            "method": "GET", "header": [],
+            "url": { "raw": "{{baseUrl}}/suppliers?search=&page=1&size=20", "host": ["{{baseUrl}}"], "path": ["suppliers"], "query": [
+              { "key": "search", "value": "", "description": "Buscar por nombre, codigo o NIT (case-insensitive)" },
+              { "key": "page", "value": "1" },
+              { "key": "size", "value": "20" }
+            ]},
+            "description": "Listar proveedores con filtro search y paginacion real."
+          }
+        },
+        {
+          "name": "Get Supplier by ID",
+          "request": { "method": "GET", "header": [],
+            "url": { "raw": "{{baseUrl}}/suppliers/{{supplierId}}", "host": ["{{baseUrl}}"], "path": ["suppliers", "{{supplierId}}"] }
+          }
+        },
+        {
+          "name": "Deactivate Supplier",
+          "request": { "method": "PATCH", "header": [],
+            "url": { "raw": "{{baseUrl}}/suppliers/{{supplierId}}/deactivate", "host": ["{{baseUrl}}"], "path": ["suppliers", "{{supplierId}}", "deactivate"] },
+            "description": "Desactivar proveedor (soft-delete -> ELIMINADO)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Compras",
+      "item": [
+        {
+          "name": "Create Purchase",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": ["var d = pm.response.json(); if(d.success && d.data) { pm.collectionVariables.set('purchaseId', d.data.id); }"], "type": "text/javascript" }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"supplierId\": \"{{supplierId}}\",\n  \"items\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"productName\": \"Monitor Samsung 27 pulgadas\",\n      \"quantity\": 10,\n      \"unitPrice\": 150.00\n    }\n  ],\n  \"notes\": \"Orden de compra mensual\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": { "raw": "{{baseUrl}}/purchases", "host": ["{{baseUrl}}"], "path": ["purchases"] },
+            "description": "Crear compra. R8: verifica que el producto exista en catalog-service. Auto-setea purchaseId."
+          }
+        },
+        {
+          "name": "List Purchases",
+          "request": {
+            "method": "GET", "header": [],
+            "url": { "raw": "{{baseUrl}}/purchases?page=1&size=20", "host": ["{{baseUrl}}"], "path": ["purchases"], "query": [
+              { "key": "page", "value": "1" },
+              { "key": "size", "value": "20" }
+            ]},
+            "description": "Listar compras con paginacion real."
+          }
+        },
+        {
+          "name": "Get Purchase by ID",
+          "request": { "method": "GET", "header": [],
+            "url": { "raw": "{{baseUrl}}/purchases/{{purchaseId}}", "host": ["{{baseUrl}}"], "path": ["purchases", "{{purchaseId}}"] }
+          }
+        },
+        {
+          "name": "Receive Purchase",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"items\": [\n    { \"productId\": \"{{productId}}\", \"receivedQuantity\": 10 }\n  ]\n}", "options": { "raw": { "language": "json" } } },
+            "url": { "raw": "{{baseUrl}}/purchases/{{purchaseId}}/receive", "host": ["{{baseUrl}}"], "path": ["purchases", "{{purchaseId}}", "receive"] },
+            "description": "Recibir compra. Usa itemId (UUID del item, del GET /purchases/{id}). R19: actualiza inventario."
+          }
+        },
+        {
+          "name": "Update Purchase Status",
+          "request": {
+            "method": "PATCH", "header": [],
+            "url": { "raw": "{{baseUrl}}/purchases/{{purchaseId}}/status?status=BORRADOR", "host": ["{{baseUrl}}"], "path": ["purchases", "{{purchaseId}}", "status"], "query": [
+              { "key": "status", "value": "BORRADOR", "description": "BORRADOR | PENDIENTE | RECIBIDA | PAGADA | CANCELADA" }
+            ]},
+            "description": "Actualizar estado de la compra. R17-R18: canceladas y pagadas no modificables."
+          }
+        },
+        {
+          "name": "Cancel Purchase",
+          "request": { "method": "PATCH", "header": [],
+            "url": { "raw": "{{baseUrl}}/purchases/{{purchaseId}}/cancel", "host": ["{{baseUrl}}"], "path": ["purchases", "{{purchaseId}}", "cancel"] },
+            "description": "Cancelar compra. R21: revierte movimientos de inventario."
+          }
+        }
+      ]
+    }
+  ],
+  "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }] },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080/api/v1" },
+    { "key": "authToken", "value": "" },
+    { "key": "supplierId", "value": "" },
+    { "key": "supplierCodigo", "value": "" },
+    { "key": "purchaseId", "value": "" },
+    { "key": "productId", "value": "" }
+  ]
+}

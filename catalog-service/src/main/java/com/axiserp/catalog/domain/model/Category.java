@@ -21,6 +21,8 @@ public class Category {
     private String description;
     private UUID parentId;
     private CategoryStatus status;
+    private UUID createdBy;
+    private UUID updatedBy;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
