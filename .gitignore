@@ -20,3 +20,7 @@ scaffold_*.py
 check_neon_schema.py
 **/HELP.md
 .env
+axisERP-db-scripts/
+docker-build.log
+commerce-service/
+*.log
