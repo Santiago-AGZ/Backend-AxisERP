@@ -61,3 +61,4 @@ scaffold_*.py
 audit_neon.py
 test_*.ps1
 *.py
+Frontend-AxisERP/
