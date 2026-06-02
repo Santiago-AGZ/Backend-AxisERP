@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "346f28e4-4883-4293-b8c3-bbc5ccacb535",
     "name": "axisERP - Purchase Service",
-    "description": "Endpoints de proveedores y compras via API Gateway (puerto 8080). Generado desde codigo fuente.",
+    "description": "Endpoints de proveedores y compras via API Gateway (puerto 8080).\n\nFLUJO:\n1. Obtener authToken desde la coleccion Auth Service\n2. Copiar authToken a esta coleccion\n3. Crear proveedor (POST /suppliers)\n4. Crear compra con items (POST /purchases)\n\nREGLAS IMPLEMENTADAS:\n- R1-R5 Proveedores: nombre, NIT unico, estado ACTIVO/INACTIVO/ELIMINADO, soft-delete\n- R6-R22 Compras: proveedor valido, items no duplicados, subtotal/tax/total automaticos\n- R17-R18: Compras canceladas/pagadas no modificables\n- R19: Recepcion actualiza inventario\n- R20: Recepciones parciales con saldo pendiente\n- R21: Cancelacion revierte movimientos de inventario\n- R22: Auditoria de operaciones criticas\n- Identificadores: PROV- para proveedores, PO- para compras\n\nRESPUESTA: ApiResponse<T> con success/code/data/message/meta/pagination.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
