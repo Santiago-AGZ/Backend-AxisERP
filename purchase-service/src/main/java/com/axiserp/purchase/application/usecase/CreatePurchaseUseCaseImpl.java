@@ -24,6 +24,7 @@ import com.axiserp.purchase.domain.model.PurchaseItem;
 import com.axiserp.purchase.domain.model.PurchaseStatus;
 import com.axiserp.purchase.domain.model.Supplier;
 import com.axiserp.purchase.ports.input.CreatePurchaseUseCase;
+import com.axiserp.purchase.ports.output.CatalogServicePort;
 import com.axiserp.purchase.ports.output.PurchaseRepositoryPort;
 import com.axiserp.purchase.ports.output.SupplierRepositoryPort;
 
@@ -39,6 +40,7 @@ public class CreatePurchaseUseCaseImpl implements CreatePurchaseUseCase {
 
     private final PurchaseRepositoryPort purchaseRepositoryPort;
     private final SupplierRepositoryPort supplierRepositoryPort;
+    private final CatalogServicePort catalogServicePort;
 
     @Override
     public PurchaseResponse execute(CreatePurchaseRequest request, UUID createdBy) {
@@ -50,11 +52,14 @@ public class CreatePurchaseUseCaseImpl implements CreatePurchaseUseCase {
             throw new SupplierInactiveException(request.getSupplierId());
         }
 
-        // 2 & 3. Verify no duplicate productIds
+        // 2 & 3. Verify no duplicate productIds and products exist (R8)
         Set<UUID> seen = new HashSet<>();
         for (PurchaseItemRequest item : request.getItems()) {
             if (!seen.add(item.getProductId())) {
                 throw new DuplicateProductInPurchaseException(item.getProductId());
+            }
+            if (!catalogServicePort.productExists(item.getProductId())) {
+                throw new IllegalArgumentException("Producto no encontrado: " + item.getProductId());
             }
         }
 
