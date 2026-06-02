@@ -14,23 +14,28 @@ import org.springframework.web.client.RestTemplate;
 
 import com.axiserp.purchase.ports.output.InventoryServicePort;
 
-import lombok.RequiredArgsConstructor;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 
 @Component
-@RequiredArgsConstructor
 public class InventoryServiceAdapter implements InventoryServicePort {
 
     private static final Logger log = LoggerFactory.getLogger(InventoryServiceAdapter.class);
+    private static final String CB_NAME = "inventoryService";
 
     private final RestTemplate restTemplate;
+    private final String inventoryServiceUrl;
+    private final String internalApiKey;
 
-    @Value("${inventory.service.url:http://localhost:8087}")
-    private String inventoryServiceUrl;
-
-    @Value("${internal.api.key:}")
-    private String internalApiKey;
+    public InventoryServiceAdapter(RestTemplate restTemplate,
+            @Value("${inventory.service.url:http://localhost:8087}") String inventoryServiceUrl,
+            @Value("${internal.api.key:}") String internalApiKey) {
+        this.restTemplate = restTemplate;
+        this.inventoryServiceUrl = inventoryServiceUrl;
+        this.internalApiKey = internalApiKey;
+    }
 
     @Override
+    @CircuitBreaker(name = CB_NAME, fallbackMethod = "registerEntryFallback")
     public void registerEntry(UUID productId, int quantity, String referenceType, UUID referenceId, String notes) {
         String url = inventoryServiceUrl
                 + "/api/v1/inventory/products/" + productId
@@ -53,6 +58,7 @@ public class InventoryServiceAdapter implements InventoryServicePort {
     }
 
     @Override
+    @CircuitBreaker(name = CB_NAME, fallbackMethod = "reverseMovementsFallback")
     public void reverseMovements(UUID purchaseId) {
         String url = inventoryServiceUrl
                 + "/api/v1/inventory/purchases/" + purchaseId + "/reverse";
@@ -68,5 +74,15 @@ public class InventoryServiceAdapter implements InventoryServicePort {
             log.error("inventory_reverse_failed purchaseId={} error={}", purchaseId, e.getMessage());
             throw new RuntimeException("Error al revertir movimientos en inventario: " + e.getMessage(), e);
         }
+    }
+
+    @SuppressWarnings("unused")
+    private void registerEntryFallback(UUID productId, int quantity, String referenceType, UUID referenceId, String notes, Throwable t) {
+        log.warn("circuit_breaker_fallback inventoryService registerEntry productId={} error={}", productId, t.getMessage());
+    }
+
+    @SuppressWarnings("unused")
+    private void reverseMovementsFallback(UUID purchaseId, Throwable t) {
+        log.warn("circuit_breaker_fallback inventoryService reverseMovements purchaseId={} error={}", purchaseId, t.getMessage());
     }
 }
