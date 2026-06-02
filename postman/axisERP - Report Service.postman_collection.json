@@ -1,0 +1,107 @@
+{
+  "info": {
+    "_postman_id": "8dc63d54-c2c1-4f10-a655-aa90b9394c5e",
+    "name": "axisERP - Report Service",
+    "description": "Endpoints de reportes via API Gateway (puerto 8080). Generado desde codigo fuente.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Reportes",
+      "item": [
+        {
+          "name": "List Report Types",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reports",
+              "host": ["{{baseUrl}}"],
+              "path": ["reports"]
+            },
+            "description": "Listar tipos de reportes disponibles: DAILY_SALES, INVENTORY_STATUS, TOP_PRODUCTS, CUSTOMER_FREQUENCY, DASHBOARD_SUMMARY. Roles: ADMIN, VENDEDOR, INVENTARIO."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Report - Daily Sales",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reports/DAILY_SALES",
+              "host": ["{{baseUrl}}"],
+              "path": ["reports", "DAILY_SALES"]
+            },
+            "description": "Reporte de ventas diarias. Roles: ADMIN, VENDEDOR, INVENTARIO."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Report - Inventory Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reports/INVENTORY_STATUS",
+              "host": ["{{baseUrl}}"],
+              "path": ["reports", "INVENTORY_STATUS"]
+            },
+            "description": "Reporte de estado de inventario. Roles: ADMIN, VENDEDOR, INVENTARIO."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Report - Top Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reports/TOP_PRODUCTS",
+              "host": ["{{baseUrl}}"],
+              "path": ["reports", "TOP_PRODUCTS"]
+            },
+            "description": "Reporte de productos mas vendidos. Roles: ADMIN, VENDEDOR, INVENTARIO."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Report - Customer Frequency",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reports/CUSTOMER_FREQUENCY",
+              "host": ["{{baseUrl}}"],
+              "path": ["reports", "CUSTOMER_FREQUENCY"]
+            },
+            "description": "Reporte de frecuencia de clientes. Roles: ADMIN, VENDEDOR, INVENTARIO."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Report - Dashboard Summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reports/DASHBOARD_SUMMARY",
+              "host": ["{{baseUrl}}"],
+              "path": ["reports", "DASHBOARD_SUMMARY"]
+            },
+            "description": "Resumen del dashboard. Roles: ADMIN, VENDEDOR, INVENTARIO."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080/api/v1" },
+    { "key": "authToken", "value": "" }
+  ]
+}
