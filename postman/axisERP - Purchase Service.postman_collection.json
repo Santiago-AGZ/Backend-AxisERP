@@ -91,7 +91,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": { "mode": "raw", "raw": "{\n  \"items\": [\n    { \"productId\": \"{{productId}}\", \"receivedQuantity\": 10 }\n  ]\n}", "options": { "raw": { "language": "json" } } },
             "url": { "raw": "{{baseUrl}}/purchases/{{purchaseId}}/receive", "host": ["{{baseUrl}}"], "path": ["purchases", "{{purchaseId}}", "receive"] },
-            "description": "Recibir compra. R19: actualiza inventario. R20: recepciones parciales permitidas."
+            "description": "Recibir compra. Usa itemId (UUID del item, del GET /purchases/{id}). R19: actualiza inventario."
           }
         },
         {

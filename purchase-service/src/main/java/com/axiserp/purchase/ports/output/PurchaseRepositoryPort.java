@@ -10,5 +10,8 @@ public interface PurchaseRepositoryPort {
     Optional<Purchase> findById(UUID id);
     Purchase save(Purchase purchase);
     List<Purchase> findAll();
+    List<Purchase> findAll(String search, String status, int page, int size);
+    long countAll();
+    long countByFilters(String search, String status);
     List<Purchase> findBySupplierId(UUID supplierId);
 }

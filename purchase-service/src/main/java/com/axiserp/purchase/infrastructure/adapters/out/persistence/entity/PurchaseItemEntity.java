@@ -25,7 +25,7 @@ public class PurchaseItemEntity {
     @Id
     private UUID id;
 
-    @Column(name = "purchase_id", insertable = false, updatable = false)
+    @Column(name = "purchase_id")
     private UUID purchaseId;
 
     @Column(name = "product_id", nullable = false)

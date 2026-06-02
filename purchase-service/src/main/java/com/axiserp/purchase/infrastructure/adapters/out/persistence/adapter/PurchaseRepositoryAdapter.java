@@ -48,6 +48,24 @@ public class PurchaseRepositoryAdapter implements PurchaseRepositoryPort {
                 .toList();
     }
 
+    @Override
+    public List<Purchase> findAll(String search, String status, int page, int size) {
+        return jpaPurchaseRepository.findByFilters(search, status, size, page * size)
+                .stream()
+                .map(this::toDomain)
+                .toList();
+    }
+
+    @Override
+    public long countAll() {
+        return jpaPurchaseRepository.count();
+    }
+
+    @Override
+    public long countByFilters(String search, String status) {
+        return jpaPurchaseRepository.countByFilters(search, status);
+    }
+
     private Purchase toDomain(PurchaseEntity entity) {
         List<PurchaseItem> items = entity.getItems().stream()
                 .map(this::toItemDomain)

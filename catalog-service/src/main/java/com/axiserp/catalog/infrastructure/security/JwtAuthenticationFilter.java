@@ -33,17 +33,21 @@ import jakarta.servlet.http.HttpServletResponse;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final Logger log = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
+    private static final String SYSTEM_USER_ID = "00000000-0000-0000-0000-000000000000";
 
     private final RestClient restClient;
     private final String jwksUrl;
+    private final String internalApiKey;
 
     private volatile PublicKey cachedPublicKey;
     private volatile String cachedKeyId;
 
     public JwtAuthenticationFilter(
             RestClient.Builder restClientBuilder,
-            @Value("${jwt.jwks-uri:https://hbtcusxbkkefphunarwn.supabase.co/auth/v1/.well-known/jwks.json}") String jwksUrl) {
+            @Value("${jwt.jwks-uri:https://hbtcusxbkkefphunarwn.supabase.co/auth/v1/.well-known/jwks.json}") String jwksUrl,
+            @Value("${internal.api.key:}") String internalApiKey) {
         this.jwksUrl = jwksUrl;
+        this.internalApiKey = internalApiKey;
         this.restClient = restClientBuilder.build();
     }
 
@@ -52,6 +56,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull HttpServletRequest request,
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain) throws ServletException, IOException {
+
+        String internalKey = request.getHeader("X-Internal-Api-Key");
+        if (internalKey != null && !internalApiKey.isBlank() && internalApiKey.equals(internalKey)) {
+            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                    SYSTEM_USER_ID, null, List.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
+            SecurityContextHolder.getContext().setAuthentication(auth);
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
