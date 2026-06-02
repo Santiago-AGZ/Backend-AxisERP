@@ -58,6 +58,22 @@ public class SupplierRepositoryAdapter implements SupplierRepositoryPort {
     }
 
     @Override
+    public List<Supplier> findAllActive(String search, int page, int size) {
+        return jpaSupplierRepository.findBySearch(search, size, page * size)
+                .stream().map(this::toDomain).toList();
+    }
+
+    @Override
+    public long countAllActive() {
+        return jpaSupplierRepository.countByStatus(SupplierEntity.SupplierStatus.ACTIVO);
+    }
+
+    @Override
+    public long countActiveBySearch(String search) {
+        return jpaSupplierRepository.countBySearch(search);
+    }
+
+    @Override
     public List<Supplier> findAll() {
         return jpaSupplierRepository.findAll().stream().map(this::toDomain).toList();
     }
