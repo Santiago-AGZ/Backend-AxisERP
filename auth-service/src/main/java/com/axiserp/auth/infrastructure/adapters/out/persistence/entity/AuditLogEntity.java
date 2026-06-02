@@ -52,7 +52,7 @@ public class AuditLogEntity {
     @Column(name = "entity_id")
     private UUID entityId;
 
-    @Column(columnDefinition = "JSONB")
+    @Column(columnDefinition = "TEXT")
     @JdbcTypeCode(SqlTypes.JSON)
     private String detail;
 

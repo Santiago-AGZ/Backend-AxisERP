@@ -1,19 +1,5 @@
 services:
 
-  postgres:
-    image: postgres:16
-    container_name: axiserp-postgres
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: axiserp
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - axiserp-network
-
   auth-service:
     build: ./auth-service
     container_name: auth-service
@@ -22,8 +8,6 @@ services:
       - "8081:8081"
     env_file:
       - .env
-    depends_on:
-      - postgres
     networks:
       - axiserp-network
 
@@ -35,8 +19,6 @@ services:
       - "8082:8082"
     env_file:
       - .env
-    depends_on:
-      - postgres
     networks:
       - axiserp-network
 
@@ -48,8 +30,6 @@ services:
       - "8083:8083"
     env_file:
       - .env
-    depends_on:
-      - postgres
     networks:
       - axiserp-network
 
@@ -61,8 +41,6 @@ services:
       - "8086:8086"
     env_file:
       - .env
-    depends_on:
-      - postgres
     networks:
       - axiserp-network
 
@@ -74,8 +52,6 @@ services:
       - "8084:8084"
     env_file:
       - .env
-    depends_on:
-      - postgres
     networks:
       - axiserp-network
 
@@ -87,8 +63,6 @@ services:
       - "8085:8085"
     env_file:
       - .env
-    depends_on:
-      - postgres
     networks:
       - axiserp-network
 
@@ -110,6 +84,3 @@ services:
 
 networks:
   axiserp-network:
-
-volumes:
-  postgres_data:
