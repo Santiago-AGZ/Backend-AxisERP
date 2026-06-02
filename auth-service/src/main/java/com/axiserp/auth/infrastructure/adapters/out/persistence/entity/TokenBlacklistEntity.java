@@ -8,6 +8,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -16,8 +17,17 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Token blacklist entity para gestionar tokens revocados.
+ * Previene reutilización de tokens después de logout o reauth.
+ * Se limpia automáticamente después de expiración.
+ */
 @Entity
-@Table(name = "token_blacklist")
+@Table(name = "token_blacklist", indexes = {
+    @Index(name = "idx_token_jti", columnList = "token_jti", unique = true),
+    @Index(name = "idx_user_id", columnList = "user_id"),
+    @Index(name = "idx_expires_at", columnList = "expires_at")
+})
 @Getter
 @Setter
 @Builder
@@ -29,32 +39,28 @@ public class TokenBlacklistEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false, unique = true, length = 512)
-    private String token;
+    @Column(name = "token_jti", nullable = false, unique = true)
+    private String tokenJti;
 
-    @Column(name = "token_type", nullable = false, length = 20)
-    private String tokenType;
-
-    @Column(name = "user_id")
+    @Column(name = "user_id", nullable = false)
     private UUID userId;
 
-    @Column(nullable = false, length = 100)
-    private String reason;
+    @Column(name = "revoked_at", nullable = false)
+    private LocalDateTime revokedAt;
 
     @Column(name = "expires_at", nullable = false)
     private LocalDateTime expiresAt;
 
-    @Column(name = "blacklisted_at", nullable = false)
-    private LocalDateTime blacklistedAt;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
     @PrePersist
     protected void onCreate() {
-        this.blacklistedAt = LocalDateTime.now();
-        if (this.tokenType == null) {
-            this.tokenType = "refresh";
+        if (this.createdAt == null) {
+            this.createdAt = LocalDateTime.now();
         }
-        if (this.reason == null) {
-            this.reason = "REVOKED";
+        if (this.revokedAt == null) {
+            this.revokedAt = LocalDateTime.now();
         }
     }
 }

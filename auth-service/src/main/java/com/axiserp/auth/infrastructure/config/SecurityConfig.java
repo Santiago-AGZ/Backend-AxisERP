@@ -3,27 +3,33 @@ package com.axiserp.auth.infrastructure.config;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.axiserp.auth.infrastructure.security.JwtAuthenticationFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.axiserp.auth.infrastructure.adapters.in.web.response.ApiResponse;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -35,8 +41,14 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final ObjectMapper objectMapper;
+    private final FirstLoginFilter firstLoginFilter;
+    private final UserStatusFilter userStatusFilter;
+    private final RateLimitingFilter rateLimitingFilter;
+    private final InternalApiKeyFilter internalApiKeyFilter;
+
+    @Value("${spring.security.oauth2.resourceserver.jwt.jwk-set-uri}")
+    private String jwkSetUri;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -48,17 +60,50 @@ public class SecurityConfig {
                         .authenticationEntryPoint(this::handleUnauthorized))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/api/v1/auth/login",
-                                "/api/v1/auth/refresh",
-                                "/api/v1/auth/logout",
-                                "/api/v1/auth/recuperar-password",
-                                "/api/v1/auth/reset-password",
                                 "/actuator/health",
-                                "/actuator/info"
+                                "/actuator/info",
+                                "/api/v1/auth/password-reset"
                         ).permitAll()
                         .anyRequest().authenticated())
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwt -> jwt
+                                .jwtAuthenticationConverter(jwtAuthenticationConverter()))
+                        .authenticationEntryPoint(this::handleUnauthorized))
+                .addFilterBefore(internalApiKeyFilter, BearerTokenAuthenticationFilter.class)
+                .addFilterBefore(userStatusFilter, BearerTokenAuthenticationFilter.class)
+                .addFilterBefore(firstLoginFilter, BearerTokenAuthenticationFilter.class)
+                .addFilterBefore(rateLimitingFilter, BearerTokenAuthenticationFilter.class)
                 .build();
+    }
+
+    @Bean
+    public JwtDecoder jwtDecoder() {
+        return NimbusJwtDecoder.withJwkSetUri(jwkSetUri)
+                .jwsAlgorithm(SignatureAlgorithm.ES256)
+                .build();
+    }
+
+    @Bean
+    public Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter() {
+        return jwt -> {
+            String userId = jwt.getSubject();
+            String role = extractRole(jwt);
+            List<SimpleGrantedAuthority> authorities = List.of(
+                    new SimpleGrantedAuthority("ROLE_" + role));
+            return new UsernamePasswordAuthenticationToken(userId, jwt, authorities);
+        };
+    }
+
+    private String extractRole(Jwt jwt) {
+        try {
+            Map<String, Object> appMetadata = jwt.getClaimAsMap("app_metadata");
+            if (appMetadata != null && appMetadata.containsKey("role")) {
+                return (String) appMetadata.get("role");
+            }
+        } catch (Exception e) {
+            // default to USER
+        }
+        return "USER";
     }
 
     private void handleUnauthorized(HttpServletRequest request,
@@ -66,23 +111,8 @@ public class SecurityConfig {
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("error", "Unauthorized");
-        body.put("message", "Se requiere autenticación para acceder a este recurso");
-        body.put("status", 401);
-        body.put("timestamp", Instant.now().toString());
-
+        ApiResponse<Void> body = ApiResponse.error("UNAUTHORIZED", "Se requiere autenticación para acceder a este recurso");
         objectMapper.writeValue(response.getOutputStream(), body);
     }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(10);
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration configuration) throws Exception {
-        return configuration.getAuthenticationManager();
-    }
 }
+

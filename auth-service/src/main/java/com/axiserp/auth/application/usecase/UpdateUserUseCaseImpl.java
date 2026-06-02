@@ -11,6 +11,7 @@ import com.axiserp.auth.application.dto.request.UpdateUserRequest;
 import com.axiserp.auth.application.dto.response.UserResponse;
 import com.axiserp.auth.application.service.AuditService;
 import com.axiserp.auth.domain.exception.DuplicateEmailException;
+import com.axiserp.auth.domain.exception.UserNotFoundException;
 import com.axiserp.auth.domain.factory.UserFactory;
 import com.axiserp.auth.domain.model.AuditLog.AuditAction;
 import com.axiserp.auth.domain.model.User;
@@ -32,9 +33,14 @@ public class UpdateUserUseCaseImpl implements UpdateUserUseCase {
 
     @Override
     @Transactional
-    public UserResponse update(UUID id, UpdateUserRequest request) {
+    public UserResponse update(UUID id, UpdateUserRequest request, UUID updatedBy) {
         User user = userRepositoryPort.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
+
+        if (user.getStatus() == User.UserStatus.ELIMINADO
+                || user.getStatus() == User.UserStatus.INACTIVO) {
+            throw new UserNotFoundException("Usuario no encontrado");
+        }
 
         if (!user.getEmail().equalsIgnoreCase(request.getEmail())
                 && userRepositoryPort.existsByEmail(request.getEmail())) {
@@ -44,7 +50,7 @@ public class UpdateUserUseCaseImpl implements UpdateUserUseCase {
         var role = roleRepositoryPort.findByName(request.getRole())
                 .orElseThrow(() -> new IllegalArgumentException("Rol no válido: " + request.getRole()));
 
-        User updated = UserFactory.update(user, request.getName(), request.getEmail(), role.getId());
+        User updated = UserFactory.update(user, request.getName(), request.getEmail(), role.getId(), updatedBy);
         User saved = userRepositoryPort.save(updated);
 
         auditService.log(AuditAction.UPDATE, "USER", saved.getId(),

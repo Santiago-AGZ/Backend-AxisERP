@@ -3,44 +3,65 @@ package com.axiserp.auth.domain.model;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-
-@Getter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class RefreshToken {
-
     private UUID id;
     private UUID userId;
     private String token;
-    private TokenStatus status;
     private LocalDateTime expiresAt;
-    private String ipAddress;
-    private String userAgent;
     private LocalDateTime createdAt;
-    private LocalDateTime revokedAt;
+    private boolean revoked;
 
-    public void setStatus(TokenStatus status) {
-        this.status = status;
+    public RefreshToken(UUID id, UUID userId, String token, LocalDateTime expiresAt, LocalDateTime createdAt, boolean revoked) {
+        this.id = id;
+        this.userId = userId;
+        this.token = token;
+        this.expiresAt = expiresAt;
+        this.createdAt = createdAt;
+        this.revoked = revoked;
     }
 
-    public void setRevokedAt(LocalDateTime revokedAt) {
-        this.revokedAt = revokedAt;
+    public RefreshToken(UUID userId, String token, LocalDateTime expiresAt) {
+        this.id = UUID.randomUUID();
+        this.userId = userId;
+        this.token = token;
+        this.expiresAt = expiresAt;
+        this.createdAt = LocalDateTime.now();
+        this.revoked = false;
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public UUID getUserId() {
+        return userId;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public LocalDateTime getExpiresAt() {
+        return expiresAt;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public boolean isRevoked() {
+        return revoked;
+    }
+
+    public void revoke() {
+        this.revoked = true;
     }
 
     public boolean isExpired() {
-        return LocalDateTime.now().isAfter(this.expiresAt);
+        return LocalDateTime.now().isAfter(expiresAt);
     }
 
-    public boolean isActive() {
-        return this.status == TokenStatus.ACTIVE && !isExpired();
-    }
-
-    public enum TokenStatus {
-        ACTIVE, REVOKED, EXPIRED
+    public boolean isValid() {
+        return !revoked && !isExpired();
     }
 }

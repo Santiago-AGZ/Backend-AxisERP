@@ -29,7 +29,6 @@ import lombok.Setter;
 public class UserEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(nullable = false)
@@ -37,9 +36,6 @@ public class UserEntity {
 
     @Column(nullable = false, unique = true, columnDefinition = "CITEXT")
     private String email;
-
-    @Column(name = "password_hash", length = 255)
-    private String passwordHash;
 
     @Column(name = "role_id", nullable = false)
     private UUID roleId;
@@ -51,14 +47,11 @@ public class UserEntity {
     @Column(name = "created_by")
     private UUID createdBy;
 
+    @Column(name = "updated_by")
+    private UUID updatedBy;
+
     @Column(name = "last_login_at")
     private LocalDateTime lastLoginAt;
-
-    @Column(name = "failed_login_attempts", nullable = false)
-    private Integer failedLoginAttempts;
-
-    @Column(name = "locked_until")
-    private LocalDateTime lockedUntil;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -75,9 +68,6 @@ public class UserEntity {
         this.updatedAt = LocalDateTime.now();
         if (this.status == null) {
             this.status = UserStatus.PENDIENTE;
-        }
-        if (this.failedLoginAttempts == null) {
-            this.failedLoginAttempts = 0;
         }
     }
 

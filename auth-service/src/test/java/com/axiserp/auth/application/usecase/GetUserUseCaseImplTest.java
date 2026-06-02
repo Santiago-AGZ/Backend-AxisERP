@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.axiserp.auth.application.dto.response.UserResponse;
 import com.axiserp.auth.domain.model.Role;
+import com.axiserp.auth.domain.exception.UserNotFoundException;
 import com.axiserp.auth.domain.model.User;
 import com.axiserp.auth.ports.output.RoleRepositoryPort;
 import com.axiserp.auth.ports.output.UserRepositoryPort;
@@ -50,7 +51,6 @@ class GetUserUseCaseImplTest {
                 .id(userId)
                 .name("Test User")
                 .email("test@axiserp.com")
-                .passwordHash("$2a$10$hashed")
                 .roleId(roleId)
                 .status(User.UserStatus.ACTIVO)
                 .createdAt(LocalDateTime.now())
@@ -76,6 +76,20 @@ class GetUserUseCaseImplTest {
     void getById_notFound() {
         when(userRepositoryPort.findById(userId)).thenReturn(Optional.empty());
 
-        assertThrows(RuntimeException.class, () -> getUserUseCase.getById(userId));
+        assertThrows(UserNotFoundException.class, () -> getUserUseCase.getById(userId));
+    }
+
+    @Test
+    @DisplayName("Should throw UserNotFoundException when user is ELIMINADO")
+    void getById_deletedUser() {
+        User deletedUser = User.builder()
+                .id(userId)
+                .status(User.UserStatus.ELIMINADO)
+                .deletedAt(java.time.LocalDateTime.now())
+                .build();
+
+        when(userRepositoryPort.findById(userId)).thenReturn(Optional.of(deletedUser));
+
+        assertThrows(UserNotFoundException.class, () -> getUserUseCase.getById(userId));
     }
 }
