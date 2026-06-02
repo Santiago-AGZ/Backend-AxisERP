@@ -31,6 +31,7 @@ public class ListSuppliersUseCaseImpl implements ListSuppliersUseCase {
     private SupplierResponse toResponse(Supplier supplier) {
         return SupplierResponse.builder()
                 .id(supplier.getId())
+                .codigo(supplier.getCodigo())
                 .name(supplier.getName())
                 .nit(supplier.getNit())
                 .phone(supplier.getPhone())
