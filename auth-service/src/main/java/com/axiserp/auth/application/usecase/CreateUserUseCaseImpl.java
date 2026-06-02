@@ -58,7 +58,7 @@ public class CreateUserUseCaseImpl implements CreateUserUseCase {
                 request.getEmail(), role.getName(), request.getName(), createdBy);
 
         User user = UserFactory.createNew(
-                supabaseUser.id(), request.getName(), request.getEmail(), role.getId(), createdBy);
+                supabaseUser.id(), request.getName(), request.getEmail(), null, role.getId(), createdBy);
 
         User saved = userRepositoryPort.save(user);
 

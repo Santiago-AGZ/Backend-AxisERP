@@ -20,7 +20,7 @@ class UserFactoryTest {
     @Test
     @DisplayName("Should create new user with default values")
     void createNew_success() {
-        User user = UserFactory.createNew(id, "Test", "test@axiserp.com", roleId, adminId);
+        User user = UserFactory.createNew(id, "Test", "test@axiserp.com", "hashed", roleId, adminId);
 
         assertEquals(id, user.getId());
         assertEquals("Test", user.getName());
@@ -37,7 +37,7 @@ class UserFactoryTest {
     @Test
     @DisplayName("Should update user preserving immutable fields")
     void update_success() {
-        User existing = UserFactory.createNew(UUID.randomUUID(), "Old", "old@axiserp.com", roleId, adminId);
+        User existing = UserFactory.createNew(UUID.randomUUID(), "Old", "old@axiserp.com", "hashed", roleId, adminId);
         UUID newRoleId = UUID.randomUUID();
 
         User updated = UserFactory.update(existing, "New Name", "new@axiserp.com", newRoleId, adminId);
@@ -55,7 +55,7 @@ class UserFactoryTest {
     @Test
     @DisplayName("Should deactivate user setting INACTIVO status and deletedAt")
     void deactivate_success() {
-        User existing = UserFactory.createNew(UUID.randomUUID(), "Test", "test@axiserp.com", roleId, adminId);
+        User existing = UserFactory.createNew(UUID.randomUUID(), "Test", "test@axiserp.com", "hashed", roleId, adminId);
 
         User deactivated = UserFactory.deactivate(existing, adminId);
 
@@ -69,7 +69,7 @@ class UserFactoryTest {
     @Test
     @DisplayName("Should update lastLoginAt on successful login")
     void withSuccessfulLogin_updatesLastLogin() {
-        User existing = UserFactory.createNew(UUID.randomUUID(), "Test", "test@axiserp.com", roleId, adminId);
+        User existing = UserFactory.createNew(UUID.randomUUID(), "Test", "test@axiserp.com", "hashed", roleId, adminId);
 
         User afterLogin = UserFactory.withSuccessfulLogin(existing);
 

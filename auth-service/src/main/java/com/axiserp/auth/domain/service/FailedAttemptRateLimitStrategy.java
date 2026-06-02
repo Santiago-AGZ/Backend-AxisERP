@@ -14,15 +14,30 @@ public class FailedAttemptRateLimitStrategy implements LoginRateLimitStrategy {
 
     @Override
     public boolean isLoginAllowed(User user) {
-        int attempts = user.getFailedLoginAttempts() != null
-                ? user.getFailedLoginAttempts()
-                : 0;
-        return attempts < MAX_ATTEMPTS;
+        return user.getFailedLoginAttempts() < MAX_ATTEMPTS;
     }
 
     @Override
     public User recordFailedAttempt(User user) {
-        return UserFactory.withFailedAttempt(user);
+        User updated = UserFactory.withFailedAttempt(user);
+        if (updated.getFailedLoginAttempts() >= MAX_ATTEMPTS) {
+            return User.builder()
+                    .id(updated.getId())
+                    .name(updated.getName())
+                    .email(updated.getEmail())
+                    .passwordHash(updated.getPasswordHash())
+                    .roleId(updated.getRoleId())
+                    .status(User.UserStatus.INACTIVO)
+                    .failedLoginAttempts(updated.getFailedLoginAttempts())
+                    .createdBy(updated.getCreatedBy())
+                    .updatedBy(updated.getUpdatedBy())
+                    .lastLoginAt(updated.getLastLoginAt())
+                    .createdAt(updated.getCreatedAt())
+                    .updatedAt(updated.getUpdatedAt())
+                    .deletedAt(updated.getDeletedAt())
+                    .build();
+        }
+        return updated;
     }
 
     @Override
@@ -32,9 +47,6 @@ public class FailedAttemptRateLimitStrategy implements LoginRateLimitStrategy {
 
     @Override
     public int remainingAttempts(User user) {
-        int attempts = user.getFailedLoginAttempts() != null
-                ? user.getFailedLoginAttempts()
-                : 0;
-        return Math.max(0, MAX_ATTEMPTS - attempts);
+        return Math.max(0, MAX_ATTEMPTS - user.getFailedLoginAttempts());
     }
 }

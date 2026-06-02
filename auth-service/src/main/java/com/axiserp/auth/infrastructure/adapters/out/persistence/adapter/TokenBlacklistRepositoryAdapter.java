@@ -47,6 +47,17 @@ public class TokenBlacklistRepositoryAdapter implements TokenBlacklistRepository
     }
 
     @Override
+    public Optional<TokenBlacklist> findByToken(String token) {
+        return jpaRepository.findByTokenJti(token)
+            .map(this::toDomain);
+    }
+
+    @Override
+    public boolean isTokenBlacklisted(String token) {
+        return jpaRepository.existsByTokenJti(token);
+    }
+
+    @Override
     public void deleteExpired() {
         jpaRepository.deleteExpired();
     }

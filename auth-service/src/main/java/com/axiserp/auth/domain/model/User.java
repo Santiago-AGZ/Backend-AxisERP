@@ -19,8 +19,10 @@ public class User {
     private UUID id;
     private String name;
     private String email;
+    private String passwordHash;
     private UUID roleId;
     private UserStatus status;
+    private int failedLoginAttempts;
     private UUID createdBy;
     private UUID updatedBy;
     private LocalDateTime lastLoginAt;

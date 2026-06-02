@@ -26,7 +26,7 @@ class FailedAttemptRateLimitStrategyTest {
     @Test
     @DisplayName("Should allow login for user with no failed attempts")
     void isLoginAllowed_noAttempts() {
-        User user = UserFactory.createNew("Test", "test@axiserp.com", "hashed", roleId, adminId);
+        User user = UserFactory.createNew(UUID.randomUUID(), "Test", "test@axiserp.com", "hashed", roleId, adminId);
 
         assertTrue(strategy.isLoginAllowed(user));
         assertEquals(5, strategy.remainingAttempts(user));
@@ -35,7 +35,7 @@ class FailedAttemptRateLimitStrategyTest {
     @Test
     @DisplayName("Should allow login for user with some failed attempts")
     void isLoginAllowed_someAttempts() {
-        User user = UserFactory.createNew("Test", "test@axiserp.com", "hashed", roleId, adminId);
+        User user = UserFactory.createNew(UUID.randomUUID(), "Test", "test@axiserp.com", "hashed", roleId, adminId);
         user = strategy.recordFailedAttempt(user);
         user = strategy.recordFailedAttempt(user);
 
@@ -46,7 +46,7 @@ class FailedAttemptRateLimitStrategyTest {
     @Test
     @DisplayName("Should block login after 5 failed attempts")
     void isLoginAllowed_blockedAfterFive() {
-        User user = UserFactory.createNew("Test", "test@axiserp.com", "hashed", roleId, adminId);
+        User user = UserFactory.createNew(UUID.randomUUID(), "Test", "test@axiserp.com", "hashed", roleId, adminId);
 
         for (int i = 0; i < 5; i++) {
             user = strategy.recordFailedAttempt(user);
@@ -60,7 +60,7 @@ class FailedAttemptRateLimitStrategyTest {
     @Test
     @DisplayName("Should increment failed attempts on each failure")
     void recordFailedAttempt_increments() {
-        User user = UserFactory.createNew("Test", "test@axiserp.com", "hashed", roleId, adminId);
+        User user = UserFactory.createNew(UUID.randomUUID(), "Test", "test@axiserp.com", "hashed", roleId, adminId);
 
         user = strategy.recordFailedAttempt(user);
         assertEquals(1, user.getFailedLoginAttempts());
@@ -72,7 +72,7 @@ class FailedAttemptRateLimitStrategyTest {
     @Test
     @DisplayName("Should reset attempts on successful login")
     void recordSuccessfulLogin_resets() {
-        User user = UserFactory.createNew("Test", "test@axiserp.com", "hashed", roleId, adminId);
+        User user = UserFactory.createNew(UUID.randomUUID(), "Test", "test@axiserp.com", "hashed", roleId, adminId);
         user = strategy.recordFailedAttempt(user);
         user = strategy.recordFailedAttempt(user);
         assertEquals(2, user.getFailedLoginAttempts());
@@ -86,7 +86,7 @@ class FailedAttemptRateLimitStrategyTest {
     @Test
     @DisplayName("Should return correct remaining attempts")
     void remainingAttempts_correct() {
-        User user = UserFactory.createNew("Test", "test@axiserp.com", "hashed", roleId, adminId);
+        User user = UserFactory.createNew(UUID.randomUUID(), "Test", "test@axiserp.com", "hashed", roleId, adminId);
 
         assertEquals(5, strategy.remainingAttempts(user));
 

@@ -86,7 +86,7 @@ public class UserStatusFilter extends OncePerRequestFilter {
             var role = roleRepository.findByName(roleName).orElse(null);
             UUID roleId = role != null ? role.getId() : null;
 
-            User provisioned = UserFactory.createNew(userId, name, email, roleId, null);
+            User provisioned = UserFactory.createNew(userId, name, email, null, roleId, null);
             provisioned.setStatus(User.UserStatus.ACTIVO);
             User saved = userRepository.save(provisioned);
 

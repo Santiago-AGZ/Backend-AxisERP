@@ -11,14 +11,16 @@ public class UserFactory {
     private UserFactory() {
     }
 
-    public static User createNew(UUID id, String name, String email,
-                                  UUID roleId, UUID createdBy) {
+    public static User createNew(UUID id, String name, String email, String passwordHash,
+                                   UUID roleId, UUID createdBy) {
         return User.builder()
                 .id(id)
                 .name(name)
                 .email(email)
+                .passwordHash(passwordHash)
                 .roleId(roleId)
                 .status(UserStatus.PENDIENTE)
+                .failedLoginAttempts(0)
                 .createdBy(createdBy)
                 .lastLoginAt(null)
                 .createdAt(LocalDateTime.now())
@@ -56,6 +58,42 @@ public class UserFactory {
                 .createdAt(existing.getCreatedAt())
                 .updatedAt(LocalDateTime.now())
                 .deletedAt(LocalDateTime.now())
+                .build();
+    }
+
+    public static User withFailedAttempt(User existing) {
+        return User.builder()
+                .id(existing.getId())
+                .name(existing.getName())
+                .email(existing.getEmail())
+                .passwordHash(existing.getPasswordHash())
+                .roleId(existing.getRoleId())
+                .status(existing.getStatus())
+                .failedLoginAttempts(existing.getFailedLoginAttempts() + 1)
+                .createdBy(existing.getCreatedBy())
+                .updatedBy(existing.getUpdatedBy())
+                .lastLoginAt(existing.getLastLoginAt())
+                .createdAt(existing.getCreatedAt())
+                .updatedAt(existing.getUpdatedAt())
+                .deletedAt(existing.getDeletedAt())
+                .build();
+    }
+
+    public static User withNewPassword(User existing, String newPasswordHash) {
+        return User.builder()
+                .id(existing.getId())
+                .name(existing.getName())
+                .email(existing.getEmail())
+                .passwordHash(newPasswordHash)
+                .roleId(existing.getRoleId())
+                .status(existing.getStatus())
+                .failedLoginAttempts(existing.getFailedLoginAttempts())
+                .createdBy(existing.getCreatedBy())
+                .updatedBy(existing.getId())
+                .lastLoginAt(existing.getLastLoginAt())
+                .createdAt(existing.getCreatedAt())
+                .updatedAt(LocalDateTime.now())
+                .deletedAt(existing.getDeletedAt())
                 .build();
     }
 
