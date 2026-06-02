@@ -39,6 +39,12 @@ public class ApiResponse<T> {
                 .data(data).pagination(pagination).meta(ApiMeta.now()).build();
     }
 
+    public static ApiResponse<Void> error(String code, String message, List<ApiError> errors) {
+        return ApiResponse.<Void>builder()
+                .success(false).code(code).message(message)
+                .errors(errors).meta(ApiMeta.now()).build();
+    }
+
     public static ApiResponse<Void> error(String code, String message) {
         return ApiResponse.<Void>builder()
                 .success(false).code(code).message(message)
