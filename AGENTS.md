@@ -1,103 +1,415 @@
-# AxisERP Platform
+# AGENTS.md
 
-Java 21 · Spring Boot 3.5.x · Maven 3.9.15 wrapper · PostgreSQL 16 · Docker Compose
+# AxisERP Development Agent Instructions
 
-## Build & Run
+## Project Overview
 
-Each service is standalone (no aggregate POM). Build and run from the service directory:
+AxisERP is an ERP platform built using:
 
-```bash
-cd <service>/ && ./mvnw clean package -DskipTests    # build
-cd <service>/ && ./mvnw test                         # run tests
-cd <service>/ && ./mvnw spring-boot:run              # run single service
-docker compose up --build                            # run all (from root)
-```
+* Java 21
+* Spring Boot 3.5.x
+* PostgreSQL (Neon)
+* RabbitMQ
+* Docker
+* Maven
 
-## Services & Ports
+Architecture:
 
-| Dir | Port | Package | SB |
-|-----|------|---------|----|
-| `api-gateway` | 8080 | `com.axiserp.gateway` | 3.5.0 |
-| `auth-service` | 8081 | `com.axiserp.auth` | 3.5.14 |
-| `catalog-service` | 8082 | `com.axiserp.catalog` | 3.5.14 |
-| `inventory-service` | 8083 | `com.axiserp.inventory` | 3.5.14 |
-| `report-service` | 8085 | `com.axiserp.report` | 3.5.0 |
+* Domain Driven Design (DDD)
+* Hexagonal Architecture
+* Clean Architecture
+* Microservices Architecture
 
-## Critical Gotchas
+---
 
-### Spring Boot version mismatch
-`api-gateway` and `report-service` use **3.5.0**; all others use **3.5.14**. Bumping the two laggards to 3.5.14 is recommended before sharing dependencies.
+## Existing Microservices
 
-### Gateway has no routes
-`api-gateway` pulls in `spring-cloud-starter-gateway` (Cloud 2025.0.0) but has zero route configuration — no `RouteLocator` bean, no YAML routes. It starts but proxies nothing.
+* api-gateway
+* auth-service
+* catalog-service
+* inventory-service
+* purchase-service
+* sales-service
+* report-service
 
-### Master is scaffolding-only
-All services on `master` contain only `Application.java`, `pom.xml`, `Dockerfile`, placeholder `application.properties`, and a trivial `contextLoads()` test. Full hexagonal architecture implementations with business logic, controllers, security, and tests live on feature branches (`feat/auth-service`, `feat/catalog-service`, etc.).
+---
 
-### Clean branches for merge
-Each service has two branch variants:
-- `feat/X-service` — diverged from master with cleanup commits
-- `feat/X-service-clean` — single implementation commit rebased on initial commit; these are local-only (not pushed) and are the intended merge candidates
+## Source of Truth
 
-### No shared module
-Every service has its own copy of `ApiResponse`, `JwtAuthenticationFilter`, `GlobalExceptionHandler` — significant duplication. No common library exists.
+The agent must always consult:
 
-## Architecture (feature branches)
+* BUSINESS_RULES.md
+* ARCHITECTURE.md
+* DEVELOPMENT_STANDARDS.md
+* MICROSERVICE_INTERACTIONS.md
 
-Hexagonal (Ports & Adapters) in every service:
-```
-com.axiserp.<service>/
-  domain/model/       — entities, value objects, domain exceptions
-  domain/service/     — domain services, factories
-  application/dto/    — request/response DTOs
-  application/service/— application services
-  application/usecase/— use case implementations
-  ports/input/        — use case contracts
-  ports/output/       — repository/outbound contracts
-  adapters/in/web/    — REST controllers, ApiResponse, GlobalExceptionHandler
-  adapters/out/       — JPA entities, repos, external service adapters
-  infrastructure/     — security filters, config (CORS, rate limiting)
-```
+Business rules are mandatory.
 
-## Auth & Inter-Service Communication (feature branches)
+Business rules have higher priority than implementation convenience.
 
-- **JWT**: ES256 (ECDSA P-256) via Supabase JWKS (`https://hbtcusxbkkefphunarwn.supabase.co/auth/v1/.well-known/jwks.json`)
-- **auth-service**: Uses `spring-security-oauth2-resource-server` + `NimbusJwtDecoder`
-- **Other services**: Manual JJWT parsing with JWKS public key caching (no OAuth2 Resource Server dependency)
-- **Inter-service auth**: `X-Internal-Api-Key` header, checked by `InternalApiKeyFilter`
-- **InternalApiKeyFilter used in**: all 6 services for cross-service calls
+No implementation may violate a business rule.
 
-## API Response Format (feature branches)
+---
 
-All endpoints return `ApiResponse<T>`:
-```json
-{"success":bool, "code":"OK"|"...", "message":"...", "data":<T>, "errors":[...], "meta":{...}, "pagination":{...}}
-```
+## Mandatory Workflow
 
-## Database
+Before writing any code:
 
-- **Local dev**: Single shared `axiserp` database on Postgres 16 container (compose.yml)
-- **Production**: Per-service Neon (Supabase) databases with HikariCP tuning for serverless pooling
-- **JPA**: `ddl-auto=update` (scaffold); feature branches switched auth-service to `validate`
-- All services reference `SPRING_DATASOURCE_URL` env var (set in compose.yml or `.env`)
+1. Analyze the requirement.
+2. Review BUSINESS_RULES.md.
+3. Review ARCHITECTURE.md.
+4. Review DEVELOPMENT_STANDARDS.md.
+5. Review MICROSERVICE_INTERACTIONS.md.
+6. Identify affected business rules.
+7. Identify affected microservices.
+8. Identify affected entities.
+9. Review existing architecture.
+10. Review existing implementation.
+11. Review existing tests.
+12. Identify applicable skills.
+13. Apply mandatory skills.
+14. Run Superpowers analysis.
+15. Create implementation plan.
+16. Explain implementation plan.
+17. Explain technical impact.
+18. Explain affected business rules.
+19. Explain affected APIs.
+20. Explain affected database structures.
 
-## Testing
+Only after completing the previous steps may code be generated.
 
-- **Framework**: JUnit 5 + Mockito + `@SpringBootTest` + `MockMvc`
-- **Scaffold**: Only `contextLoads()`; feature branches have 70+ tests per service (unit + integration)
-- **Run**: `./mvnw test` from service dir
+---
 
-## Dependencies of Note
+## Superpowers Rules
 
-- **Spring Boot Admin** (3.3.3) on auth-service only
-- **Spring Cloud Gateway** on api-gateway only
-- **Apache POI** 5.2.5 + **OpenPDF** 2.0.3 on report-service only
-- **Lombok** 1.18.38 annotation processor on all service pom.xmls
-- **No Springdoc/OpenAPI** in any service
+Superpowers analysis is mandatory before implementing code.
 
-## Git
+The agent must use Superpowers to:
 
-- **Remote**: `https://github.com/Santiago-AGZ/Backend-AxisERP.git`
-- **No CI, no hooks, no branch protection**
-- All secrets in `.env` (gitignored); no credentials in source or compose.yml
-- `.gitignore` excludes `.claude/`, `.agents/`, `.idea/`, `.vscode/`, `docs/`, `postman/`, `commerce-service/`, `*.log`, scaffold scripts, and reference docs
+* Understand the existing codebase.
+* Identify existing implementations.
+* Detect reusable components.
+* Detect duplicated logic.
+* Understand architecture decisions.
+* Understand service boundaries.
+* Validate implementation approach.
+* Identify potential side effects.
+
+The agent must not generate code before completing Superpowers analysis.
+
+If Superpowers is unavailable, the agent must manually perform equivalent analysis before implementation.
+
+---
+
+## Mandatory Skills
+
+### Architecture
+
+* clean-ddd-hexagonal
+* hexagonal-architecture
+* caveman
+* composition-patterns
+* impeccable
+
+### Microservices
+
+* microservices-architect
+* microservices-patterns
+
+### Backend
+
+* java-coding-standards
+* java-docs
+* java-springboot
+* springboot-patterns
+
+### API Design
+
+* rest-api-design
+* spring-boot-rest-api-standards
+* postman-collection-generator
+
+### Security
+
+* better-auth-best-practices
+* better-auth-security-best-practices
+* owasp-security
+
+### Database
+
+* neon-postgres
+* supabase-postgres-best-practices
+
+### Infrastructure
+
+* docker-containerization
+* docker-compose-orchestration
+* docker-expert
+* docker-patterns
+* multi-stage-dockerfile
+
+---
+
+## Skills Usage Rules
+
+Before implementing any change, the agent must identify and apply all relevant skills.
+
+The agent must not start implementation until the applicable skills have been identified.
+
+Multiple skills may be combined when required.
+
+Examples:
+
+### New Spring Boot Endpoint
+
+Required skills:
+
+* java-springboot
+* spring-boot-rest-api-standards
+* rest-api-design
+
+### Authentication Feature
+
+Required skills:
+
+* better-auth-best-practices
+* better-auth-security-best-practices
+* owasp-security
+
+### New Microservice Integration
+
+Required skills:
+
+* microservices-architect
+* microservices-patterns
+
+### Database Design
+
+Required skills:
+
+* neon-postgres
+* supabase-postgres-best-practices
+
+### Docker Deployment
+
+Required skills:
+
+* docker-containerization
+* docker-compose-orchestration
+* multi-stage-dockerfile
+
+The agent must explain which skills are being applied before implementation.
+
+---
+
+## Planning Rules
+
+The agent must always:
+
+1. Analyze.
+2. Create a plan.
+3. Explain the plan.
+4. Identify affected business rules.
+5. Identify affected services.
+6. Identify affected APIs.
+7. Identify affected databases.
+8. Identify affected domain events.
+9. Identify affected tests.
+10. Implement.
+
+The agent must not immediately generate large amounts of code without first presenting analysis and implementation plan.
+
+---
+
+## Architecture Rules
+
+The agent must always:
+
+* Respect DDD.
+* Respect Hexagonal Architecture.
+* Respect Clean Architecture.
+* Respect SOLID principles.
+* Respect OWASP security practices.
+* Respect microservice boundaries.
+* Respect Database-per-Service.
+* Respect RabbitMQ domain-event architecture.
+* Respect ownership of data by each service.
+* Respect eventual consistency principles.
+* Respect domain ownership.
+
+The agent must never:
+
+* Access another service database.
+* Create joins between databases.
+* Create direct dependencies between domains.
+* Bypass service boundaries.
+* Duplicate business logic unnecessarily.
+* Create distributed transactions between services.
+* Create shared schemas.
+* Create shared tables.
+
+---
+
+## Communication Rules
+
+Allowed communication mechanisms:
+
+### Synchronous
+
+* REST APIs
+
+### Asynchronous
+
+* RabbitMQ Domain Events
+
+Examples:
+
+* UsuarioCreado
+* UsuarioActualizado
+* PasswordCambiada
+* ProductoCreado
+* ProductoActualizado
+* ProductoEliminado
+* CompraRecibida
+* CompraAnulada
+* VentaConfirmada
+* VentaAnulada
+* StockActualizado
+* StockBajo
+* StockAgotado
+* FacturaGenerada
+
+Forbidden:
+
+* Direct database communication.
+* Shared database integration.
+* Cross-service joins.
+
+---
+
+## Business Rules Enforcement
+
+Every implementation must:
+
+* Respect all business rules.
+* Respect all validations.
+* Respect state transitions.
+* Respect audit requirements.
+* Respect security requirements.
+* Respect authorization requirements.
+* Respect domain invariants.
+
+No feature is considered complete if business rules are missing.
+
+Business rules defined in BUSINESS_RULES.md are mandatory.
+
+---
+
+## Testing Rules
+
+Every implementation must include:
+
+* JUnit 5 tests.
+* Mockito tests.
+* MockMvc tests when applicable.
+
+Required testing:
+
+* Unit tests.
+* Integration tests when applicable.
+* Business rule validation tests.
+* State transition tests.
+* Security validation tests.
+
+Critical business flows must be tested.
+
+The agent must update tests whenever behavior changes.
+
+A feature is not complete without appropriate tests.
+
+---
+
+## Documentation Rules
+
+All APIs must provide:
+
+* OpenAPI documentation.
+* Swagger UI in development environments.
+* Request documentation.
+* Response documentation.
+* Error documentation.
+
+Documentation must remain synchronized with code.
+
+The agent must update documentation whenever APIs change.
+
+---
+
+## Security Rules
+
+All implementations must follow:
+
+* OWASP Security Best Practices.
+* JWT Security Best Practices.
+* Authentication Best Practices.
+* Authorization Best Practices.
+
+Forbidden:
+
+* Hardcoded secrets.
+* Plain-text passwords.
+* Exposed credentials.
+* Security bypasses.
+* Disabled validations.
+
+---
+
+## Audit Rules
+
+All critical operations must be auditable.
+
+Audit records must include:
+
+* user
+* action
+* entity
+* entity identifier
+* timestamp
+* IP when applicable
+
+Audit records must be immutable.
+
+Audit records must never be deleted or modified.
+
+---
+
+## Quality Rules
+
+Every implementation must satisfy:
+
+* 100% of defined requirements.
+* 100% of applicable business rules.
+* Architecture standards.
+* Security standards.
+* Testing standards.
+* Documentation standards.
+
+A feature is not complete until all applicable requirements have been satisfied.
+
+---
+
+## Definition of Done
+
+A task is considered complete only when:
+
+* Requirements are implemented.
+* Business rules are implemented.
+* Architecture standards are respected.
+* Security requirements are satisfied.
+* Audit requirements are satisfied.
+* Tests are implemented and passing.
+* Documentation is updated.
+* APIs are documented.
+* Domain events are implemented when required.
+* No duplicated logic is introduced.
+* The solution is production-ready.
