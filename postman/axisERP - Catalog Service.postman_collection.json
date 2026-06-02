@@ -1,0 +1,170 @@
+{
+  "info": {
+    "_postman_id": "1fbb5b65-d6dd-4e77-943e-d098f0585097",
+    "name": "axisERP - Catalog Service",
+    "description": "Endpoints de productos y categorias via API Gateway (puerto 8080).\n\nFLUJO:\n1. Obtener authToken desde la coleccion Auth Service\n2. Copiar authToken a esta coleccion\n3. Usar los endpoints\n\nROLES:\n- ADMIN, INVENTARIO: CRUD completo\n- VENDEDOR: solo GET (lectura)\n\nREGLAS IMPLEMENTADAS:\n- R8: No auto-parent (self-reference)\n- R9: Deteccion de ciclos jerarquicos\n- R13: No crear productos en categorias inactivas\n- R14: Categorias eliminadas no aceptan cambios\n- R15: Eliminacion logica (soft-delete)\n- R16: No eliminar categoria con productos activos\n- R19: Trazabilidad (created_by, updated_by, created_at, updated_at)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Productos",
+      "item": [
+        {
+          "name": "Create Product",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": ["var d = pm.response.json(); if(d.success && d.data) { pm.collectionVariables.set('productId', d.data.id); console.log('Producto creado: ' + d.data.id); }"], "type": "text/javascript" }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Monitor Samsung 27 pulgadas\",\n  \"codigo\": \"MON-SAM-027\",\n  \"categoryId\": \"{{categoryId}}\",\n  \"purchasePrice\": 150.00,\n  \"salePrice\": 250.00\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/productos", "host": ["{{baseUrl}}"], "path": ["productos"] },
+            "description": "Crear producto. Auto-setea productId. Roles: ADMIN, INVENTARIO. La categoria debe estar ACTIVA (R13). Codigo unico e inmutable."
+          },
+          "response": []
+        },
+        {
+          "name": "List Products",
+          "request": {
+            "method": "GET", "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/productos?search=&codigo=&categoryId=&includeInactive=false&page=1&size=20",
+              "host": ["{{baseUrl}}"], "path": ["productos"],
+              "query": [
+                { "key": "search", "value": "", "description": "Buscar en nombre" },
+                { "key": "codigo", "value": "", "description": "Filtrar por codigo exacto" },
+                { "key": "categoryId", "value": "", "description": "Filtrar por UUID de categoria" },
+                { "key": "includeInactive", "value": "false", "description": "Incluir inactivos" },
+                { "key": "page", "value": "1" },
+                { "key": "size", "value": "20" }
+              ]
+            },
+            "description": "Listar productos con filtros y paginacion real. Roles: ADMIN, INVENTARIO, VENDEDOR."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Product by ID",
+          "request": {
+            "method": "GET", "header": [],
+            "url": { "raw": "{{baseUrl}}/productos/{{productId}}", "host": ["{{baseUrl}}"], "path": ["productos", "{{productId}}"] },
+            "description": "Obtener producto por UUID. Roles: ADMIN, INVENTARIO, VENDEDOR."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Product",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Monitor Samsung 27 Updated\",\n  \"categoryId\": \"{{categoryId}}\",\n  \"purchasePrice\": 160.00,\n  \"salePrice\": 270.00\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/productos/{{productId}}", "host": ["{{baseUrl}}"], "path": ["productos", "{{productId}}"] },
+            "description": "Actualizar producto (sin cambiar codigo). Roles: ADMIN, INVENTARIO."
+          },
+          "response": []
+        },
+        {
+          "name": "Deactivate Product",
+          "request": {
+            "method": "PATCH", "header": [],
+            "url": { "raw": "{{baseUrl}}/productos/{{productId}}/desactivar", "host": ["{{baseUrl}}"], "path": ["productos", "{{productId}}", "desactivar"] },
+            "description": "Desactivar producto (soft-delete). Solo ADMIN."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Categorias",
+      "item": [
+        {
+          "name": "Create Category",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": ["var d = pm.response.json(); if(d.success && d.data) { pm.collectionVariables.set('categoryId', d.data.id); console.log('Categoria creada: ' + d.data.id); }"], "type": "text/javascript" }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Monitores\",\n  \"description\": \"Monitores de computadora\",\n  \"parentId\": null\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/categorias", "host": ["{{baseUrl}}"], "path": ["categorias"] },
+            "description": "Crear categoria. parentId null = raiz. Auto-setea categoryId. Roles: ADMIN, INVENTARIO. Respuesta incluye createdBy/updatedBy."
+          },
+          "response": []
+        },
+        {
+          "name": "List Categories",
+          "request": {
+            "method": "GET", "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categorias?page=1&size=20",
+              "host": ["{{baseUrl}}"], "path": ["categorias"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "size", "value": "20" }
+              ]
+            },
+            "description": "Listar categorias con paginacion real (page, size, totalRecords, totalPages). Trae TODAS las categorias (no filtra por status). Respuesta incluye createdBy/updatedBy. Roles: ADMIN, INVENTARIO, VENDEDOR."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Category by ID",
+          "request": {
+            "method": "GET", "header": [],
+            "url": { "raw": "{{baseUrl}}/categorias/{{categoryId}}", "host": ["{{baseUrl}}"], "path": ["categorias", "{{categoryId}}"] },
+            "description": "Obtener categoria por UUID. Respuesta incluye createdBy/updatedBy. Roles: ADMIN, INVENTARIO, VENDEDOR."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Category",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Monitores Actualizado\",\n  \"description\": \"Monitores LED y LCD\",\n  \"parentId\": null\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/categorias/{{categoryId}}", "host": ["{{baseUrl}}"], "path": ["categorias", "{{categoryId}}"] },
+            "description": "Actualizar categoria. Detecta auto-parent (R8) y ciclos jerarquicos (R9). Roles: ADMIN, INVENTARIO."
+          },
+          "response": []
+        },
+        {
+          "name": "Deactivate Category",
+          "request": {
+            "method": "PATCH", "header": [],
+            "url": { "raw": "{{baseUrl}}/categorias/{{categoryId}}/desactivar", "host": ["{{baseUrl}}"], "path": ["categorias", "{{categoryId}}", "desactivar"] },
+            "description": "Desactivar categoria (soft-delete -> ELIMINADA). Bloquea si tiene productos activos (R16). Solo ADMIN."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080/api/v1" },
+    { "key": "authToken", "value": "" },
+    { "key": "productId", "value": "" },
+    { "key": "categoryId", "value": "" }
+  ]
+}
