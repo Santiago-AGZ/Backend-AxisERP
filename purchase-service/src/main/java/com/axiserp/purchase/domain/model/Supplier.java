@@ -32,6 +32,6 @@ public class Supplier {
     }
 
     public boolean isDeleted() {
-        return this.status == SupplierStatus.INACTIVO;
+        return this.status == SupplierStatus.ELIMINADO;
     }
 }

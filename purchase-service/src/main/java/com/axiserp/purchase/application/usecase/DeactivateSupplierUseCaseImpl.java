@@ -29,7 +29,7 @@ public class DeactivateSupplierUseCaseImpl implements DeactivateSupplierUseCase 
         Supplier supplier = supplierRepositoryPort.findById(id)
                 .orElseThrow(() -> new SupplierNotFoundException(id));
 
-        supplier.setStatus(SupplierStatus.INACTIVO);
+        supplier.setStatus(SupplierStatus.ELIMINADO);
         supplier.setUpdatedAt(LocalDateTime.now());
 
         Supplier saved = supplierRepositoryPort.save(supplier);
