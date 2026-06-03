@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,11 +19,13 @@ import com.axiserp.inventory.application.dto.request.AdjustmentRequest;
 import com.axiserp.inventory.application.dto.request.InitializeInventoryRequest;
 import com.axiserp.inventory.application.dto.response.InventoryResponse;
 import com.axiserp.inventory.application.dto.response.MovementResponse;
+import com.axiserp.inventory.application.dto.response.ProductInventoryResponse;
 import com.axiserp.inventory.infrastructure.adapters.in.web.dto.ApiResponse;
 import com.axiserp.inventory.infrastructure.adapters.in.web.dto.ApiResponse.PaginationMeta;
 import com.axiserp.inventory.ports.input.GetInventoryUseCase;
 import com.axiserp.inventory.ports.input.InitializeInventoryUseCase;
 import com.axiserp.inventory.ports.input.ListMovementsUseCase;
+import com.axiserp.inventory.ports.input.ListProductsUseCase;
 import com.axiserp.inventory.ports.input.RegisterAdjustmentUseCase;
 import com.axiserp.inventory.ports.input.RegisterEntryUseCase;
 import com.axiserp.inventory.ports.input.RegisterExitUseCase;
@@ -38,6 +41,7 @@ import lombok.RequiredArgsConstructor;
 public class InventoryController {
 
     private final InitializeInventoryUseCase initializeInventoryUseCase;
+    private final ListProductsUseCase listProductsUseCase;
     private final GetInventoryUseCase getInventoryUseCase;
     private final ListMovementsUseCase listMovementsUseCase;
     private final RegisterEntryUseCase registerEntryUseCase;
@@ -46,6 +50,7 @@ public class InventoryController {
     private final RegisterAdjustmentUseCase registerAdjustmentUseCase;
     private final ReverseMovementUseCase reverseMovementUseCase;
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'INVENTARIO')")
     @PostMapping("/initialize")
     public ResponseEntity<ApiResponse<InventoryResponse>> initialize(
             @Valid @RequestBody InitializeInventoryRequest request) {
@@ -54,12 +59,25 @@ public class InventoryController {
                 .body(ApiResponse.created(response, "Inventario inicializado"));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'INVENTARIO', 'VENDEDOR')")
+    @GetMapping("/products")
+    public ResponseEntity<ApiResponse<List<ProductInventoryResponse>>> listProducts(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        var result = listProductsUseCase.list(page - 1, size);
+        return ResponseEntity.ok(ApiResponse.paged(
+                result.getContent(), "Productos listados",
+                PaginationMeta.of(page, size, result.getTotal())));
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'INVENTARIO', 'VENDEDOR')")
     @GetMapping("/products/{productId}")
     public ResponseEntity<ApiResponse<InventoryResponse>> getInventory(@PathVariable UUID productId) {
         return ResponseEntity.ok(ApiResponse.ok(
                 getInventoryUseCase.getByProductId(productId), "Inventario encontrado"));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'INVENTARIO')")
     @GetMapping("/products/{productId}/movements")
     public ResponseEntity<ApiResponse<List<MovementResponse>>> listMovements(@PathVariable UUID productId) {
         List<MovementResponse> data = listMovementsUseCase.listByProductId(productId);
@@ -68,6 +86,7 @@ public class InventoryController {
                 PaginationMeta.of(1, data.size(), data.size())));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'INVENTARIO')")
     @PostMapping("/products/{productId}/entry")
     public ResponseEntity<ApiResponse<MovementResponse>> registerEntry(
             @PathVariable UUID productId,
@@ -81,6 +100,7 @@ public class InventoryController {
                 .body(ApiResponse.created(response, "Entrada registrada"));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'INVENTARIO')")
     @PostMapping("/products/{productId}/exit")
     public ResponseEntity<ApiResponse<MovementResponse>> registerExit(
             @PathVariable UUID productId,
@@ -94,6 +114,7 @@ public class InventoryController {
                 .body(ApiResponse.created(response, "Salida registrada"));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'INVENTARIO')")
     @PostMapping("/products/{productId}/return")
     public ResponseEntity<ApiResponse<MovementResponse>> registerReturn(
             @PathVariable UUID productId,
@@ -107,6 +128,7 @@ public class InventoryController {
                 .body(ApiResponse.created(response, "Devolución registrada"));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'INVENTARIO')")
     @PostMapping("/products/{productId}/adjust")
     public ResponseEntity<ApiResponse<MovementResponse>> registerAdjustment(
             @PathVariable UUID productId,
@@ -117,6 +139,7 @@ public class InventoryController {
                 .body(ApiResponse.created(response, "Ajuste registrado"));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/movements/{movementId}/reverse")
     public ResponseEntity<ApiResponse<MovementResponse>> reverseMovement(
             @PathVariable UUID movementId,
