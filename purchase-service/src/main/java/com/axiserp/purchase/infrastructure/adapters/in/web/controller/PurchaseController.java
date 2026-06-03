@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -43,6 +44,7 @@ public class PurchaseController {
     private final ReceivePurchaseUseCase receivePurchaseUseCase;
     private final CancelPurchaseUseCase cancelPurchaseUseCase;
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'INVENTARIO')")
     @PostMapping
     public ResponseEntity<ApiResponse<PurchaseResponse>> createPurchase(
             @Valid @RequestBody CreatePurchaseRequest request) {
@@ -53,11 +55,13 @@ public class PurchaseController {
                 .body(ApiResponse.created(response, "Compra creada exitosamente"));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'INVENTARIO')")
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<PurchaseResponse>> getPurchase(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.ok(getPurchaseUseCase.execute(id), "Compra encontrada"));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'INVENTARIO')")
     @GetMapping
     public ResponseEntity<ApiResponse<List<PurchaseResponse>>> listPurchases(
             @RequestParam(required = false) String search,
@@ -78,6 +82,7 @@ public class PurchaseController {
                 PaginationMeta.of(page, size, total)));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/status")
     public ResponseEntity<ApiResponse<PurchaseResponse>> updateStatus(
             @PathVariable UUID id,
@@ -86,6 +91,7 @@ public class PurchaseController {
                 updatePurchaseStatusUseCase.execute(id, status), "Estado actualizado"));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'INVENTARIO')")
     @PostMapping("/{id}/receive")
     public ResponseEntity<ApiResponse<PurchaseResponse>> receive(
             @PathVariable UUID id,
@@ -94,6 +100,7 @@ public class PurchaseController {
                 receivePurchaseUseCase.execute(id, request), "Compra recibida"));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/cancel")
     public ResponseEntity<ApiResponse<PurchaseResponse>> cancel(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.ok(cancelPurchaseUseCase.execute(id), "Compra cancelada"));
