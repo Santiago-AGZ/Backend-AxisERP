@@ -1,0 +1,181 @@
+name: Deploy to Azure
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+  push:
+    branches: [main]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ${{ github.repository_owner }}/axiserp
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    strategy:
+      matrix:
+        service: [api-gateway, auth-service, catalog-service, inventory-service, sales-service, purchase-service, report-service]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-${{ matrix.service }}
+          tags: |
+            type=sha,prefix=
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.service }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.event.inputs.environment || 'production' }}
+      url: ${{ steps.deploy-gateway.outputs.fqdn }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Set image tag
+        id: image-tag
+        run: echo "tag=sha-${GITHUB_SHA::8}" >> $GITHUB_OUTPUT
+
+      - name: Deploy Auth Service
+        run: |
+          az containerapp update \
+            --name auth-service \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --image ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-auth-service:${{ steps.image-tag.outputs.tag }} \
+            --set-env-vars \
+              AUTH_DB_URL="${{ secrets.AUTH_DB_URL }}" \
+              AUTH_DB_USERNAME="${{ secrets.AUTH_DB_USERNAME }}" \
+              SUPABASE_URL="${{ secrets.SUPABASE_URL }}" \
+              SUPABASE_JWT_ISSUER="${{ secrets.SUPABASE_JWT_ISSUER }}" \
+              SUPABASE_SERVICE_ROLE_KEY="${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+              JPA_DDL_AUTO="validate" \
+              JWT_SECRET="${{ secrets.JWT_SECRET }}"
+
+      - name: Deploy Catalog Service
+        run: |
+          az containerapp update \
+            --name catalog-service \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --image ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-catalog-service:${{ steps.image-tag.outputs.tag }} \
+            --set-env-vars \
+              CATALOG_DB_URL="${{ secrets.CATALOG_DB_URL }}" \
+              CATALOG_DB_USERNAME="${{ secrets.CATALOG_DB_USERNAME }}" \
+              JPA_DDL_AUTO="validate"
+
+      - name: Deploy Inventory Service
+        run: |
+          az containerapp update \
+            --name inventory-service \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --image ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-inventory-service:${{ steps.image-tag.outputs.tag }} \
+            --set-env-vars \
+              INVENTORY_DB_URL="${{ secrets.INVENTORY_DB_URL }}" \
+              INVENTORY_DB_USERNAME="${{ secrets.INVENTORY_DB_USERNAME }}" \
+              JPA_DDL_AUTO="validate" \
+              CATALOG_SERVICE_URL="${{ secrets.CATALOG_SERVICE_URL }}"
+
+      - name: Deploy Sales Service
+        run: |
+          az containerapp update \
+            --name sales-service \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --image ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-sales-service:${{ steps.image-tag.outputs.tag }} \
+            --set-env-vars \
+              SALES_DB_URL="${{ secrets.SALES_DB_URL }}" \
+              SALES_DB_USERNAME="${{ secrets.SALES_DB_USERNAME }}" \
+              JPA_DDL_AUTO="validate" \
+              CATALOG_SERVICE_URL="${{ secrets.CATALOG_SERVICE_URL }}" \
+              INVENTORY_SERVICE_URL="${{ secrets.INVENTORY_SERVICE_URL }}"
+
+      - name: Deploy Purchase Service
+        run: |
+          az containerapp update \
+            --name purchase-service \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --image ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-purchase-service:${{ steps.image-tag.outputs.tag }} \
+            --set-env-vars \
+              PURCHASE_DB_URL="${{ secrets.PURCHASE_DB_URL }}" \
+              PURCHASE_DB_USERNAME="${{ secrets.PURCHASE_DB_USERNAME }}" \
+              JPA_DDL_AUTO="validate"
+
+      - name: Deploy Report Service
+        run: |
+          az containerapp update \
+            --name report-service \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --image ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-report-service:${{ steps.image-tag.outputs.tag }} \
+            --set-env-vars \
+              REPORT_DB_URL="${{ secrets.REPORT_DB_URL }}" \
+              REPORT_DB_USERNAME="${{ secrets.REPORT_DB_USERNAME }}" \
+              JPA_DDL_AUTO="validate" \
+              SALES_SERVICE_URL="${{ secrets.SALES_SERVICE_URL }}" \
+              PURCHASE_SERVICE_URL="${{ secrets.PURCHASE_SERVICE_URL }}"
+
+      - name: Deploy API Gateway
+        id: deploy-gateway
+        run: |
+          az containerapp update \
+            --name api-gateway \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --image ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-api-gateway:${{ steps.image-tag.outputs.tag }} \
+            --set-env-vars \
+              AUTH_SERVICE_URL="${{ secrets.AUTH_SERVICE_URL }}" \
+              CATALOG_SERVICE_URL="${{ secrets.CATALOG_SERVICE_URL }}" \
+              INVENTORY_SERVICE_URL="${{ secrets.INVENTORY_SERVICE_URL }}" \
+              SALES_SERVICE_URL="${{ secrets.SALES_SERVICE_URL }}" \
+              PURCHASE_SERVICE_URL="${{ secrets.PURCHASE_SERVICE_URL }}" \
+              REPORT_SERVICE_URL="${{ secrets.REPORT_SERVICE_URL }}" \
+              SUPABASE_URL="${{ secrets.SUPABASE_URL }}"
+
+      - name: Get Gateway URL
+        id: gateway-url
+        run: |
+          FQDN=$(az containerapp show \
+            --name api-gateway \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --query properties.configuration.ingress.fqdn \
+            --output tsv)
+          echo "url=https://$FQDN" >> $GITHUB_OUTPUT
+          echo "Gateway deployed at: https://$FQDN"

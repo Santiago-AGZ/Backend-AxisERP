@@ -1,0 +1,17 @@
+name: CI - Inventory Service
+
+on:
+  push:
+    paths:
+      - 'inventory-service/**'
+      - '.github/workflows/ci-inventory.yml'
+      - '.github/workflows/ci-template.yml'
+  pull_request:
+    paths:
+      - 'inventory-service/**'
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci-template.yml
+    with:
+      service: inventory-service

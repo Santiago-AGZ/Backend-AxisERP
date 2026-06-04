@@ -1,0 +1,17 @@
+name: CI - Purchase Service
+
+on:
+  push:
+    paths:
+      - 'purchase-service/**'
+      - '.github/workflows/ci-purchase.yml'
+      - '.github/workflows/ci-template.yml'
+  pull_request:
+    paths:
+      - 'purchase-service/**'
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci-template.yml
+    with:
+      service: purchase-service

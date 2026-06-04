@@ -1,0 +1,38 @@
+name: CI Template
+
+on:
+  workflow_call:
+    inputs:
+      service:
+        required: true
+        type: string
+      java-version:
+        required: false
+        type: string
+        default: '21'
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ inputs.java-version }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ inputs.java-version }}
+          distribution: temurin
+          cache: maven
+
+      - name: Build and test
+        run: mvn -pl ${{ inputs.service }} -am clean verify
+        working-directory: ${{ github.workspace }}
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ inputs.service }}
+          path: ${{ inputs.service }}/target/surefire-reports/
+          retention-days: 7

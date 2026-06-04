@@ -1,0 +1,17 @@
+name: CI - API Gateway
+
+on:
+  push:
+    paths:
+      - 'api-gateway/**'
+      - '.github/workflows/ci-gateway.yml'
+      - '.github/workflows/ci-template.yml'
+  pull_request:
+    paths:
+      - 'api-gateway/**'
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci-template.yml
+    with:
+      service: api-gateway

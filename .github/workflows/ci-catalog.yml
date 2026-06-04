@@ -1,0 +1,17 @@
+name: CI - Catalog Service
+
+on:
+  push:
+    paths:
+      - 'catalog-service/**'
+      - '.github/workflows/ci-catalog.yml'
+      - '.github/workflows/ci-template.yml'
+  pull_request:
+    paths:
+      - 'catalog-service/**'
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci-template.yml
+    with:
+      service: catalog-service

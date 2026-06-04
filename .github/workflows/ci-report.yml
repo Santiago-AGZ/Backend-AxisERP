@@ -1,0 +1,17 @@
+name: CI - Report Service
+
+on:
+  push:
+    paths:
+      - 'report-service/**'
+      - '.github/workflows/ci-report.yml'
+      - '.github/workflows/ci-template.yml'
+  pull_request:
+    paths:
+      - 'report-service/**'
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci-template.yml
+    with:
+      service: report-service
