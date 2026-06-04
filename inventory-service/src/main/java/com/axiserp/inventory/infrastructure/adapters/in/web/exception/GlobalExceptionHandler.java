@@ -11,12 +11,14 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.axiserp.inventory.domain.exception.InsufficientStockException;
 import com.axiserp.inventory.domain.exception.InventoryAlreadyInitializedException;
 import com.axiserp.inventory.domain.exception.InventoryNotFoundException;
 import com.axiserp.inventory.domain.exception.InvalidStockConfigException;
 import com.axiserp.inventory.domain.exception.NegativeQuantityException;
+import com.axiserp.inventory.domain.exception.ProductNotActiveException;
 import com.axiserp.inventory.infrastructure.adapters.in.web.dto.ApiResponse;
 import com.axiserp.inventory.infrastructure.adapters.in.web.dto.ApiResponse.ApiError;
 
@@ -50,7 +52,7 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error("CONFLICT", ex.getMessage()));
     }
 
-    @ExceptionHandler({InvalidStockConfigException.class, NegativeQuantityException.class, IllegalArgumentException.class})
+    @ExceptionHandler({InvalidStockConfigException.class, NegativeQuantityException.class, ProductNotActiveException.class, IllegalArgumentException.class})
     public ResponseEntity<ApiResponse<Void>> handleBadRequest(RuntimeException ex) {
         return ResponseEntity.badRequest()
                 .body(ApiResponse.error("BAD_REQUEST", ex.getMessage()));
@@ -66,6 +68,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleIllegalState(IllegalStateException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(ApiResponse.error("CONFLICT", ex.getMessage()));
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleNotFound(NoResourceFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error("NOT_FOUND", "Recurso no encontrado: " + ex.getResourcePath()));
     }
 
     @ExceptionHandler(Exception.class)

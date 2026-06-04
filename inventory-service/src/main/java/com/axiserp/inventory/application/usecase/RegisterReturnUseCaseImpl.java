@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.axiserp.inventory.application.dto.response.MovementResponse;
+import com.axiserp.inventory.application.service.AuditService;
 import com.axiserp.inventory.domain.exception.InventoryNotFoundException;
 import com.axiserp.inventory.domain.exception.NegativeQuantityException;
 import com.axiserp.inventory.domain.model.Inventory;
@@ -25,6 +26,7 @@ public class RegisterReturnUseCaseImpl implements RegisterReturnUseCase {
     private static final Logger log = LoggerFactory.getLogger(RegisterReturnUseCaseImpl.class);
 
     private final InventoryRepositoryPort inventoryRepositoryPort;
+    private final AuditService auditService;
 
     @Override
     @Transactional
@@ -37,7 +39,7 @@ public class RegisterReturnUseCaseImpl implements RegisterReturnUseCase {
                 .orElseThrow(() -> new InventoryNotFoundException(productId));
 
         int previousStock = inventory.getCurrentStock();
-        inventory.setCurrentStock(previousStock + quantity);
+        inventory.addStock(quantity);
 
         Inventory saved = inventoryRepositoryPort.save(inventory);
 
@@ -55,6 +57,8 @@ public class RegisterReturnUseCaseImpl implements RegisterReturnUseCase {
                 .build();
 
         InventoryMovement savedMovement = inventoryRepositoryPort.saveMovement(movement);
+
+        auditService.logStockEntry(productId, createdBy, quantity, previousStock, saved.getCurrentStock());
 
         log.info("inventory_return productId={} quantity={} previousStock={} newStock={}", productId, quantity, previousStock, saved.getCurrentStock());
 

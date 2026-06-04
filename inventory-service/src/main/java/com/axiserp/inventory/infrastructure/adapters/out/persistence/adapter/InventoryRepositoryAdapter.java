@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import com.axiserp.inventory.domain.model.Inventory;
@@ -52,6 +54,59 @@ public class InventoryRepositoryAdapter implements InventoryRepositoryPort {
                 .stream()
                 .map(this::toMovementDomain)
                 .toList();
+    }
+
+    @Override
+    public List<Inventory> findAll(int page, int size) {
+        return jpaInventoryRepository.findAll(PageRequest.of(page, size))
+                .stream()
+                .map(this::toDomain)
+                .toList();
+    }
+
+    @Override
+    public long countAll() {
+        return jpaInventoryRepository.count();
+    }
+
+    @Override
+    public List<Inventory> findLowStock(int page, int size) {
+        return jpaInventoryRepository.findLowStock(size, page * size)
+                .stream()
+                .map(this::toDomain)
+                .toList();
+    }
+
+    @Override
+    public long countLowStock() {
+        return jpaInventoryRepository.countLowStock();
+    }
+
+    @Override
+    public List<Inventory> findByProductIds(List<UUID> productIds, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return jpaInventoryRepository.findByProductIds(productIds, pageable)
+                .stream()
+                .map(this::toDomain)
+                .toList();
+    }
+
+    @Override
+    public long countByProductIds(List<UUID> productIds) {
+        return jpaInventoryRepository.countByProductIds(productIds);
+    }
+
+    @Override
+    public List<Inventory> findDepleted(int page, int size) {
+        return jpaInventoryRepository.findDepleted(size, page * size)
+                .stream()
+                .map(this::toDomain)
+                .toList();
+    }
+
+    @Override
+    public long countDepleted() {
+        return jpaInventoryRepository.countDepleted();
     }
 
     private Inventory toDomain(InventoryEntity e) {
@@ -106,8 +161,7 @@ public class InventoryRepositoryAdapter implements InventoryRepositoryPort {
                 .build();
     }
 
-    private InventoryMovementEntity toMovementEntity(InventoryMovement m) {
-        // Priorizar justification sobre notes para el campo 'notes' de la BD
+private InventoryMovementEntity toMovementEntity(InventoryMovement m) {
         String notesValue = m.getJustification() != null ? m.getJustification() : m.getNotes();
         return InventoryMovementEntity.builder()
                 .id(m.getId())
