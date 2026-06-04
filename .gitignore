@@ -39,3 +39,5 @@ commerce-service/
 token_*.txt
 generate-postman.ps1
 seed-data.ps1
+update-inter-service-urls.ps1
+deploy-cloudshell.sh

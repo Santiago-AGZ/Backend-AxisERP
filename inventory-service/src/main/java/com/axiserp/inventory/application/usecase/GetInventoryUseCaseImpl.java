@@ -40,7 +40,7 @@ public class GetInventoryUseCaseImpl implements GetInventoryUseCase {
                 .productId(inventory.getProductId())
                 .currentStock(inventory.getCurrentStock())
                 .minStock(inventory.getMinStock())
-                .maxStock(inventory.getMaxStock())
+                .maxStock(inventory.getMaxStock() != null ? inventory.getMaxStock() : 0)
                 .lowStock(inventory.isLowStock())
                 .depleted(inventory.isDepleted())
                 .createdAt(inventory.getCreatedAt())

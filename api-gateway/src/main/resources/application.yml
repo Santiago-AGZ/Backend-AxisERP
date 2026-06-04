@@ -9,32 +9,32 @@ spring:
 
       routes:
         - id: auth-service
-          uri: http://auth-service:8081
+          uri: ${AUTH_SERVICE_URL:http://auth-service:8081}
           predicates:
             - Path=/api/v1/auth/**,/api/v1/usuarios/**,/api/v1/audit-log/**,/swagger-ui/**,/v3/api-docs/**,/actuator/health,/actuator/info
 
         - id: catalog-service
-          uri: http://catalog-service:8082
+          uri: ${CATALOG_SERVICE_URL:http://catalog-service:8082}
           predicates:
             - Path=/api/v1/productos/**,/api/v1/categorias/**
 
         - id: inventory-service
-          uri: http://inventory-service:8083
+          uri: ${INVENTORY_SERVICE_URL:http://inventory-service:8083}
           predicates:
             - Path=/api/v1/inventory/**
 
         - id: sales-service
-          uri: http://sales-service:8084
+          uri: ${SALES_SERVICE_URL:http://sales-service:8084}
           predicates:
             - Path=/api/v1/sales/**,/api/v1/customers/**,/api/v1/invoices/**
 
         - id: purchase-service
-          uri: http://purchase-service:8086
+          uri: ${PURCHASE_SERVICE_URL:http://purchase-service:8086}
           predicates:
             - Path=/api/v1/purchases/**,/api/v1/suppliers/**
 
         - id: report-service
-          uri: http://report-service:8085
+          uri: ${REPORT_SERVICE_URL:http://report-service:8085}
           predicates:
             - Path=/api/v1/reports/**
 
