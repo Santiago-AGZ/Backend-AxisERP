@@ -10,19 +10,23 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.axiserp.purchase.application.dto.request.CreateSupplierRequest;
+import com.axiserp.purchase.application.dto.request.UpdateSupplierRequest;
 import com.axiserp.purchase.application.dto.response.SupplierResponse;
 import com.axiserp.purchase.infrastructure.adapters.in.web.dto.ApiResponse;
 import com.axiserp.purchase.infrastructure.adapters.in.web.dto.ApiResponse.PaginationMeta;
 import com.axiserp.purchase.ports.input.CreateSupplierUseCase;
 import com.axiserp.purchase.ports.input.DeactivateSupplierUseCase;
+import com.axiserp.purchase.ports.input.ReactivateSupplierUseCase;
 import com.axiserp.purchase.ports.input.GetSupplierUseCase;
 import com.axiserp.purchase.ports.input.ListSuppliersUseCase;
+import com.axiserp.purchase.ports.input.UpdateSupplierUseCase;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +40,8 @@ public class SupplierController {
     private final GetSupplierUseCase getSupplierUseCase;
     private final ListSuppliersUseCase listSuppliersUseCase;
     private final DeactivateSupplierUseCase deactivateSupplierUseCase;
+    private final ReactivateSupplierUseCase reactivateSupplierUseCase;
+    private final UpdateSupplierUseCase updateSupplierUseCase;
 
     @PreAuthorize("hasAnyRole('ADMIN')")
     @PostMapping
@@ -74,9 +80,25 @@ public class SupplierController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<SupplierResponse>> updateSupplier(
+            @PathVariable UUID id,
+            @Valid @RequestBody UpdateSupplierRequest request) {
+        SupplierResponse response = updateSupplierUseCase.execute(id, request);
+        return ResponseEntity.ok(ApiResponse.ok(response, "Proveedor actualizado exitosamente"));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/deactivate")
     public ResponseEntity<ApiResponse<SupplierResponse>> deactivateSupplier(@PathVariable UUID id) {
         SupplierResponse response = deactivateSupplierUseCase.execute(id);
         return ResponseEntity.ok(ApiResponse.ok(response, "Proveedor desactivado"));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/{id}/reactivate")
+    public ResponseEntity<ApiResponse<SupplierResponse>> reactivateSupplier(@PathVariable UUID id) {
+        SupplierResponse response = reactivateSupplierUseCase.execute(id);
+        return ResponseEntity.ok(ApiResponse.ok(response, "Proveedor activado"));
     }
 }
