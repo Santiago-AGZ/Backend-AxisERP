@@ -10,9 +10,12 @@ import com.axiserp.auth.application.service.AuditService;
 import com.axiserp.auth.domain.exception.TokenExpiredException;
 import com.axiserp.auth.domain.factory.UserFactory;
 import com.axiserp.auth.domain.model.AuditLog.AuditAction;
+import com.axiserp.auth.domain.model.PasswordHistory;
 import com.axiserp.auth.domain.model.PasswordResetToken;
 import com.axiserp.auth.domain.model.User;
+import com.axiserp.auth.domain.service.PasswordValidator;
 import com.axiserp.auth.ports.input.ResetPasswordUseCase;
+import com.axiserp.auth.ports.output.PasswordHistoryRepositoryPort;
 import com.axiserp.auth.ports.output.PasswordResetTokenRepositoryPort;
 import com.axiserp.auth.ports.output.UserRepositoryPort;
 
@@ -28,6 +31,7 @@ public class ResetPasswordUseCaseImpl implements ResetPasswordUseCase {
     private final UserRepositoryPort userRepositoryPort;
     private final PasswordEncoder passwordEncoder;
     private final AuditService auditService;
+    private final PasswordHistoryRepositoryPort passwordHistoryRepositoryPort;
 
     @Override
     @Transactional
@@ -48,6 +52,19 @@ public class ResetPasswordUseCaseImpl implements ResetPasswordUseCase {
         User user = userRepositoryPort.findById(resetToken.getUserId())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
+        if (passwordEncoder.matches(newPassword, user.getPasswordHash())) {
+            throw new IllegalArgumentException("La nueva contraseña debe ser diferente a la actual");
+        }
+
+        PasswordValidator.validate(newPassword);
+
+        var recentPasswords = passwordHistoryRepositoryPort.findLastByUserId(user.getId(), 5);
+        for (PasswordHistory history : recentPasswords) {
+            if (passwordEncoder.matches(newPassword, history.getPasswordHash())) {
+                throw new IllegalArgumentException("La contraseña ya fue utilizada recientemente");
+            }
+        }
+
         String hashedPassword = passwordEncoder.encode(newPassword);
         User updated = UserFactory.withNewPassword(user, hashedPassword);
         userRepositoryPort.save(updated);
@@ -63,6 +80,11 @@ public class ResetPasswordUseCaseImpl implements ResetPasswordUseCase {
                 .ipAddress(resetToken.getIpAddress())
                 .build();
         passwordResetTokenRepositoryPort.save(usedToken);
+
+        passwordHistoryRepositoryPort.save(PasswordHistory.builder()
+                .userId(user.getId())
+                .passwordHash(hashedPassword)
+                .build());
 
         auditService.log(AuditAction.PASSWORD_RESET_COMPLETE, "AUTH", user.getId(),
                 user.getId(), user.getName(),

@@ -62,6 +62,10 @@ public class UserEntity {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
+    @Column(name = "failed_login_attempts", nullable = false)
+    @Builder.Default
+    private int failedLoginAttempts = 0;
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();

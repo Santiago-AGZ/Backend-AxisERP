@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.axiserp.auth.domain.exception.DuplicateEmailException;
+import com.axiserp.auth.domain.exception.InvalidCredentialsException;
 import com.axiserp.auth.domain.exception.UserInactiveException;
+import com.axiserp.auth.domain.exception.UserLockedException;
 import com.axiserp.auth.domain.exception.UserNotFoundException;
 import com.axiserp.auth.infrastructure.adapters.in.web.response.ApiResponse;
 import com.axiserp.auth.infrastructure.adapters.in.web.response.ApiResponse.ApiError;
@@ -41,6 +43,18 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleAccessDenied(AccessDeniedException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(ApiResponse.error("FORBIDDEN", "No tiene permisos para realizar esta operacion"));
+    }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInvalidCredentials(InvalidCredentialsException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponse.error("INVALID_CREDENTIALS", "Credenciales inválidas"));
+    }
+
+    @ExceptionHandler(UserLockedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleUserLocked(UserLockedException ex) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .body(ApiResponse.error("USER_LOCKED", "Usuario bloqueado por demasiados intentos fallidos"));
     }
 
     @ExceptionHandler(UserInactiveException.class)

@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.axiserp.auth.domain.model.RefreshToken;
 import com.axiserp.auth.infrastructure.adapters.out.persistence.entity.RefreshTokenEntity;

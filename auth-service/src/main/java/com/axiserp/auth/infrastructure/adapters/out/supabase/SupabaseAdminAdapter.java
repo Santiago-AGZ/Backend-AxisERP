@@ -61,6 +61,74 @@ public class SupabaseAdminAdapter implements SupabaseAuthPort {
     }
 
     @Override
+    public LoginResponse login(String email, String password) {
+        log.info("Logging in via Supabase: email={}", email);
+        try {
+            JsonNode response = publicRestClient.post()
+                    .uri("/token?grant_type=password")
+                    .body(Map.of("email", email, "password", password))
+                    .retrieve()
+                    .body(JsonNode.class);
+
+            if (response == null) {
+                throw new RuntimeException("Supabase returned empty response for login");
+            }
+
+            String accessToken = response.get("access_token").asText();
+            String refreshToken = response.get("refresh_token").asText();
+            int expiresIn = response.get("expires_in").asInt();
+            String tokenType = response.get("token_type").asText();
+
+            log.debug("Login successful, expires_in={}", expiresIn);
+            return new LoginResponse(accessToken, refreshToken, expiresIn, tokenType);
+
+        } catch (HttpStatusCodeException e) {
+            log.error("Supabase API error logging in: status={} body={}",
+                    e.getStatusCode(), e.getResponseBodyAsString());
+            if (e.getStatusCode().isSameCodeAs(org.springframework.http.HttpStatus.BAD_REQUEST)) {
+                throw new IllegalArgumentException("Credenciales inválidas");
+            }
+            throw new RuntimeException(
+                    "Error al iniciar sesión en Supabase: " + e.getStatusCode(), e);
+        } catch (Exception e) {
+            log.error("Supabase API call failed during login", e);
+            throw new RuntimeException("Error de comunicación con Supabase al iniciar sesión", e);
+        }
+    }
+
+    @Override
+    public RefreshTokenResponse refreshToken(String refreshToken) {
+        log.info("Refreshing token via Supabase");
+        try {
+            JsonNode response = publicRestClient.post()
+                    .uri("/token?grant_type=refresh_token")
+                    .body(Map.of("refresh_token", refreshToken))
+                    .retrieve()
+                    .body(JsonNode.class);
+
+            if (response == null) {
+                throw new RuntimeException("Supabase returned empty response for token refresh");
+            }
+
+            String newAccessToken = response.get("access_token").asText();
+            String newRefreshToken = response.get("refresh_token").asText();
+            int expiresIn = response.get("expires_in").asInt();
+
+            log.debug("Token refreshed successfully, expires_in={}", expiresIn);
+            return new RefreshTokenResponse(newAccessToken, newRefreshToken, expiresIn);
+
+        } catch (HttpStatusCodeException e) {
+            log.error("Supabase API error refreshing token: status={} body={}",
+                    e.getStatusCode(), e.getResponseBodyAsString());
+            throw new RuntimeException(
+                    "Error al refrescar token en Supabase: " + e.getStatusCode(), e);
+        } catch (Exception e) {
+            log.error("Supabase API call failed during token refresh", e);
+            throw new RuntimeException("Error de comunicación con Supabase al refrescar token", e);
+        }
+    }
+
+    @Override
     public SupabaseUser createUser(String email, String roleName, String name, UUID createdBy) {
         log.info("Creating Supabase user: email={}", email);
 

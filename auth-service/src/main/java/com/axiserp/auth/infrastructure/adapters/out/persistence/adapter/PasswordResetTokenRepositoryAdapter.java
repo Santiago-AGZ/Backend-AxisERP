@@ -3,6 +3,7 @@ package com.axiserp.auth.infrastructure.adapters.out.persistence.adapter;
 import java.util.UUID;
 
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.axiserp.auth.domain.model.PasswordResetToken;
 import com.axiserp.auth.infrastructure.adapters.out.persistence.entity.PasswordResetTokenEntity;

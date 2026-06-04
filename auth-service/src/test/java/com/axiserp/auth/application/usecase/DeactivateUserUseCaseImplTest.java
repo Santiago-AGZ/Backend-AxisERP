@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.axiserp.auth.application.service.AuditService;
+import com.axiserp.auth.application.service.ReauthenticationValidator;
 import com.axiserp.auth.domain.model.User;
 import com.axiserp.auth.domain.model.User.UserStatus;
 import com.axiserp.auth.ports.output.RoleRepositoryPort;
@@ -32,6 +33,9 @@ class DeactivateUserUseCaseImplTest {
     @Mock
     private AuditService auditService;
 
+    @Mock
+    private ReauthenticationValidator reauthenticationValidator;
+
     @InjectMocks
     private DeactivateUserUseCaseImpl deactivateUserUseCase;
 
@@ -45,7 +49,9 @@ class DeactivateUserUseCaseImplTest {
                 .build();
         when(userRepositoryPort.findById(deletedUser.getId())).thenReturn(Optional.of(deletedUser));
 
+        doNothing().when(reauthenticationValidator).validate(any(), anyString());
+
         assertThrows(IllegalStateException.class,
-                () -> deactivateUserUseCase.deactivate(deletedUser.getId(), UUID.randomUUID()));
+                () -> deactivateUserUseCase.deactivate(deletedUser.getId(), UUID.randomUUID(), "password"));
     }
 }

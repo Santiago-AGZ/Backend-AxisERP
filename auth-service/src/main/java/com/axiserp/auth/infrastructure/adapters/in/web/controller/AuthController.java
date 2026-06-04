@@ -1,6 +1,8 @@
 package com.axiserp.auth.infrastructure.adapters.in.web.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +19,7 @@ import com.axiserp.auth.application.dto.response.UserInfoResponse;
 import com.axiserp.auth.infrastructure.adapters.in.web.response.ApiResponse;
 import com.axiserp.auth.ports.input.GetUserInfoUseCase;
 import com.axiserp.auth.ports.output.SupabaseAuthPort;
+import com.axiserp.auth.ports.output.SupabaseAuthPort.LoginResponse;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,6 +30,13 @@ public class AuthController {
 
     private final GetUserInfoUseCase getUserInfoUseCase;
     private final SupabaseAuthPort supabaseAuthPort;
+
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse<LoginResponse>> login(
+            @Valid @RequestBody LoginRequestBody body) {
+        LoginResponse response = supabaseAuthPort.login(body.email(), body.password());
+        return ResponseEntity.ok(ApiResponse.ok(response));
+    }
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/me")
@@ -43,4 +53,6 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.ok(null,
                 "Si el correo existe, recibirás un enlace de recuperación"));
     }
+
+    private record LoginRequestBody(@NotBlank @Email String email, @NotBlank String password) {}
 }
