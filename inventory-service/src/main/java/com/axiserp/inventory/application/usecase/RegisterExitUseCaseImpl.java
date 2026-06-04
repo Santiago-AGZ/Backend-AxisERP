@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.axiserp.inventory.application.dto.response.MovementResponse;
 import com.axiserp.inventory.application.service.AuditService;
-import com.axiserp.inventory.domain.exception.InsufficientStockException;
 import com.axiserp.inventory.domain.exception.InventoryNotFoundException;
 import com.axiserp.inventory.domain.exception.NegativeQuantityException;
 import com.axiserp.inventory.domain.model.Inventory;
@@ -39,12 +38,8 @@ public class RegisterExitUseCaseImpl implements RegisterExitUseCase {
         Inventory inventory = inventoryRepositoryPort.findByProductId(productId)
                 .orElseThrow(() -> new InventoryNotFoundException(productId));
 
-        if (!inventory.canExit(quantity)) {
-            throw new InsufficientStockException(quantity, inventory.getCurrentStock());
-        }
-
         int previousStock = inventory.getCurrentStock();
-        inventory.setCurrentStock(previousStock - quantity);
+        inventory.subtractStock(quantity);
 
         Inventory saved = inventoryRepositoryPort.save(inventory);
 

@@ -23,6 +23,8 @@ import com.axiserp.inventory.application.dto.response.ProductInventoryResponse;
 import com.axiserp.inventory.infrastructure.adapters.in.web.dto.ApiResponse;
 import com.axiserp.inventory.infrastructure.adapters.in.web.dto.ApiResponse.PaginationMeta;
 import com.axiserp.inventory.ports.input.GetInventoryUseCase;
+import com.axiserp.inventory.ports.input.GetDepletedAlertsUseCase;
+import com.axiserp.inventory.ports.input.GetLowStockAlertsUseCase;
 import com.axiserp.inventory.ports.input.InitializeInventoryUseCase;
 import com.axiserp.inventory.ports.input.ListMovementsUseCase;
 import com.axiserp.inventory.ports.input.ListProductsUseCase;
@@ -42,6 +44,8 @@ public class InventoryController {
 
     private final InitializeInventoryUseCase initializeInventoryUseCase;
     private final ListProductsUseCase listProductsUseCase;
+    private final GetLowStockAlertsUseCase getLowStockAlertsUseCase;
+    private final GetDepletedAlertsUseCase getDepletedAlertsUseCase;
     private final GetInventoryUseCase getInventoryUseCase;
     private final ListMovementsUseCase listMovementsUseCase;
     private final RegisterEntryUseCase registerEntryUseCase;
@@ -63,10 +67,33 @@ public class InventoryController {
     @GetMapping("/products")
     public ResponseEntity<ApiResponse<List<ProductInventoryResponse>>> listProducts(
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        var result = listProductsUseCase.list(page - 1, size);
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) UUID categoryId) {
+        var result = listProductsUseCase.list(page - 1, size, categoryId);
         return ResponseEntity.ok(ApiResponse.paged(
                 result.getContent(), "Productos listados",
+                PaginationMeta.of(page, size, result.getTotal())));
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'INVENTARIO')")
+    @GetMapping("/alerts")
+    public ResponseEntity<ApiResponse<List<ProductInventoryResponse>>> getLowStockAlerts(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        var result = getLowStockAlertsUseCase.execute(page - 1, size);
+        return ResponseEntity.ok(ApiResponse.paged(
+                result.getContent(), "Alertas de stock minimo",
+                PaginationMeta.of(page, size, result.getTotal())));
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'INVENTARIO')")
+    @GetMapping("/alerts/depleted")
+    public ResponseEntity<ApiResponse<List<ProductInventoryResponse>>> getDepletedAlerts(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        var result = getDepletedAlertsUseCase.execute(page - 1, size);
+        return ResponseEntity.ok(ApiResponse.paged(
+                result.getContent(), "Alertas de agotamiento",
                 PaginationMeta.of(page, size, result.getTotal())));
     }
 
