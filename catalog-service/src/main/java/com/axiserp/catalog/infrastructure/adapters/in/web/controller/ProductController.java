@@ -25,6 +25,7 @@ import com.axiserp.catalog.infrastructure.adapters.in.web.dto.ApiResponse;
 import com.axiserp.catalog.infrastructure.adapters.in.web.dto.ApiResponse.PaginationMeta;
 import com.axiserp.catalog.ports.input.CreateProductUseCase;
 import com.axiserp.catalog.ports.input.DeactivateProductUseCase;
+import com.axiserp.catalog.ports.input.ReactivateProductUseCase;
 import com.axiserp.catalog.ports.input.GetProductUseCase;
 import com.axiserp.catalog.ports.input.ListProductsUseCase;
 import com.axiserp.catalog.ports.input.UpdateProductUseCase;
@@ -42,6 +43,7 @@ public class ProductController {
     private final ListProductsUseCase listProductsUseCase;
     private final UpdateProductUseCase updateProductUseCase;
     private final DeactivateProductUseCase deactivateProductUseCase;
+    private final ReactivateProductUseCase reactivateProductUseCase;
 
     @PreAuthorize("hasAnyRole('ADMIN', 'INVENTARIO')")
     @PostMapping
@@ -81,13 +83,27 @@ public class ProductController {
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<ProductResponse>> updateProduct(
             @PathVariable UUID id,
-            @Valid @RequestBody UpdateProductRequest request) {
-        return ResponseEntity.ok(ApiResponse.ok(updateProductUseCase.update(id, request), "Producto actualizado"));
+            @Valid @RequestBody UpdateProductRequest request,
+            Authentication authentication) {
+        UUID userId = UUID.fromString((String) authentication.getPrincipal());
+        return ResponseEntity.ok(ApiResponse.ok(updateProductUseCase.update(id, request, userId), "Producto actualizado"));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/desactivar")
-    public ResponseEntity<ApiResponse<ProductResponse>> deactivateProduct(@PathVariable UUID id) {
-        return ResponseEntity.ok(ApiResponse.ok(deactivateProductUseCase.deactivate(id), "Producto desactivado"));
+    public ResponseEntity<ApiResponse<ProductResponse>> deactivateProduct(
+            @PathVariable UUID id,
+            Authentication authentication) {
+        UUID userId = UUID.fromString((String) authentication.getPrincipal());
+        return ResponseEntity.ok(ApiResponse.ok(deactivateProductUseCase.deactivate(id, userId), "Producto desactivado"));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/{id}/activar")
+    public ResponseEntity<ApiResponse<ProductResponse>> reactivateProduct(
+            @PathVariable UUID id,
+            Authentication authentication) {
+        UUID userId = UUID.fromString((String) authentication.getPrincipal());
+        return ResponseEntity.ok(ApiResponse.ok(reactivateProductUseCase.reactivate(id, userId), "Producto activado"));
     }
 }

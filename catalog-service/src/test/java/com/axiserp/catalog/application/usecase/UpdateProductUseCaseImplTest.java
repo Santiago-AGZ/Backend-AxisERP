@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.axiserp.catalog.application.dto.request.UpdateProductRequest;
 import com.axiserp.catalog.application.dto.response.ProductResponse;
+import com.axiserp.catalog.application.service.CatalogAuditService;
 import com.axiserp.catalog.domain.exception.InvalidPriceException;
 import com.axiserp.catalog.domain.exception.ProductNotFoundException;
 import com.axiserp.catalog.domain.model.Category;
@@ -35,8 +36,13 @@ class UpdateProductUseCaseImplTest {
     @Mock
     private CategoryRepositoryPort categoryRepositoryPort;
 
+    @Mock
+    private CatalogAuditService catalogAuditService;
+
     @InjectMocks
     private UpdateProductUseCaseImpl updateProductUseCase;
+
+    private UUID userId;
 
     private UUID productId;
     private UUID categoryId;
@@ -45,6 +51,7 @@ class UpdateProductUseCaseImplTest {
     void setUp() {
         productId = UUID.randomUUID();
         categoryId = UUID.randomUUID();
+        userId = UUID.randomUUID();
     }
 
     @Test
@@ -75,13 +82,13 @@ class UpdateProductUseCaseImplTest {
                 .updatedAt(LocalDateTime.now())
                 .build();
 
-        UpdateProductRequest request = new UpdateProductRequest("New Name", null, null, new BigDecimal("25.00"));
+        UpdateProductRequest request = new UpdateProductRequest("New Name", null, null, null, new BigDecimal("25.00"));
 
         when(productRepositoryPort.findById(productId)).thenReturn(Optional.of(existing));
         when(categoryRepositoryPort.findById(categoryId)).thenReturn(Optional.of(category));
         when(productRepositoryPort.save(any(Product.class))).thenReturn(saved);
 
-        ProductResponse response = updateProductUseCase.update(productId, request);
+        ProductResponse response = updateProductUseCase.update(productId, request, userId);
 
         assertNotNull(response);
         assertEquals("New Name", response.getName());
@@ -94,7 +101,7 @@ class UpdateProductUseCaseImplTest {
         when(productRepositoryPort.findById(productId)).thenReturn(Optional.empty());
 
         assertThrows(ProductNotFoundException.class,
-                () -> updateProductUseCase.update(productId, new UpdateProductRequest()));
+                () -> updateProductUseCase.update(productId, new UpdateProductRequest(), userId));
     }
 
     @Test
@@ -114,8 +121,8 @@ class UpdateProductUseCaseImplTest {
 
         when(productRepositoryPort.findById(productId)).thenReturn(Optional.of(existing));
 
-        UpdateProductRequest request = new UpdateProductRequest(null, null, null, new BigDecimal("10.00"));
+        UpdateProductRequest request = new UpdateProductRequest(null, null, null, null, new BigDecimal("10.00"));
 
-        assertThrows(InvalidPriceException.class, () -> updateProductUseCase.update(productId, request));
+        assertThrows(InvalidPriceException.class, () -> updateProductUseCase.update(productId, request, userId));
     }
 }

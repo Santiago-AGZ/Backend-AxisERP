@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.axiserp.catalog.application.dto.request.CreateCategoryRequest;
 import com.axiserp.catalog.application.dto.response.CategoryResponse;
+import com.axiserp.catalog.application.service.CatalogAuditService;
 import com.axiserp.catalog.domain.exception.DuplicateCategoryException;
 import com.axiserp.catalog.domain.model.Category;
 import com.axiserp.catalog.domain.model.Category.CategoryStatus;
@@ -26,6 +27,9 @@ class CreateCategoryUseCaseImplTest {
 
     @Mock
     private CategoryRepositoryPort categoryRepositoryPort;
+
+    @Mock
+    private CatalogAuditService catalogAuditService;
 
     @InjectMocks
     private CreateCategoryUseCaseImpl createCategoryUseCase;

@@ -1,6 +1,7 @@
 package com.axiserp.catalog.domain.model;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -20,6 +21,7 @@ public class Product {
     private UUID id;
     private String name;
     private String codigo;
+    private String description;
     private UUID categoryId;
     private BigDecimal purchasePrice;
     private BigDecimal salePrice;
@@ -42,5 +44,15 @@ public class Product {
 
     public boolean hasValidMargin() {
         return salePrice.compareTo(purchasePrice) >= 0;
+    }
+
+    public BigDecimal getMargin() {
+        return salePrice.subtract(purchasePrice);
+    }
+
+    public BigDecimal getMarginPercentage() {
+        return purchasePrice.compareTo(BigDecimal.ZERO) > 0
+                ? getMargin().divide(purchasePrice, 4, RoundingMode.HALF_UP).multiply(new BigDecimal("100"))
+                : BigDecimal.ZERO;
     }
 }

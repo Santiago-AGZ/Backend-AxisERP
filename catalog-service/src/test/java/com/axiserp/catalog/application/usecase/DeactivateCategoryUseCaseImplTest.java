@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.axiserp.catalog.application.dto.response.CategoryResponse;
+import com.axiserp.catalog.application.service.CatalogAuditService;
 import com.axiserp.catalog.domain.exception.CategoryHasProductsException;
 import com.axiserp.catalog.domain.exception.CategoryNotFoundException;
 import com.axiserp.catalog.domain.model.Category;
@@ -31,6 +32,9 @@ class DeactivateCategoryUseCaseImplTest {
 
     @Mock
     private ProductRepositoryPort productRepositoryPort;
+
+    @Mock
+    private CatalogAuditService catalogAuditService;
 
     @InjectMocks
     private DeactivateCategoryUseCaseImpl deactivateCategoryUseCase;

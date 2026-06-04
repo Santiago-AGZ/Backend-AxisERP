@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.axiserp.catalog.application.dto.request.UpdateCategoryRequest;
 import com.axiserp.catalog.application.dto.response.CategoryResponse;
+import com.axiserp.catalog.application.service.CatalogAuditService;
 import com.axiserp.catalog.domain.exception.CategoryNotFoundException;
 import com.axiserp.catalog.domain.exception.DuplicateCategoryException;
 import com.axiserp.catalog.domain.factory.CategoryFactory;
@@ -25,6 +26,7 @@ public class UpdateCategoryUseCaseImpl implements UpdateCategoryUseCase {
     private static final Logger log = LoggerFactory.getLogger(UpdateCategoryUseCaseImpl.class);
 
     private final CategoryRepositoryPort categoryRepositoryPort;
+    private final CatalogAuditService catalogAuditService;
 
     @Override
     @Transactional
@@ -60,6 +62,7 @@ public class UpdateCategoryUseCaseImpl implements UpdateCategoryUseCase {
         Category saved = categoryRepositoryPort.save(updated);
 
         log.info("category_updated id={} name={} updatedBy={}", saved.getId(), saved.getName(), updatedBy);
+        catalogAuditService.log("UPDATE", "CATEGORY", saved.getId(), updatedBy, "Categoria actualizada: " + saved.getName());
 
         return toResponse(saved);
     }

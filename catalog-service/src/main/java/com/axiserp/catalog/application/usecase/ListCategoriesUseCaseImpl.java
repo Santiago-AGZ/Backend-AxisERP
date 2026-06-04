@@ -35,6 +35,19 @@ public class ListCategoriesUseCaseImpl implements ListCategoriesUseCase {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<CategoryResponse> findByFilters(String search, boolean includeInactive, int page, int size) {
+        return categoryRepositoryPort.findByFilters(search, includeInactive, page, size).stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    @Override
+    public long countByFilters(String search, boolean includeInactive) {
+        return categoryRepositoryPort.countByFilters(search, includeInactive);
+    }
+
+    @Override
     public long countAll() {
         return categoryRepositoryPort.countAll();
     }

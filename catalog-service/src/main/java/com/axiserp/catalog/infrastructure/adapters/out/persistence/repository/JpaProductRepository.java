@@ -23,7 +23,7 @@ public interface JpaProductRepository extends JpaRepository<ProductEntity, UUID>
 
     @Query(value = """
             SELECT * FROM products
-            WHERE (:search IS NULL OR to_tsvector('spanish', name) @@ plainto_tsquery('spanish', :search))
+            WHERE (:search IS NULL OR name ILIKE CONCAT('%', :search, '%'))
               AND (:codigo IS NULL OR codigo = :codigo)
               AND (:categoryId IS NULL OR CAST(category_id AS VARCHAR) = :categoryId)
               AND (:includeInactive = true OR status = 'ACTIVO')
@@ -40,7 +40,7 @@ public interface JpaProductRepository extends JpaRepository<ProductEntity, UUID>
 
     @Query(value = """
             SELECT COUNT(*) FROM products
-            WHERE (:search IS NULL OR to_tsvector('spanish', name) @@ plainto_tsquery('spanish', :search))
+            WHERE (:search IS NULL OR name ILIKE CONCAT('%', :search, '%'))
               AND (:codigo IS NULL OR codigo = :codigo)
               AND (:categoryId IS NULL OR CAST(category_id AS VARCHAR) = :categoryId)
               AND (:includeInactive = true OR status = 'ACTIVO')
