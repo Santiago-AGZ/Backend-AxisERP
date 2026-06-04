@@ -29,6 +29,23 @@ public class Inventory {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    public void addStock(int quantity) {
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("La cantidad debe ser mayor que cero");
+        }
+        this.currentStock += quantity;
+    }
+
+    public void subtractStock(int quantity) {
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("La cantidad debe ser mayor que cero");
+        }
+        if (!canExit(quantity)) {
+            throw new com.axiserp.inventory.domain.exception.InsufficientStockException(quantity, this.currentStock);
+        }
+        this.currentStock -= quantity;
+    }
+
     public boolean isLowStock() {
         return currentStock > 0 && currentStock <= minStock;
     }
