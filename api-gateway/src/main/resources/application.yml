@@ -1,0 +1,42 @@
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin
+
+      routes:
+        - id: auth-service
+          uri: http://auth-service:8081
+          predicates:
+            - Path=/api/v1/auth/**,/api/v1/usuarios/**,/api/v1/audit-log/**,/swagger-ui/**,/v3/api-docs/**,/actuator/health,/actuator/info
+
+        - id: catalog-service
+          uri: http://catalog-service:8082
+          predicates:
+            - Path=/api/v1/productos/**,/api/v1/categorias/**
+
+        - id: inventory-service
+          uri: http://inventory-service:8083
+          predicates:
+            - Path=/api/v1/inventory/**
+
+        - id: sales-service
+          uri: http://sales-service:8084
+          predicates:
+            - Path=/api/v1/sales/**,/api/v1/customers/**,/api/v1/invoices/**
+
+        - id: purchase-service
+          uri: http://purchase-service:8086
+          predicates:
+            - Path=/api/v1/purchases/**,/api/v1/suppliers/**
+
+        - id: report-service
+          uri: http://report-service:8085
+          predicates:
+            - Path=/api/v1/reports/**
+
+server:
+  port: 8080

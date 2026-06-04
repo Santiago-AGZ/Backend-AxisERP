@@ -6,8 +6,17 @@ services:
     restart: unless-stopped
     ports:
       - "8081:8081"
-    env_file:
-      - .env
+    environment:
+      - SPRING_DATASOURCE_URL=${AUTH_DB_URL}
+      - SPRING_DATASOURCE_USERNAME=${AUTH_DB_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${AUTH_DB_PASSWORD}
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_JWT_ISSUER=${SUPABASE_JWT_ISSUER}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - JPA_DDL_AUTO=update
+      - JWT_SECRET=${JWT_SECRET}
+      - INTERNAL_API_KEY=${INTERNAL_API_KEY}
     networks:
       - axiserp-network
 
@@ -17,8 +26,16 @@ services:
     restart: unless-stopped
     ports:
       - "8082:8082"
-    env_file:
-      - .env
+    environment:
+      - SPRING_DATASOURCE_URL=${CATALOG_DB_URL}
+      - SPRING_DATASOURCE_USERNAME=${CATALOG_DB_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${CATALOG_DB_PASSWORD}
+      - JPA_DDL_AUTO=update
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_JWT_ISSUER=${SUPABASE_JWT_ISSUER}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - INTERNAL_API_KEY=${INTERNAL_API_KEY}
+      - SALES_SERVICE_URL=http://sales-service:8084
     networks:
       - axiserp-network
 
@@ -28,8 +45,18 @@ services:
     restart: unless-stopped
     ports:
       - "8083:8083"
-    env_file:
-      - .env
+    environment:
+      - SPRING_DATASOURCE_URL=${INVENTORY_DB_URL}
+      - SPRING_DATASOURCE_USERNAME=${INVENTORY_DB_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${INVENTORY_DB_PASSWORD}
+      - JPA_DDL_AUTO=${JPA_DDL_AUTO}
+      - CATALOG_SERVICE_URL=http://catalog-service:8082
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_JWT_ISSUER=${SUPABASE_JWT_ISSUER}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - INTERNAL_API_KEY=${INTERNAL_API_KEY}
+    depends_on:
+      - catalog-service
     networks:
       - axiserp-network
 
@@ -39,8 +66,17 @@ services:
     restart: unless-stopped
     ports:
       - "8086:8086"
-    env_file:
-      - .env
+    environment:
+      - SPRING_DATASOURCE_URL=${PURCHASE_DB_URL}
+      - SPRING_DATASOURCE_USERNAME=${PURCHASE_DB_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${PURCHASE_DB_PASSWORD}
+      - JPA_DDL_AUTO=${JPA_DDL_AUTO}
+      - INVENTORY_SERVICE_URL=http://inventory-service:8083
+      - CATALOG_SERVICE_URL=http://catalog-service:8082
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_JWT_ISSUER=${SUPABASE_JWT_ISSUER}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - INTERNAL_API_KEY=${INTERNAL_API_KEY}
     networks:
       - axiserp-network
 
@@ -50,8 +86,20 @@ services:
     restart: unless-stopped
     ports:
       - "8084:8084"
-    env_file:
-      - .env
+    environment:
+      - SPRING_DATASOURCE_URL=${SALES_DB_URL}
+      - SPRING_DATASOURCE_USERNAME=${SALES_DB_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${SALES_DB_PASSWORD}
+      - JPA_DDL_AUTO=update
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_JWT_ISSUER=${SUPABASE_JWT_ISSUER}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - CATALOG_SERVICE_URL=http://catalog-service:8082
+      - INVENTORY_SERVICE_URL=http://inventory-service:8083
+      - INTERNAL_API_KEY=${INTERNAL_API_KEY}
+    depends_on:
+      - catalog-service
+      - inventory-service
     networks:
       - axiserp-network
 
@@ -61,8 +109,22 @@ services:
     restart: unless-stopped
     ports:
       - "8085:8085"
-    env_file:
-      - .env
+    environment:
+      - SPRING_DATASOURCE_URL=${REPORT_DB_URL}
+      - SPRING_DATASOURCE_USERNAME=${REPORT_DB_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${REPORT_DB_PASSWORD}
+      - JPA_DDL_AUTO=${JPA_DDL_AUTO}
+      - CATALOG_SERVICE_URL=http://catalog-service:8082
+      - SALES_SERVICE_URL=http://sales-service:8084
+      - PURCHASE_SERVICE_URL=http://purchase-service:8086
+      - INVENTORY_SERVICE_URL=http://inventory-service:8083
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_JWT_ISSUER=${SUPABASE_JWT_ISSUER}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - INTERNAL_API_KEY=${INTERNAL_API_KEY}
+    depends_on:
+      - sales-service
+      - purchase-service
     networks:
       - axiserp-network
 
@@ -72,6 +134,14 @@ services:
     restart: unless-stopped
     ports:
       - "8080:8080"
+    environment:
+      - AUTH_SERVICE_URL=http://auth-service:8081
+      - CATALOG_SERVICE_URL=http://catalog-service:8082
+      - INVENTORY_SERVICE_URL=http://inventory-service:8083
+      - SALES_SERVICE_URL=http://sales-service:8084
+      - PURCHASE_SERVICE_URL=http://purchase-service:8086
+      - REPORT_SERVICE_URL=http://report-service:8085
+      - SUPABASE_URL=${SUPABASE_URL}
     depends_on:
       - auth-service
       - catalog-service
