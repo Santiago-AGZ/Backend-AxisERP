@@ -28,6 +28,7 @@ import com.axiserp.auth.infrastructure.config.SecurityConfig;
 import com.axiserp.auth.ports.input.RefreshTokenUseCase;
 import com.axiserp.auth.ports.output.RoleRepositoryPort;
 import com.axiserp.auth.ports.output.SupabaseAuthPort;
+import com.axiserp.auth.ports.output.SupabaseAuthPort.RefreshTokenResponse;
 import com.axiserp.auth.ports.output.TokenBlacklistRepositoryPort;
 import com.axiserp.auth.ports.output.UserRepositoryPort;
 
@@ -77,6 +78,9 @@ class TokenControllerTest {
 
         when(tokenBlacklistService.revoke(anyString(), any(UUID.class), any()))
             .thenReturn(null);
+
+        var refreshResponse = new RefreshTokenResponse("new-access-token", "new-refresh-token", 3600);
+        when(supabaseAuthPort.refreshToken(anyString())).thenReturn(refreshResponse);
     }
 
     @Test
@@ -102,26 +106,11 @@ class TokenControllerTest {
     @Test
     @DisplayName("Refresh token endpoint should return 200 with valid token response")
     void testRefreshTokenSuccess() throws Exception {
-        LoginResponse loginResponse = LoginResponse.builder()
-                .accessToken("new-access-token")
-                .refreshToken("new-refresh-token")
-                .role("ADMIN")
-                .name("Test User")
-                .build();
-
-        when(refreshTokenUseCase.refresh(anyString(), anyString(), anyString()))
-                .thenReturn(loginResponse);
-
         String refreshRequest = "{\"refreshToken\":\"valid-refresh-token\"}";
 
         mockMvc.perform(post("/api/v1/auth/refresh")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(refreshRequest)
-                .with(jwt()
-                        .jwt(jwt -> jwt
-                                .claim("sub", userId.toString())
-                                .claim("jti", jti)
-                                .expiresAt(expiresAt))))
+                .content(refreshRequest))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.accessToken").value("new-access-token"));
     }
