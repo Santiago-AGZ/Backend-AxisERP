@@ -50,7 +50,9 @@ public class PurchaseRepositoryAdapter implements PurchaseRepositoryPort {
 
     @Override
     public List<Purchase> findAll(String search, String status, int page, int size) {
-        return jpaPurchaseRepository.findByFilters(search, status, size, page * size)
+        String searchParam = (search != null && !search.isBlank()) ? search : null;
+        String statusParam = (status != null && !status.isBlank()) ? status : null;
+        return jpaPurchaseRepository.findByFilters(searchParam, statusParam, size, page * size)
                 .stream()
                 .map(this::toDomain)
                 .toList();
@@ -63,7 +65,9 @@ public class PurchaseRepositoryAdapter implements PurchaseRepositoryPort {
 
     @Override
     public long countByFilters(String search, String status) {
-        return jpaPurchaseRepository.countByFilters(search, status);
+        String searchParam = (search != null && !search.isBlank()) ? search : null;
+        String statusParam = (status != null && !status.isBlank()) ? status : null;
+        return jpaPurchaseRepository.countByFilters(searchParam, statusParam);
     }
 
     private Purchase toDomain(PurchaseEntity entity) {

@@ -12,6 +12,7 @@ public interface SupplierRepositoryPort {
     Optional<Supplier> findByNit(String nit);
     boolean existsByCodigo(String codigo);
     boolean existsByNit(String nit);
+    boolean existsByNitAndIdNot(String nit, UUID id);
     Supplier save(Supplier supplier);
     List<Supplier> findAllActive();
     List<Supplier> findAllActive(String search, int page, int size);

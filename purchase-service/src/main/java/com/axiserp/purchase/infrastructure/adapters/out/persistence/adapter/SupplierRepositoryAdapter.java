@@ -46,6 +46,11 @@ public class SupplierRepositoryAdapter implements SupplierRepositoryPort {
     }
 
     @Override
+    public boolean existsByNitAndIdNot(String nit, UUID id) {
+        return jpaSupplierRepository.existsByNitAndIdNot(nit, id);
+    }
+
+    @Override
     public Supplier save(Supplier supplier) {
         return toDomain(jpaSupplierRepository.save(toEntity(supplier)));
     }
@@ -59,7 +64,8 @@ public class SupplierRepositoryAdapter implements SupplierRepositoryPort {
 
     @Override
     public List<Supplier> findAllActive(String search, int page, int size) {
-        return jpaSupplierRepository.findBySearch(search, size, page * size)
+        String searchParam = (search != null && !search.isBlank()) ? search : null;
+        return jpaSupplierRepository.findBySearch(searchParam, size, page * size)
                 .stream().map(this::toDomain).toList();
     }
 
@@ -70,7 +76,8 @@ public class SupplierRepositoryAdapter implements SupplierRepositoryPort {
 
     @Override
     public long countActiveBySearch(String search) {
-        return jpaSupplierRepository.countBySearch(search);
+        String searchParam = (search != null && !search.isBlank()) ? search : null;
+        return jpaSupplierRepository.countBySearch(searchParam);
     }
 
     @Override
