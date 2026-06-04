@@ -116,7 +116,12 @@ class TokenControllerTest {
 
         mockMvc.perform(post("/api/v1/auth/refresh")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(refreshRequest))
+                .content(refreshRequest)
+                .with(jwt()
+                        .jwt(jwt -> jwt
+                                .claim("sub", userId.toString())
+                                .claim("jti", jti)
+                                .expiresAt(expiresAt))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.accessToken").value("new-access-token"));
     }
