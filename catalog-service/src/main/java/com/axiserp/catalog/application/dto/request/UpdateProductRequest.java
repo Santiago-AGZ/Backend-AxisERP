@@ -15,6 +15,8 @@ public class UpdateProductRequest {
 
     private String name;
 
+    private String description;
+
     private UUID categoryId;
 
     @DecimalMin(value = "0.01", message = "El precio de compra debe ser mayor a 0")

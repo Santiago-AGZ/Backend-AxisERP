@@ -4,6 +4,6 @@ import java.util.UUID;
 
 import com.axiserp.catalog.application.dto.response.ProductResponse;
 
-public interface DeactivateProductUseCase {
-    ProductResponse deactivate(UUID id, UUID userId);
+public interface ReactivateProductUseCase {
+    ProductResponse reactivate(UUID id, UUID userId);
 }

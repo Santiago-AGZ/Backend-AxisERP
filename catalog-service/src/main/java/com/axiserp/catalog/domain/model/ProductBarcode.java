@@ -20,6 +20,7 @@ public class ProductBarcode {
     private UUID productId;
     private String barcode;
     private BarcodeType barcodeType;
+    private boolean primary;
     private LocalDateTime createdAt;
 
     public enum BarcodeType {

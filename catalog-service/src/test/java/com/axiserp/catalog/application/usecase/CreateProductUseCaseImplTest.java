@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.axiserp.catalog.application.dto.request.CreateProductRequest;
 import com.axiserp.catalog.application.dto.response.ProductResponse;
+import com.axiserp.catalog.application.service.CatalogAuditService;
 import com.axiserp.catalog.domain.exception.DuplicateCodigoException;
 import com.axiserp.catalog.domain.exception.InvalidPriceException;
 import com.axiserp.catalog.domain.model.Category;
@@ -34,6 +35,9 @@ class CreateProductUseCaseImplTest {
 
     @Mock
     private CategoryRepositoryPort categoryRepositoryPort;
+
+    @Mock
+    private CatalogAuditService catalogAuditService;
 
     @InjectMocks
     private CreateProductUseCaseImpl createProductUseCase;
@@ -51,7 +55,7 @@ class CreateProductUseCaseImplTest {
     @DisplayName("Should create product successfully")
     void create_success() {
         CreateProductRequest request = new CreateProductRequest(
-                "Test Product", "TEST001", categoryId,
+                "Test Product", "TEST001", null, categoryId,
                 new BigDecimal("10.00"), new BigDecimal("20.00"));
 
         Category category = Category.builder().id(categoryId).name("Test Category").status(Category.CategoryStatus.ACTIVA).build();
@@ -85,7 +89,7 @@ class CreateProductUseCaseImplTest {
     @DisplayName("Should throw DuplicateCodigoException when codigo exists")
     void create_duplicateCodigo() {
         CreateProductRequest request = new CreateProductRequest(
-                "Test Product", "EXISTING", categoryId,
+                "Test Product", "EXISTING", null, categoryId,
                 new BigDecimal("10.00"), new BigDecimal("20.00"));
 
         when(productRepositoryPort.existsByCodigo("EXISTING")).thenReturn(true);
@@ -98,7 +102,7 @@ class CreateProductUseCaseImplTest {
     @DisplayName("Should throw InvalidPriceException when salePrice < purchasePrice")
     void create_invalidPrice() {
         CreateProductRequest request = new CreateProductRequest(
-                "Test Product", "TEST002", categoryId,
+                "Test Product", "TEST002", null, categoryId,
                 new BigDecimal("20.00"), new BigDecimal("10.00"));
 
         when(productRepositoryPort.existsByCodigo("TEST002")).thenReturn(false);
@@ -110,7 +114,7 @@ class CreateProductUseCaseImplTest {
     @DisplayName("Should throw IllegalArgumentException when category not found")
     void create_invalidCategory() {
         CreateProductRequest request = new CreateProductRequest(
-                "Test Product", "TEST003", categoryId,
+                "Test Product", "TEST003", null, categoryId,
                 new BigDecimal("10.00"), new BigDecimal("20.00"));
 
         when(productRepositoryPort.existsByCodigo("TEST003")).thenReturn(false);

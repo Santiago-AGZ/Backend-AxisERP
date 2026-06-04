@@ -46,7 +46,9 @@ public class ProductRepositoryAdapter implements ProductRepositoryPort {
     public List<Product> findByFilters(String search, String codigo, UUID categoryId, boolean includeInactive, int page, int size) {
         int offset = page * size;
         String categoryIdStr = categoryId != null ? categoryId.toString() : null;
-        return jpaProductRepository.findByFilters(search, codigo, categoryIdStr, includeInactive, size, offset)
+        String searchParam = (search != null && !search.isBlank()) ? search : null;
+        String codigoParam = (codigo != null && !codigo.isBlank()) ? codigo : null;
+        return jpaProductRepository.findByFilters(searchParam, codigoParam, categoryIdStr, includeInactive, size, offset)
                 .stream()
                 .map(this::toDomain)
                 .toList();
@@ -55,7 +57,9 @@ public class ProductRepositoryAdapter implements ProductRepositoryPort {
     @Override
     public long countByFilters(String search, String codigo, UUID categoryId, boolean includeInactive) {
         String categoryIdStr = categoryId != null ? categoryId.toString() : null;
-        return jpaProductRepository.countByFilters(search, codigo, categoryIdStr, includeInactive);
+        String searchParam = (search != null && !search.isBlank()) ? search : null;
+        String codigoParam = (codigo != null && !codigo.isBlank()) ? codigo : null;
+        return jpaProductRepository.countByFilters(searchParam, codigoParam, categoryIdStr, includeInactive);
     }
 
     @Override
@@ -73,6 +77,7 @@ public class ProductRepositoryAdapter implements ProductRepositoryPort {
                 .id(entity.getId())
                 .name(entity.getName())
                 .codigo(entity.getCodigo())
+                .description(entity.getDescription())
                 .categoryId(entity.getCategoryId())
                 .purchasePrice(entity.getPurchasePrice())
                 .salePrice(entity.getSalePrice())
@@ -88,6 +93,7 @@ public class ProductRepositoryAdapter implements ProductRepositoryPort {
                 .id(domain.getId())
                 .name(domain.getName())
                 .codigo(domain.getCodigo())
+                .description(domain.getDescription())
                 .categoryId(domain.getCategoryId())
                 .purchasePrice(domain.getPurchasePrice())
                 .salePrice(domain.getSalePrice())
