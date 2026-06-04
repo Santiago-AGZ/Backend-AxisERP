@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.axiserp.sales.application.dto.response.SaleResponse;
+import com.axiserp.sales.application.service.AuditService;
 import com.axiserp.sales.domain.exception.CustomerNotFoundException;
 import com.axiserp.sales.domain.exception.InsufficientStockException;
 import com.axiserp.sales.domain.exception.SaleNotFoundException;
@@ -36,6 +37,7 @@ public class ConfirmSaleUseCaseImpl implements ConfirmSaleUseCase {
     private final CustomerRepositoryPort customerRepositoryPort;
     private final InvoiceRepositoryPort invoiceRepositoryPort;
     private final InventoryServicePort inventoryServicePort;
+    private final AuditService auditService;
 
     @Override
     @Transactional
@@ -89,6 +91,8 @@ public class ConfirmSaleUseCaseImpl implements ConfirmSaleUseCase {
                 .build();
 
         Invoice savedInvoice = invoiceRepositoryPort.save(invoice);
+        auditService.logSaleConfirmed(saved.getId(), null, null,
+                String.format("invoiceNumber=%d total=%s", savedInvoice.getInvoiceNumber(), saved.getTotal()));
         log.info("sale_confirmed id={} invoiceNumber={}", saved.getId(), savedInvoice.getInvoiceNumber());
 
         return GetSaleUseCaseImpl.toResponse(saved);

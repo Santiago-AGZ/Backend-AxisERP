@@ -7,5 +7,5 @@ import com.axiserp.sales.application.dto.response.SaleResponse;
 
 public interface CreateSaleUseCase {
 
-    SaleResponse create(CreateSaleRequest request, UUID createdBy);
+    SaleResponse create(CreateSaleRequest request, UUID createdBy, boolean isAdmin);
 }

@@ -18,6 +18,8 @@ public interface CustomerRepositoryPort {
 
     boolean existsByEmail(String email);
 
+    boolean existsByEmailAndIdNot(String email, UUID id);
+
     Customer save(Customer customer);
 
     List<Customer> findByFilters(String search, boolean includeInactive, int page, int size);

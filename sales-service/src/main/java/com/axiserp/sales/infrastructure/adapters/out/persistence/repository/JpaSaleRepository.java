@@ -15,15 +15,22 @@ import com.axiserp.sales.infrastructure.adapters.out.persistence.entity.SaleEnti
 public interface JpaSaleRepository extends JpaRepository<SaleEntity, UUID> {
 
     @Query("""
-            SELECT s FROM SaleEntity s
+            SELECT DISTINCT s FROM SaleEntity s
+            LEFT JOIN s.items i
             WHERE (:customerId IS NULL OR s.customerId = :customerId)
               AND (:status IS NULL OR s.status = :status)
+              AND (:productId IS NULL OR i.productId = :productId)
             ORDER BY s.updatedAt DESC
             """)
     List<SaleEntity> findByFilters(
             @Param("customerId") UUID customerId,
             @Param("status") SaleStatus status,
+            @Param("productId") UUID productId,
             Pageable pageable);
 
     Optional<SaleEntity> findBySaleNumber(String saleNumber);
+
+    boolean existsByCustomerIdAndStatusIn(UUID customerId, List<SaleStatus> statuses);
+
+    List<SaleEntity> findByCustomerIdOrderByCreatedAtDesc(UUID customerId);
 }
