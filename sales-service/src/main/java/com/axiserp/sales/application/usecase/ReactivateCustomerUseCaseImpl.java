@@ -12,36 +12,34 @@ import com.axiserp.sales.application.dto.response.CustomerResponse;
 import com.axiserp.sales.domain.exception.CustomerNotFoundException;
 import com.axiserp.sales.domain.model.Customer;
 import com.axiserp.sales.domain.model.CustomerStatus;
-import com.axiserp.sales.ports.input.DeactivateCustomerUseCase;
+import com.axiserp.sales.ports.input.ReactivateCustomerUseCase;
 import com.axiserp.sales.ports.output.CustomerRepositoryPort;
-import com.axiserp.sales.ports.output.SaleRepositoryPort;
 
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class DeactivateCustomerUseCaseImpl implements DeactivateCustomerUseCase {
+public class ReactivateCustomerUseCaseImpl implements ReactivateCustomerUseCase {
 
-    private static final Logger log = LoggerFactory.getLogger(DeactivateCustomerUseCaseImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(ReactivateCustomerUseCaseImpl.class);
 
     private final CustomerRepositoryPort customerRepositoryPort;
-    private final SaleRepositoryPort saleRepositoryPort;
 
     @Override
     @Transactional
-    public CustomerResponse deactivate(UUID id) {
+    public CustomerResponse reactivate(UUID id) {
         Customer customer = customerRepositoryPort.findById(id)
                 .orElseThrow(() -> new CustomerNotFoundException(id));
 
-        if (saleRepositoryPort.existsPendingByCustomerId(id)) {
-            throw new IllegalStateException("No se puede desactivar el cliente porque tiene ventas pendientes");
+        if (customer.getStatus() == CustomerStatus.ACTIVO) {
+            throw new IllegalStateException("El cliente ya esta activo");
         }
 
-        customer.setStatus(CustomerStatus.INACTIVO);
+        customer.setStatus(CustomerStatus.ACTIVO);
         customer.setUpdatedAt(LocalDateTime.now());
 
         Customer saved = customerRepositoryPort.save(customer);
-        log.info("customer_deactivated codigo={}", saved.getCodigo());
+        log.info("customer_reactivated codigo={}", saved.getCodigo());
         return CreateCustomerUseCaseImpl.toResponse(saved);
     }
 }

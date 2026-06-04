@@ -11,19 +11,25 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.axiserp.sales.application.dto.request.CreateCustomerRequest;
+import com.axiserp.sales.application.dto.request.UpdateCustomerRequest;
 import com.axiserp.sales.application.dto.response.CustomerResponse;
+import com.axiserp.sales.application.dto.response.SaleResponse;
 import com.axiserp.sales.infrastructure.adapters.in.web.dto.ApiResponse;
 import com.axiserp.sales.infrastructure.adapters.in.web.dto.ApiResponse.PaginationMeta;
 import com.axiserp.sales.ports.input.CreateCustomerUseCase;
 import com.axiserp.sales.ports.input.DeactivateCustomerUseCase;
+import com.axiserp.sales.ports.input.ReactivateCustomerUseCase;
+import com.axiserp.sales.ports.input.GetCustomerHistoryUseCase;
 import com.axiserp.sales.ports.input.GetCustomerUseCase;
 import com.axiserp.sales.ports.input.ListCustomersUseCase;
+import com.axiserp.sales.ports.input.UpdateCustomerUseCase;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +43,9 @@ public class CustomerController {
     private final GetCustomerUseCase getCustomerUseCase;
     private final ListCustomersUseCase listCustomersUseCase;
     private final DeactivateCustomerUseCase deactivateCustomerUseCase;
+    private final ReactivateCustomerUseCase reactivateCustomerUseCase;
+    private final UpdateCustomerUseCase updateCustomerUseCase;
+    private final GetCustomerHistoryUseCase getCustomerHistoryUseCase;
 
     @PreAuthorize("hasAnyRole('ADMIN', 'VENDEDOR')")
     @PostMapping
@@ -77,5 +86,28 @@ public class CustomerController {
     public ResponseEntity<ApiResponse<CustomerResponse>> deactivateCustomer(@PathVariable UUID id) {
         CustomerResponse response = deactivateCustomerUseCase.deactivate(id);
         return ResponseEntity.ok(ApiResponse.ok(response, "Cliente desactivado"));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/{id}/reactivate")
+    public ResponseEntity<ApiResponse<CustomerResponse>> reactivateCustomer(@PathVariable UUID id) {
+        CustomerResponse response = reactivateCustomerUseCase.reactivate(id);
+        return ResponseEntity.ok(ApiResponse.ok(response, "Cliente activado"));
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'VENDEDOR')")
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<CustomerResponse>> updateCustomer(
+            @PathVariable UUID id,
+            @Valid @RequestBody UpdateCustomerRequest request) {
+        CustomerResponse response = updateCustomerUseCase.execute(id, request);
+        return ResponseEntity.ok(ApiResponse.ok(response, "Cliente actualizado exitosamente"));
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'VENDEDOR')")
+    @GetMapping("/{customerId}/history")
+    public ResponseEntity<ApiResponse<List<SaleResponse>>> getCustomerHistory(@PathVariable UUID customerId) {
+        List<SaleResponse> data = getCustomerHistoryUseCase.execute(customerId);
+        return ResponseEntity.ok(ApiResponse.ok(data, "Historial de compras del cliente"));
     }
 }

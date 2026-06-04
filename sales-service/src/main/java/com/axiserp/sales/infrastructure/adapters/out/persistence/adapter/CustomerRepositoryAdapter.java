@@ -48,6 +48,11 @@ public class CustomerRepositoryAdapter implements CustomerRepositoryPort {
     }
 
     @Override
+    public boolean existsByEmailAndIdNot(String email, UUID id) {
+        return jpaCustomerRepository.existsByEmailAndIdNot(email, id);
+    }
+
+    @Override
     public Customer save(Customer customer) {
         return toDomain(jpaCustomerRepository.save(toEntity(customer)));
     }

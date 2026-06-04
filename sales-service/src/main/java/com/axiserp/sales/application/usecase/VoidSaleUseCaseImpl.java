@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.axiserp.sales.application.dto.response.SaleResponse;
+import com.axiserp.sales.application.service.AuditService;
 import com.axiserp.sales.domain.exception.SaleNotFoundException;
 import com.axiserp.sales.domain.exception.SaleNotModifiableException;
 import com.axiserp.sales.domain.model.Sale;
@@ -29,6 +30,7 @@ public class VoidSaleUseCaseImpl implements VoidSaleUseCase {
 
     private final SaleRepositoryPort saleRepositoryPort;
     private final InventoryServicePort inventoryServicePort;
+    private final AuditService auditService;
 
     @Override
     @Transactional
@@ -70,6 +72,8 @@ public class VoidSaleUseCaseImpl implements VoidSaleUseCase {
         sale.setUpdatedAt(LocalDateTime.now());
 
         Sale saved = saleRepositoryPort.save(sale);
+        auditService.logSaleVoided(saved.getId(), null, null,
+                String.format("saleNumber=%s status=%s", saved.getSaleNumber(), saved.getStatus()));
         log.info("sale_voided id={}", saved.getId());
 
         return GetSaleUseCaseImpl.toResponse(saved);

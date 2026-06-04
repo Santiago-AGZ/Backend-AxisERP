@@ -5,7 +5,6 @@ import java.util.UUID;
 
 import com.axiserp.sales.application.dto.response.SaleResponse;
 
-public interface ListSalesUseCase {
-
-    List<SaleResponse> list(UUID customerId, String status, UUID productId, int page, int size);
+public interface GetCustomerHistoryUseCase {
+    List<SaleResponse> execute(UUID customerId);
 }

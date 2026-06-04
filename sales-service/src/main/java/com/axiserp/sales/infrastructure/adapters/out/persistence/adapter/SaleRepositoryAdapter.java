@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.axiserp.sales.domain.model.SaleStatus;
+
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
@@ -38,10 +40,25 @@ public class SaleRepositoryAdapter implements SaleRepositoryPort {
     }
 
     @Override
-    public List<Sale> findByFilters(UUID customerId, String status, int page, int size) {
+    public boolean existsPendingByCustomerId(UUID customerId) {
+        return jpaSaleRepository.existsByCustomerIdAndStatusIn(
+                customerId,
+                List.of(SaleEntity.SaleStatus.PENDIENTE, SaleEntity.SaleStatus.CONFIRMADA));
+    }
+
+    @Override
+    public List<Sale> findByCustomerId(UUID customerId) {
+        return jpaSaleRepository.findByCustomerIdOrderByCreatedAtDesc(customerId)
+                .stream()
+                .map(this::toDomain)
+                .toList();
+    }
+
+    @Override
+    public List<Sale> findByFilters(UUID customerId, String status, UUID productId, int page, int size) {
         PageRequest pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "updatedAt"));
-        SaleEntity.SaleStatus statusEnum = status != null ? SaleEntity.SaleStatus.valueOf(status) : null;
-        return jpaSaleRepository.findByFilters(customerId, statusEnum, pageable)
+        SaleEntity.SaleStatus statusEnum = (status != null && !status.isBlank()) ? SaleEntity.SaleStatus.valueOf(status) : null;
+        return jpaSaleRepository.findByFilters(customerId, statusEnum, productId, pageable)
                 .stream()
                 .map(this::toDomain)
                 .toList();
