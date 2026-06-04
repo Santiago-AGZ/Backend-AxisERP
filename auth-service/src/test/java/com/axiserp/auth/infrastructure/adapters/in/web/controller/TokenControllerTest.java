@@ -20,19 +20,16 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.axiserp.auth.application.service.OtpService;
+import com.axiserp.auth.application.dto.response.LoginResponse;
 import com.axiserp.auth.application.service.RefreshTokenService;
 import com.axiserp.auth.application.service.TokenBlacklistService;
 import com.axiserp.auth.infrastructure.config.SecurityConfig;
+import com.axiserp.auth.ports.input.RefreshTokenUseCase;
 import com.axiserp.auth.ports.output.RoleRepositoryPort;
 import com.axiserp.auth.ports.output.SupabaseAuthPort;
 import com.axiserp.auth.ports.output.TokenBlacklistRepositoryPort;
 import com.axiserp.auth.ports.output.UserRepositoryPort;
 
-/**
- * Tests de integración para TokenController usando MockMvc y @WebMvcTest.
- * Verifica los endpoints de logout, refresh, OTP y validación de tokens.
- */
 @WebMvcTest(TokenController.class)
 @Import(SecurityConfig.class)
 @DisplayName("TokenController Integration Tests")
@@ -45,10 +42,10 @@ class TokenControllerTest {
     private RefreshTokenService refreshTokenService;
 
     @MockBean
-    private TokenBlacklistService tokenBlacklistService;
+    private RefreshTokenUseCase refreshTokenUseCase;
 
     @MockBean
-    private OtpService otpService;
+    private TokenBlacklistService tokenBlacklistService;
 
     @MockBean
     private SupabaseAuthPort supabaseAuthPort;
@@ -72,22 +69,12 @@ class TokenControllerTest {
         jti = "test-jti-" + UUID.randomUUID();
         expiresAt = Instant.now().plusSeconds(3600);
 
-        // Mock RefreshTokenService
         doNothing().when(refreshTokenService).revoke(anyString());
 
-        // Mock OtpService
-        doNothing().when(otpService).requestOtp(any(UUID.class), anyString());
-
-        // Mock TokenBlacklistService
         when(tokenBlacklistService.revoke(anyString(), any(UUID.class), any()))
             .thenReturn(null);
     }
 
-    /**
-     * Test 1: testLogoutSuccess
-     * Verifica que el endpoint POST /logout está mapeado y responde a solicitudes autenticadas.
-     * Espera: POST /logout -> 200 OK
-     */
     @Test
     @Disabled("TODO: Fix JWT claim 'jti' extraction in logout endpoint")
     @DisplayName("Logout endpoint should be callable with authenticated user")
@@ -108,68 +95,28 @@ class TokenControllerTest {
         verify(refreshTokenService, times(1)).revoke("valid-refresh-token");
     }
 
-    /**
-     * Test 2: testRefreshTokenSuccess
-     * Verifica que el endpoint POST /refresh responde correctamente.
-     * Espera: POST /refresh -> 200 OK con TokenResponse
-     */
     @Test
     @DisplayName("Refresh token endpoint should return 200 with valid token response")
     void testRefreshTokenSuccess() throws Exception {
+        LoginResponse loginResponse = LoginResponse.builder()
+                .accessToken("new-access-token")
+                .refreshToken("new-refresh-token")
+                .role("ADMIN")
+                .name("Test User")
+                .build();
+
+        when(refreshTokenUseCase.refresh(anyString(), anyString(), anyString()))
+                .thenReturn(loginResponse);
+
         String refreshRequest = "{\"refreshToken\":\"valid-refresh-token\"}";
 
         mockMvc.perform(post("/api/v1/auth/refresh")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(refreshRequest)
-                .with(jwt()
-                        .jwt(jwt -> jwt
-                                .claim("sub", userId.toString()))))
-                .andExpect(status().isOk());
+                .content(refreshRequest))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.accessToken").value("new-access-token"));
     }
 
-    /**
-     * Test 3: testRequestOtpSuccess
-     * Verifica que el endpoint POST /reauth-request responde correctamente para usuarios autenticados.
-     * Espera: POST /reauth-request -> 200 OK con mensaje de confirmación
-     */
-    @Test
-    @Disabled("TODO: Fix OtpService integration in request endpoint")
-    @DisplayName("Request OTP endpoint should succeed with authenticated user")
-    void testRequestOtpSuccess() throws Exception {
-        String otpRequest = "{\"email\":\"user@example.com\"}";
-
-        mockMvc.perform(post("/api/v1/auth/reauth-request")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(otpRequest)
-                .with(jwt()
-                        .jwt(jwt -> jwt
-                                .claim("sub", userId.toString()))))
-                .andExpect(status().isOk());
-    }
-
-    /**
-     * Test 4: testVerifyOtpSuccess
-     * Verifica que el endpoint POST /reauth-verify responde correctamente.
-     * Espera: POST /reauth-verify -> 200 OK con OtpResponse
-     */
-    @Test
-    @Disabled("TODO: Fix OTP verification endpoint")
-    @DisplayName("Verify OTP endpoint should return 200 with valid OTP response")
-    void testVerifyOtpSuccess() throws Exception {
-        String otpVerifyRequest = "{\"otpCode\":\"123456\"}";
-
-        mockMvc.perform(post("/api/v1/auth/reauth-verify")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(otpVerifyRequest)
-                .header("X-OTP-Token", "valid-otp-token"))
-                .andExpect(status().isOk());
-    }
-
-    /**
-     * Test 5: testValidateTokenSuccess
-     * Verifica que el endpoint GET /validate-token responde correctamente para usuarios autenticados.
-     * Espera: GET /validate-token -> 200 OK con información del token
-     */
     @Test
     @DisplayName("Validate token endpoint should return 200 with token information")
     void testValidateTokenSuccess() throws Exception {

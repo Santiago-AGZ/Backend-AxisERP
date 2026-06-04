@@ -73,6 +73,7 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .deletedAt(entity.getDeletedAt())
+                .failedLoginAttempts(entity.getFailedLoginAttempts())
                 .build();
     }
 
@@ -89,6 +90,7 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
                 .createdAt(domain.getCreatedAt())
                 .updatedAt(domain.getUpdatedAt())
                 .deletedAt(domain.getDeletedAt())
+                .failedLoginAttempts(domain.getFailedLoginAttempts())
                 .build();
     }
 }

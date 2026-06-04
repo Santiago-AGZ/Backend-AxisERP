@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import org.springframework.transaction.annotation.Transactional;
+
 import com.axiserp.auth.domain.model.TokenBlacklist;
 import com.axiserp.auth.ports.output.TokenBlacklistRepositoryPort;
 
@@ -33,6 +35,7 @@ public class TokenBlacklistService {
      * @param expiresAt fecha y hora de expiración del token
      * @return TokenBlacklist guardado en la base de datos
      */
+    @Transactional
     public TokenBlacklist revoke(String tokenJti, UUID userId, LocalDateTime expiresAt) {
         TokenBlacklist tokenBlacklist = new TokenBlacklist(tokenJti, userId, expiresAt);
         TokenBlacklist saved = tokenBlacklistRepositoryPort.save(tokenBlacklist);

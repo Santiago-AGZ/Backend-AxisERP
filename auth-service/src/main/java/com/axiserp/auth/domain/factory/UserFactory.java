@@ -45,6 +45,38 @@ public class UserFactory {
                 .build();
     }
 
+    public static User reactivate(User existing, UUID updatedBy) {
+        return User.builder()
+                .id(existing.getId())
+                .name(existing.getName())
+                .email(existing.getEmail())
+                .roleId(existing.getRoleId())
+                .status(UserStatus.ACTIVO)
+                .createdBy(existing.getCreatedBy())
+                .updatedBy(updatedBy)
+                .lastLoginAt(existing.getLastLoginAt())
+                .createdAt(existing.getCreatedAt())
+                .updatedAt(LocalDateTime.now())
+                .deletedAt(null)
+                .build();
+    }
+
+    public static User activate(User existing, UUID updatedBy) {
+        return User.builder()
+                .id(existing.getId())
+                .name(existing.getName())
+                .email(existing.getEmail())
+                .roleId(existing.getRoleId())
+                .status(UserStatus.ACTIVO)
+                .createdBy(existing.getCreatedBy())
+                .updatedBy(updatedBy)
+                .lastLoginAt(existing.getLastLoginAt())
+                .createdAt(existing.getCreatedAt())
+                .updatedAt(LocalDateTime.now())
+                .deletedAt(existing.getDeletedAt())
+                .build();
+    }
+
     public static User deactivate(User existing, UUID updatedBy) {
         return User.builder()
                 .id(existing.getId())
@@ -52,6 +84,23 @@ public class UserFactory {
                 .email(existing.getEmail())
                 .roleId(existing.getRoleId())
                 .status(UserStatus.INACTIVO)
+                .createdBy(existing.getCreatedBy())
+                .updatedBy(updatedBy)
+                .lastLoginAt(existing.getLastLoginAt())
+                .createdAt(existing.getCreatedAt())
+                .updatedAt(LocalDateTime.now())
+                .deletedAt(LocalDateTime.now())
+                .build();
+    }
+
+    public static User logicalDelete(User existing, UUID updatedBy) {
+        return User.builder()
+                .id(existing.getId())
+                .name(existing.getName())
+                .email(existing.getEmail())
+                .roleId(existing.getRoleId())
+                .status(UserStatus.ELIMINADO)
+                .failedLoginAttempts(existing.getFailedLoginAttempts())
                 .createdBy(existing.getCreatedBy())
                 .updatedBy(updatedBy)
                 .lastLoginAt(existing.getLastLoginAt())

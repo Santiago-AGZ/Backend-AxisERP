@@ -18,9 +18,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.axiserp.auth.application.service.AuditService;
+import com.axiserp.auth.domain.model.PasswordHistory;
 import com.axiserp.auth.domain.model.PasswordResetToken;
 import com.axiserp.auth.domain.model.User;
 import com.axiserp.auth.domain.exception.TokenExpiredException;
+import com.axiserp.auth.ports.output.PasswordHistoryRepositoryPort;
 import com.axiserp.auth.ports.output.PasswordResetTokenRepositoryPort;
 import com.axiserp.auth.ports.output.UserRepositoryPort;
 
@@ -38,6 +40,9 @@ class ResetPasswordUseCaseImplTest {
 
     @Mock
     private AuditService auditService;
+
+    @Mock
+    private PasswordHistoryRepositoryPort passwordHistoryRepositoryPort;
 
     @InjectMocks
     private ResetPasswordUseCaseImpl resetPasswordUseCase;
@@ -76,12 +81,16 @@ class ResetPasswordUseCaseImplTest {
         when(passwordResetTokenRepositoryPort.findByToken(token)).thenReturn(resetToken);
         when(userRepositoryPort.findById(userId)).thenReturn(Optional.of(user));
         when(passwordEncoder.encode("NewPass@1234")).thenReturn("$2a$10$newHash");
+        when(passwordEncoder.matches(anyString(), eq(user.getPasswordHash()))).thenReturn(false);
+        when(passwordHistoryRepositoryPort.findLastByUserId(any(), anyInt())).thenReturn(java.util.List.of());
         when(passwordResetTokenRepositoryPort.save(any(PasswordResetToken.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(passwordHistoryRepositoryPort.save(any(PasswordHistory.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         resetPasswordUseCase.resetPassword(token, "NewPass@1234");
 
         verify(userRepositoryPort).save(argThat(u -> u.getPasswordHash().equals("$2a$10$newHash")));
         verify(passwordResetTokenRepositoryPort).save(argThat(t -> t.isUsed() && t.getUsedAt() != null));
+        verify(passwordHistoryRepositoryPort).save(any(PasswordHistory.class));
         verify(auditService).log(any(), eq("AUTH"), eq(userId), eq(userId), eq("Test User"), any(), isNull(), isNull());
     }
 
