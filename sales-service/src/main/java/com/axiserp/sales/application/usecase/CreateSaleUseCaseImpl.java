@@ -17,6 +17,7 @@ import com.axiserp.sales.application.dto.request.CreateSaleRequest;
 import com.axiserp.sales.application.dto.request.SaleItemRequest;
 import com.axiserp.sales.application.dto.response.SaleItemResponse;
 import com.axiserp.sales.application.dto.response.SaleResponse;
+import com.axiserp.sales.application.service.AuditService;
 import com.axiserp.sales.domain.exception.CustomerInactiveException;
 import com.axiserp.sales.domain.exception.CustomerNotFoundException;
 import com.axiserp.sales.domain.exception.DuplicateProductInSaleException;
@@ -25,6 +26,7 @@ import com.axiserp.sales.domain.model.Sale;
 import com.axiserp.sales.domain.model.SaleItem;
 import com.axiserp.sales.domain.model.SaleStatus;
 import com.axiserp.sales.ports.input.CreateSaleUseCase;
+import com.axiserp.sales.ports.output.CatalogServicePort;
 import com.axiserp.sales.ports.output.CustomerRepositoryPort;
 import com.axiserp.sales.ports.output.SaleRepositoryPort;
 
@@ -39,10 +41,12 @@ public class CreateSaleUseCaseImpl implements CreateSaleUseCase {
 
     private final CustomerRepositoryPort customerRepositoryPort;
     private final SaleRepositoryPort saleRepositoryPort;
+    private final CatalogServicePort catalogServicePort;
+    private final AuditService auditService;
 
     @Override
     @Transactional
-    public SaleResponse create(CreateSaleRequest request, UUID createdBy) {
+    public SaleResponse create(CreateSaleRequest request, UUID createdBy, boolean isAdmin) {
         // 1. Verify customer exists and is active
         Customer customer = customerRepositoryPort.findById(request.getCustomerId())
                 .orElseThrow(() -> new CustomerNotFoundException(request.getCustomerId()));
@@ -62,6 +66,27 @@ public class CreateSaleUseCaseImpl implements CreateSaleUseCase {
             if (!productIds.add(itemReq.getProductId())) {
                 throw new DuplicateProductInSaleException(itemReq.getProductId());
             }
+        }
+
+        // 3.2 Verify all products exist and are active in catalog
+        for (SaleItemRequest itemReq : request.getItems()) {
+            var summary = catalogServicePort.findProductSummary(itemReq.getProductId());
+            if (summary == null) {
+                throw new IllegalArgumentException("El producto " + itemReq.getProductId() + " no existe en el catalogo");
+            }
+            if (!"ACTIVO".equals(summary.getStatus())) {
+                throw new IllegalArgumentException("El producto " + itemReq.getProductId() + " no esta activo");
+            }
+        }
+
+        // 3.5 Validate discount permissions
+        BigDecimal saleDiscount = request.getDiscount() != null ? request.getDiscount() : BigDecimal.ZERO;
+        boolean hasDiscount = saleDiscount.compareTo(BigDecimal.ZERO) > 0;
+        boolean hasItemDiscount = request.getItems().stream()
+                .anyMatch(item -> item.getDiscount() != null && item.getDiscount().compareTo(BigDecimal.ZERO) > 0);
+
+        if ((hasDiscount || hasItemDiscount) && !isAdmin) {
+            throw new IllegalArgumentException("Los descuentos requieren autorizacion del ADMIN");
         }
 
         // 4 & 5 & 6. Validate quantities/prices and calculate item subtotals
@@ -95,7 +120,13 @@ public class CreateSaleUseCaseImpl implements CreateSaleUseCase {
                 .map(SaleItem::getSubtotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        BigDecimal saleDiscount = request.getDiscount() != null ? request.getDiscount() : BigDecimal.ZERO;
+        if (hasDiscount) {
+            BigDecimal maxDiscount = subtotal.multiply(new BigDecimal("0.30"));
+            if (saleDiscount.compareTo(maxDiscount) > 0) {
+                throw new IllegalArgumentException("El descuento no puede exceder el 30% del subtotal");
+            }
+        }
+
         BigDecimal taxBase = subtotal.subtract(saleDiscount);
         BigDecimal tax = taxBase.multiply(TAX_RATE).setScale(2, RoundingMode.HALF_UP);
         BigDecimal total = taxBase.add(tax).setScale(2, RoundingMode.HALF_UP);
@@ -125,6 +156,8 @@ public class CreateSaleUseCaseImpl implements CreateSaleUseCase {
                 .build();
 
         Sale saved = saleRepositoryPort.save(sale);
+        auditService.logSaleCreated(saved.getId(), createdBy, null,
+                String.format("saleNumber=%s customerId=%s total=%s", saved.getSaleNumber(), saved.getCustomerId(), saved.getTotal()));
         log.info("sale_created id={} saleNumber={} customerId={} total={}", saved.getId(), saved.getSaleNumber(), saved.getCustomerId(), saved.getTotal());
 
         return toResponse(saved);

@@ -22,6 +22,8 @@ public interface JpaCustomerRepository extends JpaRepository<CustomerEntity, UUI
 
     boolean existsByEmail(String email);
 
+    boolean existsByEmailAndIdNot(String email, UUID id);
+
     // :hasSearch evita el problema de lower(bytea) con parámetros null
     // :pattern debe venir pre-formateado como '%texto%' o '%' desde el adapter
     @Query("""

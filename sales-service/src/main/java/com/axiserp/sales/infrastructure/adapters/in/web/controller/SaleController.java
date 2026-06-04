@@ -49,7 +49,9 @@ public class SaleController {
             Authentication authentication) {
 
         UUID userId = UUID.fromString((String) authentication.getPrincipal());
-        SaleResponse response = createSaleUseCase.create(request, userId);
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        SaleResponse response = createSaleUseCase.create(request, userId, isAdmin);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.created(response, "Venta creada exitosamente"));
     }
@@ -65,10 +67,11 @@ public class SaleController {
     public ResponseEntity<ApiResponse<List<SaleResponse>>> listSales(
             @RequestParam(required = false) UUID customerId,
             @RequestParam(required = false) String status,
+            @RequestParam(required = false) UUID productId,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size) {
 
-        List<SaleResponse> data = listSalesUseCase.list(customerId, status, page - 1, size);
+        List<SaleResponse> data = listSalesUseCase.list(customerId, status, productId, page - 1, size);
         return ResponseEntity.ok(ApiResponse.paged(
                 data, "Ventas recuperadas exitosamente",
                 PaginationMeta.of(page, size, data.size())));
