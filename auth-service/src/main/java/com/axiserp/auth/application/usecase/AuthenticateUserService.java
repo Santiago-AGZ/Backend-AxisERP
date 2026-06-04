@@ -13,6 +13,7 @@ import com.axiserp.auth.application.dto.request.LoginRequest;
 import com.axiserp.auth.application.dto.response.LoginResponse;
 import com.axiserp.auth.application.service.AuditService;
 import com.axiserp.auth.application.service.JwtService;
+import com.axiserp.auth.application.service.SuspiciousActivityDetector;
 import com.axiserp.auth.domain.exception.InvalidCredentialsException;
 import com.axiserp.auth.domain.exception.UserInactiveException;
 import com.axiserp.auth.domain.exception.UserLockedException;
@@ -47,6 +48,7 @@ public class AuthenticateUserService implements AuthenticateUserUseCase {
     private final AuditService auditService;
     private final PasswordEncoder passwordEncoder;
     private final LoginRateLimitStrategy rateLimitStrategy;
+    private final SuspiciousActivityDetector suspiciousActivityDetector;
 
     @Override
     @Transactional
@@ -70,6 +72,7 @@ public class AuthenticateUserService implements AuthenticateUserUseCase {
             userRepositoryPort.save(updated);
             log.warn("login_failed_invalid_password username={} ip={} attempts_left={}",
                     request.getUsername(), ipAddress, rateLimitStrategy.remainingAttempts(updated));
+            suspiciousActivityDetector.recordFailedLogin(user.getId(), user.getEmail(), ipAddress, userAgent);
             auditService.logLogin(user.getId(), user.getName(), false, ipAddress, userAgent);
             throw new InvalidCredentialsException();
         }

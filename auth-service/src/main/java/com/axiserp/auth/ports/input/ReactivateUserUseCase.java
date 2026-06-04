@@ -4,7 +4,7 @@ import java.util.UUID;
 
 import com.axiserp.auth.application.dto.response.UserResponse;
 
-public interface DeactivateUserUseCase {
+public interface ReactivateUserUseCase {
 
-    UserResponse deactivate(UUID id, UUID updatedBy, String currentPassword);
+    UserResponse reactivate(UUID id, UUID updatedBy);
 }

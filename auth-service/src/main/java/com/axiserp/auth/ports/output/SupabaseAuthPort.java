@@ -5,4 +5,10 @@ import java.util.UUID;
 public interface SupabaseAuthPort {
     SupabaseUser createUser(String email, String roleName, String name, UUID createdBy);
     void sendPasswordReset(String email);
+    RefreshTokenResponse refreshToken(String refreshToken);
+    LoginResponse login(String email, String password);
+
+    record RefreshTokenResponse(String accessToken, String refreshToken, int expiresIn) {}
+
+    record LoginResponse(String accessToken, String refreshToken, int expiresIn, String tokenType) {}
 }

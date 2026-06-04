@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,15 +23,20 @@ import com.axiserp.auth.application.dto.request.UpdateUserRequest;
 import com.axiserp.auth.application.dto.response.AuditLogResponse;
 import com.axiserp.auth.application.dto.response.UserResponse;
 import com.axiserp.auth.domain.model.PageResult;
+import com.axiserp.auth.domain.model.User;
 import com.axiserp.auth.infrastructure.adapters.in.web.response.ApiResponse;
 import com.axiserp.auth.infrastructure.adapters.in.web.response.ApiResponse.PaginationMeta;
+import com.axiserp.auth.ports.input.ActivateUserUseCase;
 import com.axiserp.auth.ports.input.CreateUserUseCase;
 import com.axiserp.auth.ports.input.DeactivateUserUseCase;
+import com.axiserp.auth.ports.input.DeleteUserUseCase;
+import com.axiserp.auth.ports.input.ReactivateUserUseCase;
 import com.axiserp.auth.ports.input.GetAuditLogUseCase;
 import com.axiserp.auth.ports.input.GetProfileUseCase;
 import com.axiserp.auth.ports.input.GetUserUseCase;
 import com.axiserp.auth.ports.input.ListUsersUseCase;
 import com.axiserp.auth.ports.input.UpdateUserUseCase;
+import com.axiserp.auth.ports.output.UserRepositoryPort;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -45,6 +51,9 @@ public class UserController {
     private final ListUsersUseCase listUsersUseCase;
     private final UpdateUserUseCase updateUserUseCase;
     private final DeactivateUserUseCase deactivateUserUseCase;
+    private final DeleteUserUseCase deleteUserUseCase;
+    private final ReactivateUserUseCase reactivateUserUseCase;
+    private final ActivateUserUseCase activateUserUseCase;
     private final GetProfileUseCase getProfileUseCase;
     private final GetAuditLogUseCase getAuditLogUseCase;
 
@@ -70,6 +79,12 @@ public class UserController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/usuarios/deleted")
+    public ResponseEntity<ApiResponse<List<UserResponse>>> listDeletedUsers() {
+        return ResponseEntity.ok(ApiResponse.ok(listUsersUseCase.listAll(null, "ELIMINADO", null)));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/usuarios/{id}")
     public ResponseEntity<ApiResponse<UserResponse>> getUser(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.ok(getUserUseCase.getById(id)));
@@ -89,9 +104,28 @@ public class UserController {
     @PatchMapping("/usuarios/{id}/desactivar")
     public ResponseEntity<ApiResponse<UserResponse>> deactivateUser(
             @PathVariable UUID id,
+            @RequestParam String currentPassword,
             Authentication authentication) {
         UUID adminId = UUID.fromString((String) authentication.getPrincipal());
-        return ResponseEntity.ok(ApiResponse.ok(deactivateUserUseCase.deactivate(id, adminId), "Usuario desactivado exitosamente"));
+        return ResponseEntity.ok(ApiResponse.ok(deactivateUserUseCase.deactivate(id, adminId, currentPassword), "Usuario desactivado exitosamente"));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/usuarios/{id}/activar")
+    public ResponseEntity<ApiResponse<UserResponse>> activateUser(
+            @PathVariable UUID id,
+            Authentication authentication) {
+        UUID adminId = UUID.fromString((String) authentication.getPrincipal());
+        return ResponseEntity.ok(ApiResponse.ok(activateUserUseCase.activate(id, adminId), "Usuario activado exitosamente"));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/usuarios/{id}/reactivar")
+    public ResponseEntity<ApiResponse<UserResponse>> reactivateUser(
+            @PathVariable UUID id,
+            Authentication authentication) {
+        UUID adminId = UUID.fromString((String) authentication.getPrincipal());
+        return ResponseEntity.ok(ApiResponse.ok(reactivateUserUseCase.reactivate(id, adminId), "Usuario reactivado exitosamente"));
     }
 
     @PreAuthorize("isAuthenticated()")
@@ -99,6 +133,16 @@ public class UserController {
     public ResponseEntity<ApiResponse<UserResponse>> getMyProfile(Authentication authentication) {
         String userId = (String) authentication.getPrincipal();
         return ResponseEntity.ok(ApiResponse.ok(getProfileUseCase.getProfile(userId)));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/usuarios/{id}")
+    public ResponseEntity<ApiResponse<UserResponse>> deleteUser(
+            @PathVariable UUID id,
+            @RequestParam String currentPassword,
+            Authentication authentication) {
+        UUID adminId = UUID.fromString((String) authentication.getPrincipal());
+        return ResponseEntity.ok(ApiResponse.ok(deleteUserUseCase.delete(id, adminId, currentPassword), "Usuario eliminado exitosamente"));
     }
 
     @PreAuthorize("hasRole('ADMIN')")

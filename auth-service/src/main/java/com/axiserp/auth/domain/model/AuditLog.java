@@ -28,7 +28,7 @@ public class AuditLog {
 
     public enum AuditAction {
         LOGIN, LOGOUT,
-        CREATE, UPDATE, DELETE, DEACTIVATE, VOID,
+        CREATE, UPDATE, DELETE, DEACTIVATE, REACTIVATE, VOID,
         PASSWORD_RESET_REQUEST, PASSWORD_RESET_COMPLETE
     }
 }

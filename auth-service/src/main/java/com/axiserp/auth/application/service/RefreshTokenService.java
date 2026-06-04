@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import org.springframework.transaction.annotation.Transactional;
+
 import com.axiserp.auth.domain.model.RefreshToken;
 import com.axiserp.auth.ports.output.RefreshTokenRepositoryPort;
 
@@ -82,6 +84,7 @@ public class RefreshTokenService {
      *
      * @param token el token a revocar
      */
+    @Transactional
     public void revoke(String token) {
         refreshTokenRepositoryPort.deleteByToken(token);
         log.info("refresh_token_revoked token={}", token);
