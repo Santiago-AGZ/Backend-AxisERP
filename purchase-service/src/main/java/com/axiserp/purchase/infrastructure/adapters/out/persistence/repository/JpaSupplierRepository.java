@@ -14,6 +14,7 @@ public interface JpaSupplierRepository extends JpaRepository<SupplierEntity, UUI
     Optional<SupplierEntity> findByCodigo(String codigo);
     boolean existsByCodigo(String codigo);
     boolean existsByNit(String nit);
+    boolean existsByNitAndIdNot(String nit, UUID id);
     Optional<SupplierEntity> findByNit(String nit);
     List<SupplierEntity> findByStatusOrderByNameAsc(SupplierEntity.SupplierStatus status);
     long countByStatus(SupplierEntity.SupplierStatus status);

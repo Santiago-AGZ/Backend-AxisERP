@@ -3,6 +3,7 @@ package com.axiserp.purchase.domain.model;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,6 +20,7 @@ public class Supplier {
     private UUID id;
     private String codigo;
     private String name;
+    @Setter(AccessLevel.NONE)
     private String nit;
     private String phone;
     private String email;
