@@ -9,50 +9,42 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.axiserp.catalog.application.dto.response.CategoryResponse;
 import com.axiserp.catalog.application.service.CatalogAuditService;
-import com.axiserp.catalog.domain.exception.CategoryHasProductsException;
 import com.axiserp.catalog.domain.exception.CategoryNotFoundException;
 import com.axiserp.catalog.domain.factory.CategoryFactory;
 import com.axiserp.catalog.domain.model.Category;
-import com.axiserp.catalog.ports.input.DeactivateCategoryUseCase;
+import com.axiserp.catalog.ports.input.ReactivateCategoryUseCase;
 import com.axiserp.catalog.ports.output.CategoryRepositoryPort;
-import com.axiserp.catalog.ports.output.ProductRepositoryPort;
 
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class DeactivateCategoryUseCaseImpl implements DeactivateCategoryUseCase {
+public class ReactivateCategoryUseCaseImpl implements ReactivateCategoryUseCase {
 
-    private static final Logger log = LoggerFactory.getLogger(DeactivateCategoryUseCaseImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(ReactivateCategoryUseCaseImpl.class);
 
     private final CategoryRepositoryPort categoryRepositoryPort;
-    private final ProductRepositoryPort productRepositoryPort;
     private final CatalogAuditService catalogAuditService;
 
     @Override
     @Transactional
-    public CategoryResponse deactivate(UUID id, UUID updatedBy) {
+    public CategoryResponse reactivate(UUID id, UUID updatedBy) {
         Category existing = categoryRepositoryPort.findById(id)
                 .orElseThrow(CategoryNotFoundException::new);
 
         if (existing.isDeleted()) {
-            throw new IllegalStateException("La categoria ya esta eliminada");
+            throw new IllegalStateException("No se puede reactivar una categoria eliminada");
         }
 
-        if (!existing.isActive()) {
-            throw new IllegalStateException("La categoria ya esta inactiva");
+        if (existing.isActive()) {
+            throw new IllegalStateException("La categoria ya esta activa");
         }
 
-        int activeProductCount = productRepositoryPort.countActiveByCategoryId(id);
-        if (activeProductCount > 0) {
-            throw new CategoryHasProductsException(activeProductCount);
-        }
+        Category reactivated = CategoryFactory.reactivate(existing, updatedBy);
+        Category saved = categoryRepositoryPort.save(reactivated);
 
-        Category deleted = CategoryFactory.softDelete(existing, updatedBy);
-        Category saved = categoryRepositoryPort.save(deleted);
-
-        log.info("category_deleted id={} name={} updatedBy={}", saved.getId(), saved.getName(), updatedBy);
-        catalogAuditService.log("DEACTIVATE", "CATEGORY", saved.getId(), updatedBy, "Categoria desactivada: " + saved.getName());
+        log.info("category_reactivated id={} name={} updatedBy={}", saved.getId(), saved.getName(), updatedBy);
+        catalogAuditService.log("REACTIVATE", "CATEGORY", saved.getId(), updatedBy, "Categoria reactivada: " + saved.getName());
 
         return toResponse(saved);
     }
@@ -71,4 +63,3 @@ public class DeactivateCategoryUseCaseImpl implements DeactivateCategoryUseCase 
                 .build();
     }
 }
-

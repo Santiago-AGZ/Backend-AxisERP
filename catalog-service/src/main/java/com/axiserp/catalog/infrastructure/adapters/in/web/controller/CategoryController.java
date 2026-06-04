@@ -24,6 +24,7 @@ import com.axiserp.catalog.infrastructure.adapters.in.web.dto.ApiResponse;
 import com.axiserp.catalog.infrastructure.adapters.in.web.dto.ApiResponse.PaginationMeta;
 import com.axiserp.catalog.ports.input.CreateCategoryUseCase;
 import com.axiserp.catalog.ports.input.DeactivateCategoryUseCase;
+import com.axiserp.catalog.ports.input.ReactivateCategoryUseCase;
 import com.axiserp.catalog.ports.input.GetCategoryUseCase;
 import com.axiserp.catalog.ports.input.ListCategoriesUseCase;
 import com.axiserp.catalog.ports.input.UpdateCategoryUseCase;
@@ -41,6 +42,7 @@ public class CategoryController {
     private final ListCategoriesUseCase listCategoriesUseCase;
     private final UpdateCategoryUseCase updateCategoryUseCase;
     private final DeactivateCategoryUseCase deactivateCategoryUseCase;
+    private final ReactivateCategoryUseCase reactivateCategoryUseCase;
 
     @PreAuthorize("hasAnyRole('ADMIN', 'INVENTARIO')")
     @PostMapping
@@ -56,10 +58,12 @@ public class CategoryController {
     @PreAuthorize("hasAnyRole('ADMIN', 'INVENTARIO', 'VENDEDOR')")
     @GetMapping
     public ResponseEntity<ApiResponse<List<CategoryResponse>>> listCategories(
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "false") boolean includeInactive,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size) {
-        List<CategoryResponse> data = listCategoriesUseCase.listAll(page - 1, size);
-        long total = listCategoriesUseCase.countAll();
+        List<CategoryResponse> data = listCategoriesUseCase.findByFilters(search, includeInactive, page - 1, size);
+        long total = listCategoriesUseCase.countByFilters(search, includeInactive);
         return ResponseEntity.ok(ApiResponse.paged(
                 data, "Categorias recuperadas exitosamente",
                 PaginationMeta.of(page, size, total)));
@@ -88,5 +92,14 @@ public class CategoryController {
             Authentication authentication) {
         UUID updatedBy = UUID.fromString((String) authentication.getPrincipal());
         return ResponseEntity.ok(ApiResponse.ok(deactivateCategoryUseCase.deactivate(id, updatedBy), "Categoria desactivada"));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/{id}/activar")
+    public ResponseEntity<ApiResponse<CategoryResponse>> reactivateCategory(
+            @PathVariable UUID id,
+            Authentication authentication) {
+        UUID updatedBy = UUID.fromString((String) authentication.getPrincipal());
+        return ResponseEntity.ok(ApiResponse.ok(reactivateCategoryUseCase.reactivate(id, updatedBy), "Categoria activada"));
     }
 }

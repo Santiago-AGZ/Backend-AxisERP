@@ -38,6 +38,9 @@ public class ProductEntity {
     @Column(nullable = false, unique = true, length = 100)
     private String codigo;
 
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
     @Column(name = "category_id", nullable = false)
     private UUID categoryId;
 

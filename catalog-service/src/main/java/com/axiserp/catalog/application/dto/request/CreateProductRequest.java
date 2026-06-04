@@ -6,6 +6,7 @@ import java.util.UUID;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,6 +21,9 @@ public class CreateProductRequest {
 
     @NotBlank(message = "El codigo del producto es obligatorio")
     private String codigo;
+
+    @Size(max = 2000)
+    private String description;
 
     @NotNull(message = "La categoria es obligatoria")
     private UUID categoryId;

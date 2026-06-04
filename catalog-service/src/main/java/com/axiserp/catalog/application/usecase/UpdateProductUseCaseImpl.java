@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.axiserp.catalog.application.dto.request.UpdateProductRequest;
 import com.axiserp.catalog.application.dto.response.CategoryResponse;
 import com.axiserp.catalog.application.dto.response.ProductResponse;
+import com.axiserp.catalog.application.service.CatalogAuditService;
 import com.axiserp.catalog.domain.exception.DuplicateCodigoException;
 import com.axiserp.catalog.domain.exception.InvalidPriceException;
 import com.axiserp.catalog.domain.exception.ProductNotFoundException;
@@ -30,10 +31,11 @@ public class UpdateProductUseCaseImpl implements UpdateProductUseCase {
 
     private final ProductRepositoryPort productRepositoryPort;
     private final CategoryRepositoryPort categoryRepositoryPort;
+    private final CatalogAuditService catalogAuditService;
 
     @Override
     @Transactional
-    public ProductResponse update(UUID id, UpdateProductRequest request) {
+    public ProductResponse update(UUID id, UpdateProductRequest request, UUID userId) {
         Product existing = productRepositoryPort.findById(id)
                 .orElseThrow(ProductNotFoundException::new);
 
@@ -60,6 +62,7 @@ public class UpdateProductUseCaseImpl implements UpdateProductUseCase {
         Product updated = ProductFactory.update(
                 existing,
                 request.getName(),
+                request.getDescription(),
                 request.getCategoryId() != null ? request.getCategoryId() : existing.getCategoryId(),
                 request.getPurchasePrice(),
                 request.getSalePrice());
@@ -72,6 +75,7 @@ public class UpdateProductUseCaseImpl implements UpdateProductUseCase {
         }
 
         log.info("product_updated id={} codigo={}", saved.getId(), saved.getCodigo());
+        catalogAuditService.log("UPDATE", "PRODUCT", saved.getId(), userId, "Producto actualizado: " + saved.getName());
 
         return toResponse(saved, category);
     }
@@ -81,12 +85,15 @@ public class UpdateProductUseCaseImpl implements UpdateProductUseCase {
                 .id(product.getId())
                 .name(product.getName())
                 .codigo(product.getCodigo())
+                .description(product.getDescription())
                 .category(ProductResponse.CategorySummary.builder()
                         .id(category.getId())
                         .name(category.getName())
                         .build())
                 .purchasePrice(product.getPurchasePrice())
                 .salePrice(product.getSalePrice())
+                .margin(product.getMargin())
+                .marginPercentage(product.getMarginPercentage())
                 .status(product.getStatus().name())
                 .createdAt(product.getCreatedAt())
                 .updatedAt(product.getUpdatedAt())

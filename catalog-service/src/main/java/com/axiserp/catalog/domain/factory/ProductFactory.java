@@ -11,12 +11,13 @@ public final class ProductFactory {
 
     private ProductFactory() {}
 
-    public static Product createNew(String name, String codigo, UUID categoryId,
+    public static Product createNew(String name, String codigo, String description, UUID categoryId,
             BigDecimal purchasePrice, BigDecimal salePrice, UUID createdBy) {
         return Product.builder()
                 .id(UUID.randomUUID())
                 .name(name)
                 .codigo(codigo)
+                .description(description)
                 .categoryId(categoryId)
                 .purchasePrice(purchasePrice)
                 .salePrice(salePrice)
@@ -27,16 +28,33 @@ public final class ProductFactory {
                 .build();
     }
 
-    public static Product update(Product existing, String name, UUID categoryId,
+    public static Product update(Product existing, String name, String description, UUID categoryId,
             BigDecimal purchasePrice, BigDecimal salePrice) {
         return Product.builder()
                 .id(existing.getId())
                 .name(name != null ? name : existing.getName())
                 .codigo(existing.getCodigo())
+                .description(description != null ? description : existing.getDescription())
                 .categoryId(categoryId != null ? categoryId : existing.getCategoryId())
                 .purchasePrice(purchasePrice != null ? purchasePrice : existing.getPurchasePrice())
                 .salePrice(salePrice != null ? salePrice : existing.getSalePrice())
                 .status(existing.getStatus())
+                .createdBy(existing.getCreatedBy())
+                .createdAt(existing.getCreatedAt())
+                .updatedAt(LocalDateTime.now())
+                .build();
+    }
+
+    public static Product reactivate(Product existing) {
+        return Product.builder()
+                .id(existing.getId())
+                .name(existing.getName())
+                .codigo(existing.getCodigo())
+                .description(existing.getDescription())
+                .categoryId(existing.getCategoryId())
+                .purchasePrice(existing.getPurchasePrice())
+                .salePrice(existing.getSalePrice())
+                .status(ProductStatus.ACTIVO)
                 .createdBy(existing.getCreatedBy())
                 .createdAt(existing.getCreatedAt())
                 .updatedAt(LocalDateTime.now())
@@ -48,6 +66,7 @@ public final class ProductFactory {
                 .id(existing.getId())
                 .name(existing.getName())
                 .codigo(existing.getCodigo())
+                .description(existing.getDescription())
                 .categoryId(existing.getCategoryId())
                 .purchasePrice(existing.getPurchasePrice())
                 .salePrice(existing.getSalePrice())
@@ -63,6 +82,7 @@ public final class ProductFactory {
                 .id(existing.getId())
                 .name(existing.getName())
                 .codigo(existing.getCodigo())
+                .description(existing.getDescription())
                 .categoryId(existing.getCategoryId())
                 .purchasePrice(existing.getPurchasePrice())
                 .salePrice(existing.getSalePrice())

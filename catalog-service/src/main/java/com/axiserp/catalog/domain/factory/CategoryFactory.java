@@ -37,6 +37,20 @@ public final class CategoryFactory {
                 .build();
     }
 
+    public static Category reactivate(Category existing, UUID updatedBy) {
+        return Category.builder()
+                .id(existing.getId())
+                .name(existing.getName())
+                .description(existing.getDescription())
+                .parentId(existing.getParentId())
+                .status(CategoryStatus.ACTIVA)
+                .createdBy(existing.getCreatedBy())
+                .updatedBy(updatedBy)
+                .createdAt(existing.getCreatedAt())
+                .updatedAt(LocalDateTime.now())
+                .build();
+    }
+
     public static Category deactivate(Category existing, UUID updatedBy) {
         return Category.builder()
                 .id(existing.getId())

@@ -60,6 +60,22 @@ public class CategoryRepositoryAdapter implements CategoryRepositoryPort {
     }
 
     @Override
+    public List<Category> findByFilters(String search, boolean includeInactive, int page, int size) {
+        int offset = page * size;
+        String searchParam = (search != null && !search.isBlank()) ? search : null;
+        return jpaCategoryRepository.findByFilters(searchParam, includeInactive, size, offset)
+                .stream()
+                .map(this::toDomain)
+                .toList();
+    }
+
+    @Override
+    public long countByFilters(String search, boolean includeInactive) {
+        String searchParam = (search != null && !search.isBlank()) ? search : null;
+        return jpaCategoryRepository.countByFilters(searchParam, includeInactive);
+    }
+
+    @Override
     public long countAll() {
         return jpaCategoryRepository.count();
     }

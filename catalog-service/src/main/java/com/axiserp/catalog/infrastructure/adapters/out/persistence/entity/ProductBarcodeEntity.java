@@ -41,6 +41,9 @@ public class ProductBarcodeEntity {
     @Column(name = "barcode_type", nullable = false, length = 20)
     private BarcodeType barcodeType;
 
+    @Column(name = "is_primary", nullable = false)
+    private boolean isPrimary;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 

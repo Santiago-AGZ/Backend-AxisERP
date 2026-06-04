@@ -20,5 +20,9 @@ public interface CategoryRepositoryPort {
 
     List<Category> findAllOrderedByName(int page, int size);
 
+    List<Category> findByFilters(String search, boolean includeInactive, int page, int size);
+
+    long countByFilters(String search, boolean includeInactive);
+
     long countAll();
 }

@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import com.axiserp.catalog.application.dto.request.CreateCategoryRequest;
 import com.axiserp.catalog.application.dto.response.CategoryResponse;
+import com.axiserp.catalog.application.service.CatalogAuditService;
 import com.axiserp.catalog.domain.exception.CategoryNotFoundException;
 import com.axiserp.catalog.domain.exception.DuplicateCategoryException;
 import com.axiserp.catalog.domain.factory.CategoryFactory;
@@ -25,6 +26,7 @@ public class CreateCategoryUseCaseImpl implements CreateCategoryUseCase {
     private static final Logger log = LoggerFactory.getLogger(CreateCategoryUseCaseImpl.class);
 
     private final CategoryRepositoryPort categoryRepositoryPort;
+    private final CatalogAuditService catalogAuditService;
 
     @Override
     @Transactional
@@ -42,6 +44,7 @@ public class CreateCategoryUseCaseImpl implements CreateCategoryUseCase {
         Category saved = categoryRepositoryPort.save(category);
 
         log.info("category_created id={} name={} parentId={} createdBy={}", saved.getId(), saved.getName(), saved.getParentId(), createdBy);
+        catalogAuditService.log("CREATE", "CATEGORY", saved.getId(), createdBy, "Categoria creada: " + saved.getName());
 
         return toResponse(saved);
     }
