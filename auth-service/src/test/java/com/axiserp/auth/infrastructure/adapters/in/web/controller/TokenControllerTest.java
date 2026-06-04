@@ -21,6 +21,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.axiserp.auth.application.dto.response.LoginResponse;
+import com.axiserp.auth.application.service.JwtService;
 import com.axiserp.auth.application.service.RefreshTokenService;
 import com.axiserp.auth.application.service.TokenBlacklistService;
 import com.axiserp.auth.infrastructure.config.SecurityConfig;
@@ -58,6 +59,9 @@ class TokenControllerTest {
 
     @MockBean
     private TokenBlacklistRepositoryPort tokenBlacklistRepositoryPort;
+
+    @MockBean
+    private JwtService jwtService;
 
     private UUID userId;
     private String jti;
