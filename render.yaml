@@ -12,32 +12,32 @@ services:
       - key: AUTH_SERVICE_URL
         fromService:
           name: auth-service
-          type: private-service
+          type: web
           property: hostport
       - key: CATALOG_SERVICE_URL
         fromService:
           name: catalog-service
-          type: private-service
+          type: web
           property: hostport
       - key: INVENTORY_SERVICE_URL
         fromService:
           name: inventory-service
-          type: private-service
+          type: web
           property: hostport
       - key: SALES_SERVICE_URL
         fromService:
           name: sales-service
-          type: private-service
+          type: web
           property: hostport
       - key: PURCHASE_SERVICE_URL
         fromService:
           name: purchase-service
-          type: private-service
+          type: web
           property: hostport
       - key: REPORT_SERVICE_URL
         fromService:
           name: report-service
-          type: private-service
+          type: web
           property: hostport
       - key: SUPABASE_URL
         sync: false
@@ -48,7 +48,7 @@ services:
       - key: JWT_SECRET
         sync: false
 
-  - type: private-service
+  - type: web
     name: auth-service
     env: docker
     repo: https://github.com/Santiago-AGZ/Backend-AxisERP
@@ -83,7 +83,7 @@ services:
       - key: JWT_REFRESH_EXPIRATION
         value: "604800000"
 
-  - type: private-service
+  - type: web
     name: catalog-service
     env: docker
     repo: https://github.com/Santiago-AGZ/Backend-AxisERP
@@ -106,7 +106,7 @@ services:
       - key: JPA_DDL_AUTO
         value: "validate"
 
-  - type: private-service
+  - type: web
     name: inventory-service
     env: docker
     repo: https://github.com/Santiago-AGZ/Backend-AxisERP
@@ -125,7 +125,7 @@ services:
       - key: CATALOG_SERVICE_URL
         fromService:
           name: catalog-service
-          type: private-service
+          type: web
           property: hostport
       - key: SUPABASE_JWT_ISSUER
         sync: false
@@ -134,7 +134,7 @@ services:
       - key: JPA_DDL_AUTO
         value: "validate"
 
-  - type: private-service
+  - type: web
     name: sales-service
     env: docker
     repo: https://github.com/Santiago-AGZ/Backend-AxisERP
@@ -153,12 +153,12 @@ services:
       - key: CATALOG_SERVICE_URL
         fromService:
           name: catalog-service
-          type: private-service
+          type: web
           property: hostport
       - key: INVENTORY_SERVICE_URL
         fromService:
           name: inventory-service
-          type: private-service
+          type: web
           property: hostport
       - key: SUPABASE_JWT_ISSUER
         sync: false
@@ -167,7 +167,7 @@ services:
       - key: JPA_DDL_AUTO
         value: "validate"
 
-  - type: private-service
+  - type: web
     name: purchase-service
     env: docker
     repo: https://github.com/Santiago-AGZ/Backend-AxisERP
@@ -186,12 +186,12 @@ services:
       - key: CATALOG_SERVICE_URL
         fromService:
           name: catalog-service
-          type: private-service
+          type: web
           property: hostport
       - key: INVENTORY_SERVICE_URL
         fromService:
           name: inventory-service
-          type: private-service
+          type: web
           property: hostport
       - key: SUPABASE_JWT_ISSUER
         sync: false
@@ -200,7 +200,7 @@ services:
       - key: JPA_DDL_AUTO
         value: "validate"
 
-  - type: private-service
+  - type: web
     name: report-service
     env: docker
     repo: https://github.com/Santiago-AGZ/Backend-AxisERP
@@ -219,22 +219,22 @@ services:
       - key: CATALOG_SERVICE_URL
         fromService:
           name: catalog-service
-          type: private-service
+          type: web
           property: hostport
       - key: INVENTORY_SERVICE_URL
         fromService:
           name: inventory-service
-          type: private-service
+          type: web
           property: hostport
       - key: SALES_SERVICE_URL
         fromService:
           name: sales-service
-          type: private-service
+          type: web
           property: hostport
       - key: PURCHASE_SERVICE_URL
         fromService:
           name: purchase-service
-          type: private-service
+          type: web
           property: hostport
       - key: SUPABASE_JWT_ISSUER
         sync: false
