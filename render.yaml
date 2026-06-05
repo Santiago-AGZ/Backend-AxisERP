@@ -1,0 +1,166 @@
+services:
+  - type: web
+    name: api-gateway
+    env: docker
+    repo: https://github.com/Santiago-AGZ/Backend-AxisERP
+    branch: master
+    dockerfilePath: ./api-gateway/Dockerfile
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: PORT
+        value: "8080"
+      - key: SERVER_PORT
+        value: "8080"
+      - key: AUTH_SERVICE_URL
+        fromService:
+          name: auth-service
+          type: private-service
+          property: hostport
+      - key: CATALOG_SERVICE_URL
+        fromService:
+          name: catalog-service
+          type: private-service
+          property: hostport
+      - key: INVENTORY_SERVICE_URL
+        fromService:
+          name: inventory-service
+          type: private-service
+          property: hostport
+      - key: SALES_SERVICE_URL
+        fromService:
+          name: sales-service
+          type: private-service
+          property: hostport
+      - key: PURCHASE_SERVICE_URL
+        fromService:
+          name: purchase-service
+          type: private-service
+          property: hostport
+      - key: REPORT_SERVICE_URL
+        fromService:
+          name: report-service
+          type: private-service
+          property: hostport
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_JWT_ISSUER
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+
+  - type: private-service
+    name: auth-service
+    env: docker
+    repo: https://github.com/Santiago-AGZ/Backend-AxisERP
+    branch: master
+    dockerfilePath: ./auth-service/Dockerfile
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: PORT
+        value: "8081"
+      - key: AUTH_DB_URL
+        sync: false
+      - key: AUTH_DB_USERNAME
+        sync: false
+
+  - type: private-service
+    name: catalog-service
+    env: docker
+    repo: https://github.com/Santiago-AGZ/Backend-AxisERP
+    branch: master
+    dockerfilePath: ./catalog-service/Dockerfile
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: PORT
+        value: "8082"
+      - key: CATALOG_DB_URL
+        sync: false
+      - key: CATALOG_DB_USERNAME
+        sync: false
+
+  - type: private-service
+    name: inventory-service
+    env: docker
+    repo: https://github.com/Santiago-AGZ/Backend-AxisERP
+    branch: master
+    dockerfilePath: ./inventory-service/Dockerfile
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: PORT
+        value: "8083"
+      - key: INVENTORY_DB_URL
+        sync: false
+      - key: INVENTORY_DB_USERNAME
+        sync: false
+      - key: CATALOG_SERVICE_URL
+        fromService:
+          name: catalog-service
+          type: private-service
+          property: hostport
+
+  - type: private-service
+    name: sales-service
+    env: docker
+    repo: https://github.com/Santiago-AGZ/Backend-AxisERP
+    branch: master
+    dockerfilePath: ./sales-service/Dockerfile
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: PORT
+        value: "8084"
+      - key: SALES_DB_URL
+        sync: false
+      - key: SALES_DB_USERNAME
+        sync: false
+      - key: CATALOG_SERVICE_URL
+        fromService:
+          name: catalog-service
+          type: private-service
+          property: hostport
+      - key: INVENTORY_SERVICE_URL
+        fromService:
+          name: inventory-service
+          type: private-service
+          property: hostport
+
+  - type: private-service
+    name: purchase-service
+    env: docker
+    repo: https://github.com/Santiago-AGZ/Backend-AxisERP
+    branch: master
+    dockerfilePath: ./purchase-service/Dockerfile
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: PORT
+        value: "8086"
+      - key: PURCHASE_DB_URL
+        sync: false
+      - key: PURCHASE_DB_USERNAME
+        sync: false
+
+  - type: private-service
+    name: report-service
+    env: docker
+    repo: https://github.com/Santiago-AGZ/Backend-AxisERP
+    branch: master
+    dockerfilePath: ./report-service/Dockerfile
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: PORT
+        value: "8085"
+      - key: REPORT_DB_URL
+        sync: false
+      - key: REPORT_DB_USERNAME
+        sync: false
+      - key: SALES_SERVICE_URL
+        fromService:
+          name: sales-service
+          type: private-service
+          property: hostport
+      - key: PURCHASE_SERVICE_URL
+        fromService:
+          name: purchase-service
+          type: private-service
+          property: hostport
