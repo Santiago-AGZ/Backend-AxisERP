@@ -64,18 +64,24 @@ jobs:
 
   deploy:
     needs: build-and-push
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Windows]
     environment:
       name: ${{ github.event.inputs.environment || 'production' }}
       url: ${{ steps.deploy-gateway.outputs.fqdn }}
+    env:
+      AZURE_CONFIG_DIR: C:\Users\Santiago\.azure
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Azure Login
-        uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Ensure Azure CLI is logged in
+        run: |
+          az account show 2>$null
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host "ERROR: Run 'az login' on the runner machine first."
+            exit 1
+          }
+        shell: pwsh
 
       - name: Set image tag
         id: image-tag
