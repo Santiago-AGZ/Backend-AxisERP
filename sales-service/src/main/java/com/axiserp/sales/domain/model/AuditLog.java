@@ -23,5 +23,7 @@ public class AuditLog {
     private String details;
     private UUID userId;
     private String userName;
+    private String ipAddress;
+    private String userAgent;
     private LocalDateTime timestamp;
 }

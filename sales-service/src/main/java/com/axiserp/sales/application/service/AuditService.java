@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.axiserp.sales.application.shared.RequestContext;
 import com.axiserp.sales.domain.model.AuditLog;
 import com.axiserp.sales.ports.output.AuditLogRepositoryPort;
 
@@ -45,6 +46,8 @@ public class AuditService {
                 .details(details)
                 .userId(userId)
                 .userName(userName)
+                .ipAddress(RequestContext.getIpAddress())
+                .userAgent(RequestContext.getUserAgent())
                 .timestamp(LocalDateTime.now())
                 .build();
         auditLogRepositoryPort.save(auditLog);

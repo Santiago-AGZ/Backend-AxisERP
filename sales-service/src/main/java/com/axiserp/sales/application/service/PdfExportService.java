@@ -82,9 +82,9 @@ public class PdfExportService {
             document.add(new Paragraph("DETALLE DE PRODUCTOS", headerFont));
             document.add(new Paragraph(" "));
 
-            PdfPTable table = new PdfPTable(6);
+            PdfPTable table = new PdfPTable(5);
             table.setWidthPercentage(100);
-            table.setWidths(new float[]{3f, 1f, 1.5f, 1f, 1.5f, 1.5f});
+            table.setWidths(new float[]{3f, 1f, 1.5f, 1f, 1.5f});
 
             String[] headers = {"Producto", "Cantidad", "P. Unitario", "Dto.", "Subtotal"};
             for (String h : headers) {

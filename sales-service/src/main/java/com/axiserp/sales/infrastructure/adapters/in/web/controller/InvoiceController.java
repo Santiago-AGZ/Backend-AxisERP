@@ -57,13 +57,13 @@ public class InvoiceController {
     @PreAuthorize("hasAnyRole('ADMIN', 'VENDEDOR')")
     @GetMapping("/{saleId}/excel")
     public ResponseEntity<byte[]> generateInvoiceExcel(@PathVariable UUID saleId) {
-        byte[] csv = excelExportService.generateInvoiceCsv(saleId);
+        byte[] excel = excelExportService.generateInvoiceExcel(saleId);
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.parseMediaType("text/csv"));
+        headers.setContentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
         headers.setContentDisposition(
                 org.springframework.http.ContentDisposition.attachment()
-                        .filename("factura-" + saleId + ".csv")
+                        .filename("factura-" + saleId + ".xlsx")
                         .build());
-        return new ResponseEntity<>(csv, headers, HttpStatus.OK);
+        return new ResponseEntity<>(excel, headers, HttpStatus.OK);
     }
 }

@@ -44,6 +44,12 @@ public class AuditLogEntity {
     @Column(name = "user_name", length = 100)
     private String userName;
 
+    @Column(name = "ip_address", length = 45)
+    private String ipAddress;
+
+    @Column(name = "user_agent", columnDefinition = "TEXT")
+    private String userAgent;
+
     @Column(nullable = false)
     private LocalDateTime timestamp;
 
