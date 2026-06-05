@@ -11,6 +11,7 @@ import org.springframework.web.client.RestClient;
 import com.axiserp.purchase.ports.output.CatalogServicePort;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 
 @Component
 public class CatalogServiceAdapter implements CatalogServicePort {
@@ -33,6 +34,7 @@ public class CatalogServiceAdapter implements CatalogServicePort {
     }
 
     @Override
+    @Retry(name = CB_NAME)
     @CircuitBreaker(name = CB_NAME, fallbackMethod = "productExistsFallback")
     public boolean productExists(UUID productId) {
         restClient.get()

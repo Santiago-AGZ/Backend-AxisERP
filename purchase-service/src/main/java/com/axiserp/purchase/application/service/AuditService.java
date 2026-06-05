@@ -7,8 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.axiserp.purchase.infrastructure.adapters.out.persistence.entity.AuditLogEntity;
-import com.axiserp.purchase.infrastructure.adapters.out.persistence.repository.JpaAuditLogRepository;
+import com.axiserp.purchase.application.shared.RequestContext;
+import com.axiserp.purchase.domain.model.AuditLog;
+import com.axiserp.purchase.ports.output.AuditLogRepositoryPort;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,7 +19,7 @@ public class AuditService {
 
     private static final Logger log = LoggerFactory.getLogger(AuditService.class);
 
-    private final JpaAuditLogRepository auditLogRepository;
+    private final AuditLogRepositoryPort auditLogRepositoryPort;
 
     public void logCreate(String entityType, UUID entityId, UUID userId, String detail) {
         save("CREATE", entityType, entityId, userId, detail);
@@ -33,15 +34,18 @@ public class AuditService {
     }
 
     private void save(String action, String entityType, UUID entityId, UUID userId, String detail) {
-        AuditLogEntity entry = AuditLogEntity.builder()
+        AuditLog auditLog = AuditLog.builder()
                 .id(UUID.randomUUID())
                 .action(action)
                 .entityType(entityType)
                 .entityId(entityId)
                 .userId(userId)
                 .detail(detail)
+                .ipAddress(RequestContext.getIpAddress())
+                .userAgent(RequestContext.getUserAgent())
+                .timestamp(LocalDateTime.now())
                 .build();
-        auditLogRepository.save(entry);
+        auditLogRepositoryPort.save(auditLog);
         log.info("audit_log action={} entity={} id={}", action, entityType, entityId);
     }
 }
