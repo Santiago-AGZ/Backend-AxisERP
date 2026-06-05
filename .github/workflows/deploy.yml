@@ -74,109 +74,38 @@ jobs:
 
       - name: Ensure Azure CLI is logged in
         run: az account show
+        shell: pwsh
 
       - name: Set image tag
         id: image-tag
         run: echo "tag=sha-${GITHUB_SHA::8}" >> $GITHUB_OUTPUT
 
       - name: Deploy Auth Service
-        run: |
-          az containerapp update \
-            --name auth-service \
-            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
-            --image ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-auth-service:${{ steps.image-tag.outputs.tag }} \
-            --set-env-vars \
-              AUTH_DB_URL="${{ secrets.AUTH_DB_URL }}" \
-              AUTH_DB_USERNAME="${{ secrets.AUTH_DB_USERNAME }}" \
-              SUPABASE_URL="${{ secrets.SUPABASE_URL }}" \
-              SUPABASE_JWT_ISSUER="${{ secrets.SUPABASE_JWT_ISSUER }}" \
-              SUPABASE_SERVICE_ROLE_KEY="${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
-              JPA_DDL_AUTO="validate" \
-              JWT_SECRET="${{ secrets.JWT_SECRET }}"
+        run: az containerapp update --name auth-service --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --image ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-auth-service:${{ steps.image-tag.outputs.tag }} --set-env-vars AUTH_DB_URL="${{ secrets.AUTH_DB_URL }}" AUTH_DB_USERNAME="${{ secrets.AUTH_DB_USERNAME }}" SUPABASE_URL="${{ secrets.SUPABASE_URL }}" SUPABASE_JWT_ISSUER="${{ secrets.SUPABASE_JWT_ISSUER }}" SUPABASE_SERVICE_ROLE_KEY="${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" JPA_DDL_AUTO="validate" JWT_SECRET="${{ secrets.JWT_SECRET }}"
 
       - name: Deploy Catalog Service
-        run: |
-          az containerapp update \
-            --name catalog-service \
-            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
-            --image ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-catalog-service:${{ steps.image-tag.outputs.tag }} \
-            --set-env-vars \
-              CATALOG_DB_URL="${{ secrets.CATALOG_DB_URL }}" \
-              CATALOG_DB_USERNAME="${{ secrets.CATALOG_DB_USERNAME }}" \
-              JPA_DDL_AUTO="validate"
+        run: az containerapp update --name catalog-service --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --image ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-catalog-service:${{ steps.image-tag.outputs.tag }} --set-env-vars CATALOG_DB_URL="${{ secrets.CATALOG_DB_URL }}" CATALOG_DB_USERNAME="${{ secrets.CATALOG_DB_USERNAME }}" JPA_DDL_AUTO="validate"
 
       - name: Deploy Inventory Service
-        run: |
-          az containerapp update \
-            --name inventory-service \
-            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
-            --image ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-inventory-service:${{ steps.image-tag.outputs.tag }} \
-            --set-env-vars \
-              INVENTORY_DB_URL="${{ secrets.INVENTORY_DB_URL }}" \
-              INVENTORY_DB_USERNAME="${{ secrets.INVENTORY_DB_USERNAME }}" \
-              JPA_DDL_AUTO="validate" \
-              CATALOG_SERVICE_URL="${{ secrets.CATALOG_SERVICE_URL }}"
+        run: az containerapp update --name inventory-service --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --image ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-inventory-service:${{ steps.image-tag.outputs.tag }} --set-env-vars INVENTORY_DB_URL="${{ secrets.INVENTORY_DB_URL }}" INVENTORY_DB_USERNAME="${{ secrets.INVENTORY_DB_USERNAME }}" JPA_DDL_AUTO="validate" CATALOG_SERVICE_URL="${{ secrets.CATALOG_SERVICE_URL }}"
 
       - name: Deploy Sales Service
-        run: |
-          az containerapp update \
-            --name sales-service \
-            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
-            --image ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-sales-service:${{ steps.image-tag.outputs.tag }} \
-            --set-env-vars \
-              SALES_DB_URL="${{ secrets.SALES_DB_URL }}" \
-              SALES_DB_USERNAME="${{ secrets.SALES_DB_USERNAME }}" \
-              JPA_DDL_AUTO="validate" \
-              CATALOG_SERVICE_URL="${{ secrets.CATALOG_SERVICE_URL }}" \
-              INVENTORY_SERVICE_URL="${{ secrets.INVENTORY_SERVICE_URL }}"
+        run: az containerapp update --name sales-service --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --image ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-sales-service:${{ steps.image-tag.outputs.tag }} --set-env-vars SALES_DB_URL="${{ secrets.SALES_DB_URL }}" SALES_DB_USERNAME="${{ secrets.SALES_DB_USERNAME }}" JPA_DDL_AUTO="validate" CATALOG_SERVICE_URL="${{ secrets.CATALOG_SERVICE_URL }}" INVENTORY_SERVICE_URL="${{ secrets.INVENTORY_SERVICE_URL }}"
 
       - name: Deploy Purchase Service
-        run: |
-          az containerapp update \
-            --name purchase-service \
-            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
-            --image ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-purchase-service:${{ steps.image-tag.outputs.tag }} \
-            --set-env-vars \
-              PURCHASE_DB_URL="${{ secrets.PURCHASE_DB_URL }}" \
-              PURCHASE_DB_USERNAME="${{ secrets.PURCHASE_DB_USERNAME }}" \
-              JPA_DDL_AUTO="validate"
+        run: az containerapp update --name purchase-service --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --image ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-purchase-service:${{ steps.image-tag.outputs.tag }} --set-env-vars PURCHASE_DB_URL="${{ secrets.PURCHASE_DB_URL }}" PURCHASE_DB_USERNAME="${{ secrets.PURCHASE_DB_USERNAME }}" JPA_DDL_AUTO="validate"
 
       - name: Deploy Report Service
-        run: |
-          az containerapp update \
-            --name report-service \
-            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
-            --image ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-report-service:${{ steps.image-tag.outputs.tag }} \
-            --set-env-vars \
-              REPORT_DB_URL="${{ secrets.REPORT_DB_URL }}" \
-              REPORT_DB_USERNAME="${{ secrets.REPORT_DB_USERNAME }}" \
-              JPA_DDL_AUTO="validate" \
-              SALES_SERVICE_URL="${{ secrets.SALES_SERVICE_URL }}" \
-              PURCHASE_SERVICE_URL="${{ secrets.PURCHASE_SERVICE_URL }}"
+        run: az containerapp update --name report-service --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --image ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-report-service:${{ steps.image-tag.outputs.tag }} --set-env-vars REPORT_DB_URL="${{ secrets.REPORT_DB_URL }}" REPORT_DB_USERNAME="${{ secrets.REPORT_DB_USERNAME }}" JPA_DDL_AUTO="validate" SALES_SERVICE_URL="${{ secrets.SALES_SERVICE_URL }}" PURCHASE_SERVICE_URL="${{ secrets.PURCHASE_SERVICE_URL }}"
 
       - name: Deploy API Gateway
         id: deploy-gateway
-        run: |
-          az containerapp update \
-            --name api-gateway \
-            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
-            --image ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-api-gateway:${{ steps.image-tag.outputs.tag }} \
-            --set-env-vars \
-              AUTH_SERVICE_URL="${{ secrets.AUTH_SERVICE_URL }}" \
-              CATALOG_SERVICE_URL="${{ secrets.CATALOG_SERVICE_URL }}" \
-              INVENTORY_SERVICE_URL="${{ secrets.INVENTORY_SERVICE_URL }}" \
-              SALES_SERVICE_URL="${{ secrets.SALES_SERVICE_URL }}" \
-              PURCHASE_SERVICE_URL="${{ secrets.PURCHASE_SERVICE_URL }}" \
-              REPORT_SERVICE_URL="${{ secrets.REPORT_SERVICE_URL }}" \
-              SUPABASE_URL="${{ secrets.SUPABASE_URL }}"
+        run: az containerapp update --name api-gateway --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --image ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-api-gateway:${{ steps.image-tag.outputs.tag }} --set-env-vars AUTH_SERVICE_URL="${{ secrets.AUTH_SERVICE_URL }}" CATALOG_SERVICE_URL="${{ secrets.CATALOG_SERVICE_URL }}" INVENTORY_SERVICE_URL="${{ secrets.INVENTORY_SERVICE_URL }}" SALES_SERVICE_URL="${{ secrets.SALES_SERVICE_URL }}" PURCHASE_SERVICE_URL="${{ secrets.PURCHASE_SERVICE_URL }}" REPORT_SERVICE_URL="${{ secrets.REPORT_SERVICE_URL }}" SUPABASE_URL="${{ secrets.SUPABASE_URL }}"
 
       - name: Get Gateway URL
         id: gateway-url
         run: |
-          FQDN=$(az containerapp show \
-            --name api-gateway \
-            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
-            --query properties.configuration.ingress.fqdn \
-            --output tsv)
-          echo "url=https://$FQDN" >> $GITHUB_OUTPUT
+          $FQDN = az containerapp show --name api-gateway --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --query properties.configuration.ingress.fqdn --output tsv
+          echo "url=https://$FQDN" >> $env:GITHUB_OUTPUT
           echo "Gateway deployed at: https://$FQDN"
+        shell: pwsh
