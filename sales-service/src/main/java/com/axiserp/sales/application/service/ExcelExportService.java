@@ -1,11 +1,11 @@
 package com.axiserp.sales.application.service;
 
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStreamWriter;
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
+import java.math.RoundingMode;
 import java.util.UUID;
 
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -32,7 +32,7 @@ public class ExcelExportService {
     private final InvoiceRepositoryPort invoiceRepositoryPort;
     private final CustomerRepositoryPort customerRepositoryPort;
 
-    public byte[] generateInvoiceCsv(UUID saleId) {
+    public byte[] generateInvoiceExcel(UUID saleId) {
         Sale sale = saleRepositoryPort.findById(saleId)
                 .orElseThrow(() -> new SaleNotFoundException(saleId));
 
@@ -42,61 +42,101 @@ public class ExcelExportService {
         Customer customer = customerRepositoryPort.findById(sale.getCustomerId())
                 .orElseThrow(() -> new SaleNotFoundException(sale.getCustomerId()));
 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try (OutputStreamWriter writer = new OutputStreamWriter(baos, StandardCharsets.UTF_8)) {
-            writer.write('\uFEFF');
+        try (Workbook workbook = new XSSFWorkbook()) {
+            Sheet sheet = workbook.createSheet("Factura");
 
-            writer.write("FACTURA DE VENTA\n");
-            writer.write("Factura No," + String.valueOf(invoice.getInvoiceNumber()) + "\n");
-            writer.write("Fecha," + String.valueOf(invoice.getIssuedAt()) + "\n");
-            writer.write("Venta No," + sale.getSaleNumber() + "\n");
-            writer.write("\n");
+            CellStyle titleStyle = createStyle(workbook, true, (short) 16);
+            CellStyle headerStyle = createStyle(workbook, true, (short) 11);
+            CellStyle labelStyle = createStyle(workbook, true, (short) 11);
+            CellStyle valueStyle = createStyle(workbook, false, (short) 11);
+            CellStyle priceStyle = createStyle(workbook, false, (short) 11);
+            priceStyle.setAlignment(HorizontalAlignment.RIGHT);
 
-            writer.write("DATOS DEL CLIENTE\n");
-            writer.write("Nombre," + customer.getName() + "\n");
-            writer.write("Documento," + customer.getDocumentNumber() + "\n");
+            int r = 0;
+
+            createRow(sheet, r++, titleStyle, "FACTURA DE VENTA");
+
+            r++;
+            createRow(sheet, r++, labelStyle, "Factura No:", String.valueOf(invoice.getInvoiceNumber()));
+            createRow(sheet, r++, labelStyle, "Fecha:", String.valueOf(invoice.getIssuedAt()));
+            createRow(sheet, r++, labelStyle, "Venta No:", sale.getSaleNumber());
+
+            r++;
+            createRow(sheet, r++, headerStyle, "DATOS DEL CLIENTE");
+            createRow(sheet, r++, labelStyle, "Nombre:", customer.getName());
+            createRow(sheet, r++, labelStyle, "Documento:", customer.getDocumentNumber());
             if (customer.getEmail() != null) {
-                writer.write("Email," + customer.getEmail() + "\n");
+                createRow(sheet, r++, labelStyle, "Email:", customer.getEmail());
             }
-            writer.write("\n");
 
-            writer.write("Producto,Cantidad,P. Unitario,Dto.,Subtotal\n");
+            r++;
+            Row headerRow = sheet.createRow(r++);
+            String[] headers = {"Producto", "Cantidad", "P. Unitario", "Dto.", "Subtotal"};
+            for (int i = 0; i < headers.length; i++) {
+                Cell cell = headerRow.createCell(i);
+                cell.setCellValue(headers[i]);
+                cell.setCellStyle(headerStyle);
+            }
+
             for (SaleItem item : sale.getItems()) {
-                writer.write(escapeCsv(item.getProductName() != null ? item.getProductName() : "") + ",");
-                writer.write(String.valueOf(item.getQuantity()) + ",");
-                writer.write(formatPrice(item.getUnitPrice()) + ",");
-                writer.write(formatPrice(item.getDiscount()) + ",");
-                writer.write(formatPrice(item.getSubtotal()) + "\n");
+                Row dataRow = sheet.createRow(r++);
+                dataRow.createCell(0).setCellValue(item.getProductName() != null ? item.getProductName() : "");
+                dataRow.createCell(1).setCellValue(item.getQuantity());
+
+                Cell priceCell = dataRow.createCell(2);
+                priceCell.setCellValue(formatPrice(item.getUnitPrice()));
+                priceCell.setCellStyle(priceStyle);
+
+                Cell discCell = dataRow.createCell(3);
+                discCell.setCellValue(formatPrice(item.getDiscount()));
+                discCell.setCellStyle(priceStyle);
+
+                Cell subCell = dataRow.createCell(4);
+                subCell.setCellValue(formatPrice(item.getSubtotal()));
+                subCell.setCellStyle(priceStyle);
             }
-            writer.write("\n");
 
-            writer.write("RESUMEN\n");
-            writer.write("Subtotal," + formatPrice(sale.getSubtotal()) + "\n");
-            writer.write("Descuento," + formatPrice(sale.getDiscount()) + "\n");
-            writer.write("IVA (19%)," + formatPrice(sale.getTax()) + "\n");
-            writer.write("Total," + formatPrice(sale.getTotal()) + "\n");
+            r++;
+            createRow(sheet, r++, headerStyle, "RESUMEN");
+            createRow(sheet, r++, labelStyle, "Subtotal:", formatPrice(sale.getSubtotal()));
+            createRow(sheet, r++, labelStyle, "Descuento:", formatPrice(sale.getDiscount()));
+            createRow(sheet, r++, labelStyle, "IVA (19%):", formatPrice(sale.getTax()));
+            createRow(sheet, r++, labelStyle, "Total:", formatPrice(sale.getTotal()));
 
-            writer.flush();
+            for (int i = 0; i < headers.length; i++) {
+                sheet.autoSizeColumn(i);
+            }
+
+            try (var baos = new java.io.ByteArrayOutputStream()) {
+                workbook.write(baos);
+                log.info("invoice_excel_generated saleId={}", saleId);
+                return baos.toByteArray();
+            }
         } catch (Exception e) {
-            log.error("Error generating CSV for saleId={}: {}", saleId, e.getMessage(), e);
-            throw new RuntimeException("Error al generar el CSV de la factura", e);
+            log.error("Error generating Excel for saleId={}: {}", saleId, e.getMessage(), e);
+            throw new RuntimeException("Error al generar el Excel de la factura", e);
         }
-
-        log.info("invoice_csv_generated saleId={}", saleId);
-        return baos.toByteArray();
     }
 
     private String formatPrice(BigDecimal price) {
-        return price != null ? price.setScale(2, BigDecimal.ROUND_HALF_UP).toString() : "0.00";
+        return price != null ? price.setScale(2, RoundingMode.HALF_UP).toString() : "0.00";
     }
 
-    private String escapeCsv(String value) {
-        if (value == null) {
-            return "";
+    private CellStyle createStyle(Workbook wb, boolean bold, short fontSize) {
+        CellStyle style = wb.createCellStyle();
+        Font font = wb.createFont();
+        font.setBold(bold);
+        font.setFontHeightInPoints(fontSize);
+        style.setFont(font);
+        return style;
+    }
+
+    private void createRow(Sheet sheet, int rowNum, CellStyle style, String... values) {
+        Row row = sheet.createRow(rowNum);
+        for (int i = 0; i < values.length; i++) {
+            Cell cell = row.createCell(i);
+            cell.setCellValue(values[i]);
+            cell.setCellStyle(style);
         }
-        if (value.contains(",") || value.contains("\"") || value.contains("\n")) {
-            return "\"" + value.replace("\"", "\"\"") + "\"";
-        }
-        return value;
     }
 }

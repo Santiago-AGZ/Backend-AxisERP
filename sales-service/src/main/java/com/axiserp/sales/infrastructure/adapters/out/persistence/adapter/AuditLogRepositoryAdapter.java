@@ -34,6 +34,8 @@ public class AuditLogRepositoryAdapter implements AuditLogRepositoryPort {
                 .details(e.getDetails())
                 .userId(e.getUserId())
                 .userName(e.getUserName())
+                .ipAddress(e.getIpAddress())
+                .userAgent(e.getUserAgent())
                 .timestamp(e.getTimestamp())
                 .build();
     }
@@ -47,6 +49,8 @@ public class AuditLogRepositoryAdapter implements AuditLogRepositoryPort {
                 .details(d.getDetails())
                 .userId(d.getUserId())
                 .userName(d.getUserName())
+                .ipAddress(d.getIpAddress())
+                .userAgent(d.getUserAgent())
                 .timestamp(d.getTimestamp() != null ? d.getTimestamp() : LocalDateTime.now())
                 .build();
     }

@@ -14,11 +14,12 @@ public interface SaleRepositoryPort {
 
     boolean existsPendingByCustomerId(UUID customerId);
 
-    List<Sale> findByCustomerId(UUID customerId);
-
     /**
      * @param status nullable string representing SaleStatus name, e.g. "CONFIRMADA"
      * @param productId nullable UUID to filter by product
+     * @param createdBy nullable UUID to filter by creator (used for VENDEDOR scope)
      */
-    List<Sale> findByFilters(UUID customerId, String status, UUID productId, int page, int size);
+    List<Sale> findByFilters(UUID customerId, String status, UUID productId, UUID createdBy, int page, int size);
+
+    List<Sale> findByCustomerId(UUID customerId, UUID createdBy);
 }

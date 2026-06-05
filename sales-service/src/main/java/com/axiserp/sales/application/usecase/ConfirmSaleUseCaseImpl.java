@@ -12,6 +12,7 @@ import com.axiserp.sales.application.dto.response.SaleResponse;
 import com.axiserp.sales.application.service.AuditService;
 import com.axiserp.sales.domain.exception.CustomerNotFoundException;
 import com.axiserp.sales.domain.exception.InsufficientStockException;
+import com.axiserp.sales.domain.exception.SaleAccessDeniedException;
 import com.axiserp.sales.domain.exception.SaleNotFoundException;
 import com.axiserp.sales.domain.exception.SaleNotModifiableException;
 import com.axiserp.sales.domain.model.Customer;
@@ -45,6 +46,8 @@ public class ConfirmSaleUseCaseImpl implements ConfirmSaleUseCase {
         // 1. Load sale and verify it can be confirmed
         Sale sale = saleRepositoryPort.findById(saleId)
                 .orElseThrow(() -> new SaleNotFoundException(saleId));
+
+        GetSaleUseCaseImpl.checkOwnership(sale);
 
         if (sale.getStatus() != SaleStatus.BORRADOR && sale.getStatus() != SaleStatus.PENDIENTE) {
             throw new SaleNotModifiableException("La venta solo puede confirmarse si esta en BORRADOR o PENDIENTE. Estado actual: " + sale.getStatus());

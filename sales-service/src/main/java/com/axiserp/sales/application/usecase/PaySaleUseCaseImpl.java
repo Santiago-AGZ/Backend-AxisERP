@@ -32,6 +32,8 @@ public class PaySaleUseCaseImpl implements PaySaleUseCase {
         Sale sale = saleRepositoryPort.findById(saleId)
                 .orElseThrow(() -> new SaleNotFoundException(saleId));
 
+        GetSaleUseCaseImpl.checkOwnership(sale);
+
         if (sale.getStatus() != SaleStatus.CONFIRMADA) {
             throw new SaleNotModifiableException("La venta solo puede pagarse si esta CONFIRMADA. Estado actual: " + sale.getStatus());
         }
