@@ -146,6 +146,7 @@ public class InventoryRepositoryAdapter implements InventoryRepositoryPort {
     private InventoryMovement toMovementDomain(InventoryMovementEntity e) {
         return InventoryMovement.builder()
                 .id(e.getId())
+                .inventoryId(e.getInventoryId())
                 .productId(e.getProductId())
                 .movementType(MovementType.valueOf(e.getMovementType().name()))
                 .quantity(e.getQuantity())
@@ -153,8 +154,7 @@ public class InventoryRepositoryAdapter implements InventoryRepositoryPort {
                 .newStock(e.getNewStock())
                 .referenceType(e.getReferenceType())
                 .referenceId(e.getReferenceId())
-                // BD tiene 'notes' para justificación/notas; 'user_id' para el autor
-                .justification(e.getNotes())
+                .justification(e.getJustification())
                 .notes(e.getNotes())
                 .createdBy(e.getUserId())
                 .createdAt(e.getCreatedAt())
@@ -162,9 +162,9 @@ public class InventoryRepositoryAdapter implements InventoryRepositoryPort {
     }
 
 private InventoryMovementEntity toMovementEntity(InventoryMovement m) {
-        String notesValue = m.getJustification() != null ? m.getJustification() : m.getNotes();
         return InventoryMovementEntity.builder()
                 .id(m.getId())
+                .inventoryId(m.getInventoryId())
                 .productId(m.getProductId())
                 .movementType(m.getMovementType())
                 .quantity(m.getQuantity())
@@ -172,7 +172,8 @@ private InventoryMovementEntity toMovementEntity(InventoryMovement m) {
                 .newStock(m.getNewStock())
                 .referenceType(m.getReferenceType())
                 .referenceId(m.getReferenceId())
-                .notes(notesValue)
+                .justification(m.getJustification())
+                .notes(m.getNotes())
                 .userId(m.getCreatedBy())
                 .createdAt(m.getCreatedAt())
                 .build();

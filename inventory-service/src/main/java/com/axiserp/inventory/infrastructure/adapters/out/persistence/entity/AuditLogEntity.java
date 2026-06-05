@@ -44,6 +44,12 @@ public class AuditLogEntity {
     @Column(name = "user_id")
     private UUID userId;
 
+    @Column(name = "ip_address", length = 45)
+    private String ipAddress;
+
+    @Column(name = "user_agent", columnDefinition = "TEXT")
+    private String userAgent;
+
     @PrePersist
     protected void onCreate() {
         this.timestamp = LocalDateTime.now();

@@ -33,6 +33,9 @@ public class InventoryMovementEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(name = "inventory_id")
+    private UUID inventoryId;
+
     @Column(name = "product_id", nullable = false)
     private UUID productId;
 
@@ -55,7 +58,10 @@ public class InventoryMovementEntity {
     @Column(name = "reference_id")
     private UUID referenceId;
 
-    @Column(name = "notes")
+    @Column(name = "justification", length = 500)
+    private String justification;
+
+    @Column(name = "notes", length = 500)
     private String notes;
 
     @Column(name = "user_id", nullable = false)
