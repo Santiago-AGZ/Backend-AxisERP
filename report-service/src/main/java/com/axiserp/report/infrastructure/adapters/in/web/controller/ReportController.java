@@ -24,7 +24,7 @@ import com.axiserp.report.application.service.ExcelExportService;
 import com.axiserp.report.application.service.PdfExportService;
 import com.axiserp.report.application.service.ReportAuditService;
 import com.axiserp.report.infrastructure.adapters.in.web.dto.ApiResponse;
-import com.axiserp.report.infrastructure.adapters.out.persistence.entity.ExportLogEntity;
+import com.axiserp.report.domain.model.ExportLog;
 import com.axiserp.report.ports.input.GenerateDashboardUseCase;
 import com.axiserp.report.ports.input.GenerateFrequentCustomersReportUseCase;
 import com.axiserp.report.ports.input.GenerateInventoryReportUseCase;
@@ -149,7 +149,7 @@ public class ReportController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/audit")
-    public ResponseEntity<ApiResponse<java.util.List<ExportLogEntity>>> getAuditLog(
+    public ResponseEntity<ApiResponse<java.util.List<ExportLog>>> getAuditLog(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) java.time.LocalDateTime from,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) java.time.LocalDateTime to,
             @RequestParam(required = false) String reportType) {
