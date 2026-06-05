@@ -20,17 +20,27 @@ public interface JpaSaleRepository extends JpaRepository<SaleEntity, UUID> {
             WHERE (:customerId IS NULL OR s.customerId = :customerId)
               AND (:status IS NULL OR s.status = :status)
               AND (:productId IS NULL OR i.productId = :productId)
+              AND (:createdBy IS NULL OR s.createdBy = :createdBy)
             ORDER BY s.updatedAt DESC
             """)
     List<SaleEntity> findByFilters(
             @Param("customerId") UUID customerId,
             @Param("status") SaleStatus status,
             @Param("productId") UUID productId,
+            @Param("createdBy") UUID createdBy,
             Pageable pageable);
 
     Optional<SaleEntity> findBySaleNumber(String saleNumber);
 
     boolean existsByCustomerIdAndStatusIn(UUID customerId, List<SaleStatus> statuses);
 
-    List<SaleEntity> findByCustomerIdOrderByCreatedAtDesc(UUID customerId);
+    @Query("""
+            SELECT s FROM SaleEntity s
+            WHERE s.customerId = :customerId
+              AND (:createdBy IS NULL OR s.createdBy = :createdBy)
+            ORDER BY s.createdAt DESC
+            """)
+    List<SaleEntity> findByCustomerIdOrderByCreatedAtDesc(
+            @Param("customerId") UUID customerId,
+            @Param("createdBy") UUID createdBy);
 }
