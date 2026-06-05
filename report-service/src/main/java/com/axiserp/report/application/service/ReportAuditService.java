@@ -1,6 +1,6 @@
 package com.axiserp.report.application.service;
 
-import com.axiserp.report.infrastructure.adapters.out.persistence.entity.ExportLogEntity;
+import com.axiserp.report.domain.model.ExportLog;
 import com.axiserp.report.ports.output.ExportLogRepositoryPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -20,7 +20,7 @@ public class ReportAuditService {
     private final ExportLogRepositoryPort exportLogRepository;
 
     public void logReportGeneration(String reportType, String format, Integer recordCount, String filterParams) {
-        ExportLogEntity log = ExportLogEntity.builder()
+        ExportLog log = ExportLog.builder()
                 .userId(getCurrentUserId())
                 .reportType(reportType)
                 .format(format)
@@ -32,7 +32,7 @@ public class ReportAuditService {
     }
 
     public void logExport(String reportType, String format, Integer recordCount, Long fileSizeBytes, String filterParams) {
-        ExportLogEntity log = ExportLogEntity.builder()
+        ExportLog log = ExportLog.builder()
                 .userId(getCurrentUserId())
                 .reportType(reportType)
                 .format(format)
@@ -44,7 +44,7 @@ public class ReportAuditService {
         exportLogRepository.save(log);
     }
 
-    public List<ExportLogEntity> getAuditLog(LocalDateTime from, LocalDateTime to, String reportType) {
+    public List<ExportLog> getAuditLog(LocalDateTime from, LocalDateTime to, String reportType) {
         if (reportType != null && !reportType.isBlank()) {
             return exportLogRepository.findByReportType(reportType);
         }
@@ -60,7 +60,6 @@ public class ReportAuditService {
             try {
                 return UUID.fromString(userId);
             } catch (IllegalArgumentException e) {
-                // invalid UUID format, fall through
             }
         }
         return SYSTEM_USER_ID;
