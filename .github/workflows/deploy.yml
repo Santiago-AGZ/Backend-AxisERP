@@ -68,20 +68,12 @@ jobs:
     environment:
       name: ${{ github.event.inputs.environment || 'production' }}
       url: ${{ steps.deploy-gateway.outputs.fqdn }}
-    env:
-      AZURE_CONFIG_DIR: C:\Users\Santiago\.azure
 
     steps:
       - uses: actions/checkout@v4
 
       - name: Ensure Azure CLI is logged in
-        run: |
-          az account show 2>$null
-          if ($LASTEXITCODE -ne 0) {
-            Write-Host "ERROR: Run 'az login' on the runner machine first."
-            exit 1
-          }
-        shell: pwsh
+        run: az account show
 
       - name: Set image tag
         id: image-tag
