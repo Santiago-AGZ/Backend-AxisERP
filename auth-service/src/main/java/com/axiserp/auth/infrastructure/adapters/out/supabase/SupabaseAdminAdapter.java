@@ -32,14 +32,14 @@ public class SupabaseAdminAdapter implements SupabaseAuthPort {
 
         String baseUrl = supabaseUrl + "/auth/v1/admin";
 
-        this.restClient = restClientBuilder
+        this.restClient = restClientBuilder.clone()
                 .baseUrl(baseUrl)
                 .defaultHeader("apikey", serviceRoleKey)
                 .defaultHeader("Authorization", "Bearer " + serviceRoleKey)
                 .defaultHeader("Content-Type", "application/json")
                 .build();
 
-        this.publicRestClient = restClientBuilder
+        this.publicRestClient = restClientBuilder.clone()
                 .baseUrl(supabaseUrl + "/auth/v1")
                 .defaultHeader("apikey", anonKey)
                 .defaultHeader("Content-Type", "application/json")
