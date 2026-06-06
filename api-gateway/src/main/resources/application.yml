@@ -20,3 +20,7 @@ management:
 
 server:
   port: 8080
+  error:
+    include-exception: true
+    include-message: always
+    include-stacktrace: always
