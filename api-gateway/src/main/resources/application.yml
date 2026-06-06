@@ -7,36 +7,16 @@ spring:
       default-filters:
         - DedupeResponseHeader=Access-Control-Allow-Origin
 
-      routes:
-        - id: auth-service
-          uri: ${AUTH_SERVICE_URL:http://auth-service:8081}
-          predicates:
-            - Path=/api/v1/auth/**,/api/v1/usuarios/**,/api/v1/audit-log/**,/swagger-ui/**,/v3/api-docs/**,/actuator/health,/actuator/info
+logging:
+  level:
+    org.springframework.cloud.gateway: TRACE
+    org.springframework.http.server.reactive: DEBUG
 
-        - id: catalog-service
-          uri: ${CATALOG_SERVICE_URL:http://catalog-service:8082}
-          predicates:
-            - Path=/api/v1/productos/**,/api/v1/categorias/**
-
-        - id: inventory-service
-          uri: ${INVENTORY_SERVICE_URL:http://inventory-service:8083}
-          predicates:
-            - Path=/api/v1/inventory/**
-
-        - id: sales-service
-          uri: ${SALES_SERVICE_URL:http://sales-service:8084}
-          predicates:
-            - Path=/api/v1/sales/**,/api/v1/customers/**,/api/v1/invoices/**
-
-        - id: purchase-service
-          uri: ${PURCHASE_SERVICE_URL:http://purchase-service:8086}
-          predicates:
-            - Path=/api/v1/purchases/**,/api/v1/suppliers/**
-
-        - id: report-service
-          uri: ${REPORT_SERVICE_URL:http://report-service:8085}
-          predicates:
-            - Path=/api/v1/reports/**
+management:
+  endpoints:
+    web:
+      exposure:
+        include: gateway,health,info
 
 server:
   port: 8080
