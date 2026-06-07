@@ -84,14 +84,6 @@ jobs:
           retention-days: 30
           if-no-files-found: warn
 
-      - name: OWASP Dependency-Check scan
-        if: success()
-        continue-on-error: true
-        run: |
-          mvn -f ${{ inputs.service }}/pom.xml \
-            org.owasp:dependency-check-maven:9.0.9:check \
-            -DfailOnCVSS=7.0 || true
-
       - name: Run Trivy vulnerability scan
         if: inputs.run-trivy
         run: |
