@@ -86,29 +86,24 @@ jobs:
 
       - name: OWASP Dependency-Check scan
         if: success()
-        run: |
-          mvn -f ${{ inputs.service }}/pom.xml org.owasp:dependency-check-maven:9.0.9:check -DfailOnCVSS=7.0 -Dformat=sarif -DsarifReportFilename="${{ inputs.service }}-dependency-check.sarif" || true
         continue-on-error: true
+        run: |
+          mvn -f ${{ inputs.service }}/pom.xml \
+            org.owasp:dependency-check-maven:9.0.9:check \
+            -DfailOnCVSS=7.0 || true
 
-      - name: Run Trivy vulnerability scan (filesystem)
+      - name: Run Trivy vulnerability scan
         if: inputs.run-trivy
         run: |
+          echo "=== Trivy: ${{ inputs.service }} (filesystem) ==="
           docker run --rm \
             -v ${{ github.workspace }}:/workspace \
             aquasec/trivy:0.71.0 \
             filesystem \
             --severity CRITICAL,HIGH \
             --exit-code 1 \
-            --format sarif \
-            --output /workspace/trivy-fs-${{ inputs.service }}.sarif \
+            --format table \
             /workspace/${{ inputs.service }}
-
-      - name: Upload Trivy filesystem results
-        if: always() && inputs.run-trivy
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: trivy-fs-${{ inputs.service }}.sarif
-          category: trivy-fs-${{ inputs.service }}
 
       - name: Set up Docker Buildx
         if: inputs.build-docker
@@ -148,20 +143,12 @@ jobs:
       - name: Scan Docker image with Trivy
         if: inputs.build-docker
         run: |
+          echo "=== Trivy: ${{ inputs.service }} image ==="
           docker run --rm \
             -v /var/run/docker.sock:/var/run/docker.sock:ro \
-            -v ${{ github.workspace }}:/workspace \
             aquasec/trivy:0.71.0 \
             image \
             --severity CRITICAL,HIGH \
             --exit-code 1 \
-            --format sarif \
-            --output /workspace/trivy-docker-${{ inputs.service }}.sarif \
+            --format table \
             ${{ inputs.service }}:ci-${{ github.sha }}
-
-      - name: Upload Docker scan results
-        if: always() && inputs.build-docker
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: trivy-docker-${{ inputs.service }}.sarif
-          category: trivy-docker-${{ inputs.service }}
