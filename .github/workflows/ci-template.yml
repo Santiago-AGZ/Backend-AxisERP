@@ -57,15 +57,16 @@ jobs:
 
       - name: Run Trivy vulnerability scan (filesystem)
         if: inputs.run-trivy
-        uses: aquasecurity/trivy-action@v0.29.0
-        with:
-          scan-type: fs
-          scan-ref: ${{ inputs.service }}
-          format: sarif
-          output: trivy-fs-${{ inputs.service }}.sarif
-          severity: CRITICAL,HIGH
-          exit-code: 0
-          scanners: vuln,secret
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}:/workspace \
+            aquasec/trivy:0.71.0 \
+            filesystem \
+            --severity CRITICAL,HIGH \
+            --exit-code 0 \
+            --format sarif \
+            --output /workspace/trivy-fs-${{ inputs.service }}.sarif \
+            /workspace/${{ inputs.service }}
 
       - name: Upload Trivy filesystem results
         if: success() && inputs.run-trivy
@@ -90,16 +91,18 @@ jobs:
           provenance: false
 
       - name: Scan Docker image with Trivy
-        if: inputs.build-docker && steps.docker_build.conclusion == 'success'
-        uses: aquasecurity/trivy-action@v0.29.0
-        with:
-          scan-type: image
-          image-ref: ${{ inputs.service }}:ci-${{ github.sha }}
-          format: sarif
-          output: trivy-docker-${{ inputs.service }}.sarif
-          severity: CRITICAL,HIGH
-          exit-code: 0
-          scanners: vuln
+        if: inputs.build-docker
+        run: |
+          docker run --rm \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            -v ${{ github.workspace }}:/workspace \
+            aquasec/trivy:0.71.0 \
+            image \
+            --severity CRITICAL,HIGH \
+            --exit-code 0 \
+            --format sarif \
+            --output /workspace/trivy-docker-${{ inputs.service }}.sarif \
+            ${{ inputs.service }}:ci-${{ github.sha }}
 
       - name: Upload Docker scan results
         if: success() && inputs.build-docker
