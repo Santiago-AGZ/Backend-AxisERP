@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,12 +23,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.axiserp.auth.application.dto.request.LogoutRequest;
 import com.axiserp.auth.application.dto.request.RefreshTokenRequest;
+import com.axiserp.auth.application.dto.response.LoginResponse;
 import com.axiserp.auth.application.dto.response.TokenResponse;
 import com.axiserp.auth.application.service.RefreshTokenService;
 import com.axiserp.auth.application.service.TokenBlacklistService;
 import com.axiserp.auth.infrastructure.adapters.in.web.response.ApiResponse;
-import com.axiserp.auth.ports.output.SupabaseAuthPort;
-import com.axiserp.auth.ports.output.SupabaseAuthPort.RefreshTokenResponse;
+import com.axiserp.auth.ports.input.RefreshTokenUseCase;
 
 /**
  * Controlador REST para gestionar tokens de autenticación.
@@ -41,7 +42,7 @@ public class TokenController {
 
     private final RefreshTokenService refreshTokenService;
     private final TokenBlacklistService tokenBlacklistService;
-    private final SupabaseAuthPort supabaseAuthPort;
+    private final RefreshTokenUseCase refreshTokenUseCase;
 
     /**
      * Realiza logout revocando el access token y refresh token del usuario.
@@ -91,15 +92,19 @@ public class TokenController {
      */
     @PostMapping("/refresh")
     public ResponseEntity<ApiResponse<TokenResponse>> refresh(
-            @Valid @RequestBody RefreshTokenRequest request) {
+            @Valid @RequestBody RefreshTokenRequest request,
+            HttpServletRequest httpRequest) {
         try {
-            RefreshTokenResponse supabaseResponse = supabaseAuthPort.refreshToken(
-                    request.refreshToken());
+            String ipAddress = getClientIp(httpRequest);
+            String userAgent = httpRequest.getHeader("User-Agent");
+            LoginResponse loginResponse = refreshTokenUseCase.refresh(
+                    request.refreshToken(), ipAddress, userAgent);
 
             TokenResponse tokenResponse = TokenResponse.builder()
-                    .accessToken(supabaseResponse.accessToken())
+                    .accessToken(loginResponse.getAccessToken())
+                    .refreshToken(loginResponse.getRefreshToken())
                     .tokenType("Bearer")
-                    .expiresIn(supabaseResponse.expiresIn())
+                    .expiresIn(900)
                     .build();
 
             log.info("access_token_refreshed");
@@ -148,6 +153,14 @@ public class TokenController {
             errorInfo.put("valid", false);
             return ResponseEntity.ok(ApiResponse.ok(errorInfo, "Token inválido"));
         }
+    }
+
+    private static String getClientIp(HttpServletRequest request) {
+        String xForwardedFor = request.getHeader("X-Forwarded-For");
+        if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
+            return xForwardedFor.split(",")[0].trim();
+        }
+        return request.getRemoteAddr();
     }
 }
 

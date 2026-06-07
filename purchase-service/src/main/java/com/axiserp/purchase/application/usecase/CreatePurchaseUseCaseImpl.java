@@ -11,6 +11,7 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.axiserp.purchase.application.dto.request.CreatePurchaseRequest;
 import com.axiserp.purchase.application.dto.request.PurchaseItemRequest;
@@ -45,6 +46,7 @@ public class CreatePurchaseUseCaseImpl implements CreatePurchaseUseCase {
     private final AuditService auditService;
 
     @Override
+    @Transactional
     public PurchaseResponse execute(CreatePurchaseRequest request, UUID createdBy) {
         // 1. Verify supplier exists and is active
         Supplier supplier = supplierRepositoryPort.findById(request.getSupplierId())

@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.axiserp.purchase.application.dto.response.PurchaseItemResponse;
 import com.axiserp.purchase.application.dto.response.PurchaseResponse;
@@ -29,6 +30,7 @@ public class UpdatePurchaseStatusUseCaseImpl implements UpdatePurchaseStatusUseC
     private final PurchaseRepositoryPort purchaseRepositoryPort;
 
     @Override
+    @Transactional
     public PurchaseResponse execute(UUID purchaseId, PurchaseStatus newStatus) {
         Purchase purchase = purchaseRepositoryPort.findById(purchaseId)
                 .orElseThrow(() -> new PurchaseNotFoundException(purchaseId));

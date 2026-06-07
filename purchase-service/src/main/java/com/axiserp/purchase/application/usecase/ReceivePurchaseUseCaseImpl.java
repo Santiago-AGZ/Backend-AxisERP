@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.axiserp.purchase.application.dto.request.ReceiveItemRequest;
 import com.axiserp.purchase.application.dto.request.ReceivePurchaseRequest;
@@ -35,6 +36,7 @@ public class ReceivePurchaseUseCaseImpl implements ReceivePurchaseUseCase {
     private final InventoryServicePort inventoryServicePort;
 
     @Override
+    @Transactional
     public PurchaseResponse execute(UUID purchaseId, ReceivePurchaseRequest request) {
         Purchase purchase = purchaseRepositoryPort.findById(purchaseId)
                 .orElseThrow(() -> new PurchaseNotFoundException(purchaseId));

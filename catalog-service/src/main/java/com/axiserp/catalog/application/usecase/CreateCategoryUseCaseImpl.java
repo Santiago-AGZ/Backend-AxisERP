@@ -42,6 +42,9 @@ public class CreateCategoryUseCaseImpl implements CreateCategoryUseCase {
             if (parent.isDeleted()) {
                 throw new IllegalArgumentException("No se puede asignar una categoria padre eliminada");
             }
+            if (wouldCreateCycle(request.getParentId())) {
+                throw new IllegalArgumentException("No se puede crear una categoria con un padre que es su propio descendiente");
+            }
         }
 
         Category category = CategoryFactory.createNew(request.getName(), request.getDescription(), request.getParentId(), createdBy);
@@ -51,6 +54,19 @@ public class CreateCategoryUseCaseImpl implements CreateCategoryUseCase {
         catalogAuditService.log("CREATE", "CATEGORY", saved.getId(), createdBy, "Categoria creada: " + saved.getName());
 
         return toResponse(saved);
+    }
+
+    private boolean wouldCreateCycle(UUID parentId) {
+        var visited = new java.util.HashSet<UUID>();
+        UUID current = parentId;
+        while (current != null) {
+            if (!visited.add(current)) {
+                return true;
+            }
+            var parent = categoryRepositoryPort.findById(current).orElse(null);
+            current = parent != null ? parent.getParentId() : null;
+        }
+        return false;
     }
 
     private CategoryResponse toResponse(Category category) {
