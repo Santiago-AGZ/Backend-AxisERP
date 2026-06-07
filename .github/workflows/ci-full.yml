@@ -4,6 +4,11 @@ on:
   push:
     branches: [main, master]
 
+permissions:
+  contents: read
+  security-events: write
+  actions: write
+
 concurrency:
   group: ci-full-${{ github.ref }}
   cancel-in-progress: true

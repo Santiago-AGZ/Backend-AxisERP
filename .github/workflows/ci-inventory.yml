@@ -12,6 +12,11 @@ on:
       - '.github/workflows/ci-inventory.yml'
       - '.github/workflows/ci-template.yml'
 
+permissions:
+  contents: read
+  security-events: write
+  actions: write
+
 concurrency:
   group: ci-inventory-${{ github.ref }}
   cancel-in-progress: true

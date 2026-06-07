@@ -12,6 +12,11 @@ on:
       - '.github/workflows/ci-report.yml'
       - '.github/workflows/ci-template.yml'
 
+permissions:
+  contents: read
+  security-events: write
+  actions: write
+
 concurrency:
   group: ci-report-${{ github.ref }}
   cancel-in-progress: true

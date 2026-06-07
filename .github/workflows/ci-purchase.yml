@@ -12,6 +12,11 @@ on:
       - '.github/workflows/ci-purchase.yml'
       - '.github/workflows/ci-template.yml'
 
+permissions:
+  contents: read
+  security-events: write
+  actions: write
+
 concurrency:
   group: ci-purchase-${{ github.ref }}
   cancel-in-progress: true

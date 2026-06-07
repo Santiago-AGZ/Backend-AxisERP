@@ -12,6 +12,11 @@ on:
       - '.github/workflows/ci-gateway.yml'
       - '.github/workflows/ci-template.yml'
 
+permissions:
+  contents: read
+  security-events: write
+  actions: write
+
 concurrency:
   group: ci-gateway-${{ github.ref }}
   cancel-in-progress: true
