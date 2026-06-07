@@ -160,7 +160,8 @@ class InventoryControllerTest {
                         .build());
 
         mockMvc.perform(post("/api/v1/inventory/products/{productId}/entry", productId)
-                        .param("quantity", "10"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"quantity\":10}"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.success").value(true));
     }

@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.axiserp.inventory.application.dto.request.AdjustmentRequest;
 import com.axiserp.inventory.application.dto.request.InitializeInventoryRequest;
+import com.axiserp.inventory.application.dto.request.MovementRequest;
 import com.axiserp.inventory.application.dto.response.InventoryResponse;
 import com.axiserp.inventory.application.dto.response.MovementResponse;
 import com.axiserp.inventory.application.dto.response.ProductInventoryResponse;
@@ -117,12 +118,10 @@ public class InventoryController {
     @PostMapping("/products/{productId}/entry")
     public ResponseEntity<ApiResponse<MovementResponse>> registerEntry(
             @PathVariable UUID productId,
-            @RequestParam int quantity,
-            @RequestParam(required = false) String referenceType,
-            @RequestParam(required = false) UUID referenceId,
-            @RequestParam(required = false) String notes) {
+            @Valid @RequestBody MovementRequest request) {
         MovementResponse response = registerEntryUseCase.registerEntry(
-                productId, quantity, referenceType, referenceId, notes, currentUserId());
+                productId, request.getQuantity(), request.getReferenceType(),
+                request.getReferenceId(), request.getNotes(), currentUserId());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.created(response, "Entrada registrada"));
     }
@@ -131,12 +130,10 @@ public class InventoryController {
     @PostMapping("/products/{productId}/exit")
     public ResponseEntity<ApiResponse<MovementResponse>> registerExit(
             @PathVariable UUID productId,
-            @RequestParam int quantity,
-            @RequestParam(required = false) String referenceType,
-            @RequestParam(required = false) UUID referenceId,
-            @RequestParam(required = false) String notes) {
+            @Valid @RequestBody MovementRequest request) {
         MovementResponse response = registerExitUseCase.registerExit(
-                productId, quantity, referenceType, referenceId, notes, currentUserId());
+                productId, request.getQuantity(), request.getReferenceType(),
+                request.getReferenceId(), request.getNotes(), currentUserId());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.created(response, "Salida registrada"));
     }
@@ -145,12 +142,10 @@ public class InventoryController {
     @PostMapping("/products/{productId}/return")
     public ResponseEntity<ApiResponse<MovementResponse>> registerReturn(
             @PathVariable UUID productId,
-            @RequestParam int quantity,
-            @RequestParam(required = false) String referenceType,
-            @RequestParam(required = false) UUID referenceId,
-            @RequestParam(required = false) String notes) {
+            @Valid @RequestBody MovementRequest request) {
         MovementResponse response = registerReturnUseCase.registerReturn(
-                productId, quantity, referenceType, referenceId, notes, currentUserId());
+                productId, request.getQuantity(), request.getReferenceType(),
+                request.getReferenceId(), request.getNotes(), currentUserId());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.created(response, "Devolución registrada"));
     }
