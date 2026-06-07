@@ -9,6 +9,8 @@ on:
   pull_request:
     paths:
       - 'api-gateway/**'
+      - '.github/workflows/ci-gateway.yml'
+      - '.github/workflows/ci-template.yml'
 
 concurrency:
   group: ci-gateway-${{ github.ref }}
@@ -19,3 +21,5 @@ jobs:
     uses: ./.github/workflows/ci-template.yml
     with:
       service: api-gateway
+      build-docker: false
+      run-trivy: true

@@ -15,18 +15,13 @@ on:
       build-docker:
         required: false
         type: boolean
-        default: true
-        description: 'Build and scan Docker image (default: true)'
+        default: false
+        description: 'Build and scan Docker image (default: false)'
       run-trivy:
         required: false
         type: boolean
         default: true
         description: 'Run Trivy security scans (default: true)'
-
-permissions:
-  contents: read
-  security-events: write
-  actions: read
 
 jobs:
   build-test:
@@ -80,22 +75,12 @@ jobs:
           retention-days: 30
           if-no-files-found: warn
 
-      - name: Generate and upload SBOM
-        if: success()
-        run: |
-          mvn -f ${{ inputs.service }}/pom.xml org.cyclonedx:cyclonedx-maven-plugin:2.7.10:aggregate -DoutputFormat=json || true
-          if [ -f "${{ inputs.service }}/target/bom.json" ]; then
-            mv "${{ inputs.service }}/target/bom.json" "${{ inputs.service }}-sbom.json"
-            echo "✓ SBOM generated successfully"
-          fi
-        continue-on-error: true
-
       - name: Upload SBOM artifact
         if: always()
         uses: actions/upload-artifact@v4.3.1
         with:
           name: ${{ inputs.service }}-sbom
-          path: ${{ inputs.service }}-sbom.json
+          path: ${{ inputs.service }}/target/bom.json
           retention-days: 30
           if-no-files-found: warn
 

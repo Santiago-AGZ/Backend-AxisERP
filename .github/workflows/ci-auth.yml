@@ -9,6 +9,8 @@ on:
   pull_request:
     paths:
       - 'auth-service/**'
+      - '.github/workflows/ci-auth.yml'
+      - '.github/workflows/ci-template.yml'
 
 concurrency:
   group: ci-auth-${{ github.ref }}
@@ -19,3 +21,5 @@ jobs:
     uses: ./.github/workflows/ci-template.yml
     with:
       service: auth-service
+      build-docker: false
+      run-trivy: true

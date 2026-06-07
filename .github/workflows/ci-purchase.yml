@@ -9,6 +9,8 @@ on:
   pull_request:
     paths:
       - 'purchase-service/**'
+      - '.github/workflows/ci-purchase.yml'
+      - '.github/workflows/ci-template.yml'
 
 concurrency:
   group: ci-purchase-${{ github.ref }}
@@ -19,3 +21,5 @@ jobs:
     uses: ./.github/workflows/ci-template.yml
     with:
       service: purchase-service
+      build-docker: false
+      run-trivy: true
