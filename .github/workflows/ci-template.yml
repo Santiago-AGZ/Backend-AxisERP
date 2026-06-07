@@ -19,11 +19,6 @@ on:
         type: boolean
         default: true
 
-permissions:
-  contents: read
-  security-events: write
-  actions: write
-
 jobs:
   build-test:
     name: ${{ inputs.service }}

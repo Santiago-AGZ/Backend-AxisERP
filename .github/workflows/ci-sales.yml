@@ -10,10 +10,6 @@ on:
     paths:
       - 'sales-service/**'
 
-permissions:
-  contents: read
-  security-events: write
-
 concurrency:
   group: ci-sales-${{ github.ref }}
   cancel-in-progress: true
