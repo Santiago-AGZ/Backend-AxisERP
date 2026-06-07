@@ -27,8 +27,6 @@ import com.axiserp.auth.application.service.TokenBlacklistService;
 import com.axiserp.auth.infrastructure.config.SecurityConfig;
 import com.axiserp.auth.ports.input.RefreshTokenUseCase;
 import com.axiserp.auth.ports.output.RoleRepositoryPort;
-import com.axiserp.auth.ports.output.SupabaseAuthPort;
-import com.axiserp.auth.ports.output.SupabaseAuthPort.RefreshTokenResponse;
 import com.axiserp.auth.ports.output.TokenBlacklistRepositoryPort;
 import com.axiserp.auth.ports.output.UserRepositoryPort;
 
@@ -48,9 +46,6 @@ class TokenControllerTest {
 
     @MockBean
     private TokenBlacklistService tokenBlacklistService;
-
-    @MockBean
-    private SupabaseAuthPort supabaseAuthPort;
 
     @MockBean
     private UserRepositoryPort userRepositoryPort;
@@ -79,8 +74,13 @@ class TokenControllerTest {
         when(tokenBlacklistService.revoke(anyString(), any(UUID.class), any()))
             .thenReturn(null);
 
-        var refreshResponse = new RefreshTokenResponse("new-access-token", "new-refresh-token", 3600);
-        when(supabaseAuthPort.refreshToken(anyString())).thenReturn(refreshResponse);
+        var loginResponse = LoginResponse.builder()
+                .accessToken("new-access-token")
+                .refreshToken("new-refresh-token")
+                .name("Test User")
+                .role("ADMIN")
+                .build();
+        when(refreshTokenUseCase.refresh(anyString(), anyString(), any())).thenReturn(loginResponse);
     }
 
     @Test
