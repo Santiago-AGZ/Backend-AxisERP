@@ -83,12 +83,9 @@ jobs:
       - name: Generate and upload SBOM
         if: success()
         run: |
-          mvn -f ${{ inputs.service }}/pom.xml \
-          org.cyclonedx:cyclonedx-maven-plugin:2.7.10:makeAggregate \
-          -DoutputFormat=json \
-          -Doutput="${{ inputs.service }}-sbom.json"
-
-          if [ -f "${{ inputs.service }}-sbom.json" ]; then
+          mvn -f ${{ inputs.service }}/pom.xml org.cyclonedx:cyclonedx-maven-plugin:2.7.10:aggregate -DoutputFormat=json || true
+          if [ -f "${{ inputs.service }}/target/bom.json" ]; then
+            mv "${{ inputs.service }}/target/bom.json" "${{ inputs.service }}-sbom.json"
             echo "✓ SBOM generated successfully"
           fi
         continue-on-error: true
@@ -105,13 +102,8 @@ jobs:
       - name: OWASP Dependency-Check scan
         if: success()
         run: |
-          mvn -f ${{ inputs.service }}/pom.xml \
-          org.owasp:dependency-check-maven:9.0.9:check \
-          -DnvdApiKey=${{ secrets.NVD_API_KEY || 'demo' }} \
-          -DfailOnCVSS=7.0 \
-          -Dformat=sarif \
-          -DsarifReportFilename="${{ inputs.service }}-dependency-check.sarif" \
-          || true
+          mvn -f ${{ inputs.service }}/pom.xml org.owasp:dependency-check-maven:9.0.9:check -DfailOnCVSS=7.0 -Dformat=sarif -DsarifReportFilename="${{ inputs.service }}-dependency-check.sarif" || true
+        continue-on-error: true
 
       - name: Run Trivy vulnerability scan (filesystem)
         if: inputs.run-trivy
