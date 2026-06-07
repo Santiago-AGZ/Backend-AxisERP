@@ -10,6 +10,10 @@ on:
     paths:
       - 'inventory-service/**'
 
+permissions:
+  contents: read
+  security-events: write
+
 concurrency:
   group: ci-inventory-${{ github.ref }}
   cancel-in-progress: true

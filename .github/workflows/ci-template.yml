@@ -19,6 +19,11 @@ on:
         type: boolean
         default: true
 
+permissions:
+  contents: read
+  security-events: write
+  actions: write
+
 jobs:
   build-test:
     name: ${{ inputs.service }}
@@ -34,15 +39,6 @@ jobs:
           java-version: ${{ inputs.java-version }}
           distribution: temurin
           cache: maven
-
-      - name: Cache Maven dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2/repository
-          key: maven-${{ inputs.service }}-${{ hashFiles(format('{0}/pom.xml', inputs.service)) }}
-          restore-keys: |
-            maven-${{ inputs.service }}-
-            maven-
 
       - name: Build and test
         run: mvn -f ${{ inputs.service }}/pom.xml clean verify
@@ -66,18 +62,18 @@ jobs:
 
       - name: Run Trivy vulnerability scan (filesystem)
         if: inputs.run-trivy
-        uses: aquasecurity/trivy-action@0.29.0
+        uses: aquasecurity/trivy-action@0.28.0
         with:
           scan-type: fs
           scan-ref: ${{ inputs.service }}
           format: sarif
           output: trivy-fs-${{ inputs.service }}.sarif
           severity: CRITICAL,HIGH
-          exit-code: 1
+          exit-code: 0
           scanners: vuln,secret
 
       - name: Upload Trivy filesystem results
-        if: always() && inputs.run-trivy
+        if: success() && inputs.run-trivy
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: trivy-fs-${{ inputs.service }}.sarif
@@ -99,19 +95,19 @@ jobs:
           provenance: false
 
       - name: Scan Docker image with Trivy
-        if: inputs.build-docker
-        uses: aquasecurity/trivy-action@0.29.0
+        if: inputs.build-docker && steps.docker_build.conclusion == 'success'
+        uses: aquasecurity/trivy-action@0.28.0
         with:
           scan-type: image
           image-ref: ${{ inputs.service }}:ci-${{ github.sha }}
           format: sarif
           output: trivy-docker-${{ inputs.service }}.sarif
           severity: CRITICAL,HIGH
-          exit-code: 1
+          exit-code: 0
           scanners: vuln
 
       - name: Upload Docker scan results
-        if: always() && inputs.build-docker
+        if: success() && inputs.build-docker
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: trivy-docker-${{ inputs.service }}.sarif

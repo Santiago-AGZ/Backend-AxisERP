@@ -10,6 +10,10 @@ on:
     paths:
       - 'report-service/**'
 
+permissions:
+  contents: read
+  security-events: write
+
 concurrency:
   group: ci-report-${{ github.ref }}
   cancel-in-progress: true

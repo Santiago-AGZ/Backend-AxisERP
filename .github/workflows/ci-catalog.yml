@@ -10,6 +10,10 @@ on:
     paths:
       - 'catalog-service/**'
 
+permissions:
+  contents: read
+  security-events: write
+
 concurrency:
   group: ci-catalog-${{ github.ref }}
   cancel-in-progress: true

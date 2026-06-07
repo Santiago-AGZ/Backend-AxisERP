@@ -10,6 +10,10 @@ on:
     paths:
       - 'api-gateway/**'
 
+permissions:
+  contents: read
+  security-events: write
+
 concurrency:
   group: ci-gateway-${{ github.ref }}
   cancel-in-progress: true
