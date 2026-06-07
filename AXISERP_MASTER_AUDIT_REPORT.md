@@ -6,6 +6,26 @@
 
 ---
 
+## Corrections Applied
+
+### P0 — Fixed (in session)
+
+| # | Hallazgo | Archivo | Solución |
+|---|----------|---------|----------|
+| C1 | Refresh token logged in plaintext | `auth-service/.../RefreshTokenService.java:90` | Changed to `token_id=****{last4}` (commit `d5ee698`) |
+| C2 | api-gateway Actuator sin configurar | `api-gateway/.../application.yml` | **FALSE POSITIVE** — ya estaba configurado en líneas 17-21 |
+
+### P1 — Fixed (commit `a7cdd91`)
+
+| # | Hallazgo | Archivo | Solución |
+|---|----------|---------|----------|
+| H1 | AuthController llama SupabaseAuthPort directo (bypass use case) | `AuthController.java:37,52` | Routing through `AuthenticateUserUseCase` y `RequestPasswordResetUseCase` |
+| H2 | TokenController llama SupabaseAuthPort.refreshToken directo | `TokenController.java:96-97` | Routing through `RefreshTokenUseCase.refresh()` |
+| H3 | 4 purchase write use cases sin @Transactional | `purchase-service/.../*Impl.java` | Agregado `@Transactional` a `Create`, `UpdateStatus`, `Receive`, `Cancel` |
+| M4 | CreateCategory sin cycle detection | `CreateCategoryUseCaseImpl.java` | Agregado `wouldCreateCycle()` que traverse ancestors con HashSet |
+
+---
+
 ## Resumen Ejecutivo
 
 | Dimensión | Score | Estado |
