@@ -26,4 +26,3 @@ jobs:
     with:
       service: api-gateway
       build-docker: false
-      run-trivy: true

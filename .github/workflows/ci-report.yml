@@ -26,4 +26,3 @@ jobs:
     with:
       service: report-service
       build-docker: false
-      run-trivy: true

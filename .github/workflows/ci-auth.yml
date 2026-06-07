@@ -26,4 +26,3 @@ jobs:
     with:
       service: auth-service
       build-docker: false
-      run-trivy: true

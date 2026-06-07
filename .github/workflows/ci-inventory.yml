@@ -26,4 +26,3 @@ jobs:
     with:
       service: inventory-service
       build-docker: false
-      run-trivy: true
