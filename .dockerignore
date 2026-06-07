@@ -1,9 +1,11 @@
-target/
-pom.xml
-src/
+**/target/
 .git/
+.gitattributes
+.gitignore
 .idea/
 *.iml
 .env
 *.log
 HELP.md
+README.md
+node_modules/

@@ -1,36 +1,59 @@
-name: CI Build and Test
+name: Full CI - Build, Docker & Security
 
 on:
   push:
     branches: [main, master]
-  pull_request:
-    branches: [main, master]
+
+concurrency:
+  group: ci-full-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build-and-test:
-    runs-on: ubuntu-latest
+  ci-auth:
+    uses: ./.github/workflows/ci-template.yml
+    with:
+      service: auth-service
+      build-docker: true
+      run-trivy: true
 
-    strategy:
-      matrix:
-        service:
-          - api-gateway
-          - auth-service
-          - catalog-service
-          - inventory-service
-          - sales-service
-          - purchase-service
-          - report-service
+  ci-catalog:
+    uses: ./.github/workflows/ci-template.yml
+    with:
+      service: catalog-service
+      build-docker: true
+      run-trivy: true
 
-    steps:
-      - uses: actions/checkout@v4
+  ci-inventory:
+    uses: ./.github/workflows/ci-template.yml
+    with:
+      service: inventory-service
+      build-docker: true
+      run-trivy: true
 
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          java-version: "21"
-          distribution: "temurin"
-          cache: maven
+  ci-sales:
+    uses: ./.github/workflows/ci-template.yml
+    with:
+      service: sales-service
+      build-docker: true
+      run-trivy: true
 
-      - name: Build and test ${{ matrix.service }}
-        run: mvn clean verify -pl ${{ matrix.service }} -am
-        working-directory: ${{ matrix.service }}
+  ci-purchase:
+    uses: ./.github/workflows/ci-template.yml
+    with:
+      service: purchase-service
+      build-docker: true
+      run-trivy: true
+
+  ci-report:
+    uses: ./.github/workflows/ci-template.yml
+    with:
+      service: report-service
+      build-docker: true
+      run-trivy: true
+
+  ci-gateway:
+    uses: ./.github/workflows/ci-template.yml
+    with:
+      service: api-gateway
+      build-docker: true
+      run-trivy: true

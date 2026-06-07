@@ -10,6 +10,10 @@ on:
     paths:
       - 'catalog-service/**'
 
+concurrency:
+  group: ci-catalog-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   ci:
     uses: ./.github/workflows/ci-template.yml

@@ -10,6 +10,10 @@ on:
     paths:
       - 'report-service/**'
 
+concurrency:
+  group: ci-report-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   ci:
     uses: ./.github/workflows/ci-template.yml
