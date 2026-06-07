@@ -34,6 +34,9 @@ import com.axiserp.sales.ports.input.CreateSaleUseCase;
 import com.axiserp.sales.ports.input.DeactivateCustomerUseCase;
 import com.axiserp.sales.ports.input.GetCustomerHistoryUseCase;
 import com.axiserp.sales.ports.input.GetCustomerUseCase;
+import com.axiserp.sales.ports.input.GenerateInvoiceCsvUseCase;
+import com.axiserp.sales.ports.input.GenerateInvoiceExcelUseCase;
+import com.axiserp.sales.ports.input.GenerateInvoicePdfUseCase;
 import com.axiserp.sales.ports.input.GetInvoiceUseCase;
 import com.axiserp.sales.ports.input.GetSaleUseCase;
 import com.axiserp.sales.ports.input.ListCustomersUseCase;
@@ -240,8 +243,9 @@ class InvoiceControllerTest {
     private MockMvc mockMvc;
 
     @Mock private GetInvoiceUseCase getInvoiceUseCase;
-    @Mock private PdfExportService pdfExportService;
-    @Mock private ExcelExportService excelExportService;
+    @Mock private GenerateInvoicePdfUseCase generateInvoicePdfUseCase;
+    @Mock private GenerateInvoiceExcelUseCase generateInvoiceExcelUseCase;
+    @Mock private GenerateInvoiceCsvUseCase generateInvoiceCsvUseCase;
 
     private UUID invoiceId;
     private UUID saleId;
@@ -249,7 +253,8 @@ class InvoiceControllerTest {
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders
-                .standaloneSetup(new InvoiceController(getInvoiceUseCase, pdfExportService, excelExportService))
+                .standaloneSetup(new InvoiceController(getInvoiceUseCase, generateInvoicePdfUseCase,
+                        generateInvoiceExcelUseCase, generateInvoiceCsvUseCase))
                 .build();
 
         invoiceId = UUID.randomUUID();
@@ -282,7 +287,7 @@ class InvoiceControllerTest {
     @Test
     @DisplayName("GET /api/v1/invoices/{saleId}/pdf - should return 200")
     void generateInvoicePdf_success() throws Exception {
-        when(pdfExportService.generateInvoicePdf(saleId)).thenReturn(new byte[]{1, 2, 3});
+        when(generateInvoicePdfUseCase.generateInvoicePdf(saleId)).thenReturn(new byte[]{1, 2, 3});
 
         mockMvc.perform(get("/api/v1/invoices/{saleId}/pdf", saleId))
                 .andExpect(status().isOk())
@@ -292,7 +297,7 @@ class InvoiceControllerTest {
     @Test
     @DisplayName("GET /api/v1/invoices/{saleId}/excel - should return 200")
     void generateInvoiceExcel_success() throws Exception {
-        when(excelExportService.generateInvoiceExcel(saleId)).thenReturn(new byte[]{1, 2, 3});
+        when(generateInvoiceExcelUseCase.generateInvoiceExcel(saleId)).thenReturn(new byte[]{1, 2, 3});
 
         mockMvc.perform(get("/api/v1/invoices/{saleId}/excel", saleId))
                 .andExpect(status().isOk())

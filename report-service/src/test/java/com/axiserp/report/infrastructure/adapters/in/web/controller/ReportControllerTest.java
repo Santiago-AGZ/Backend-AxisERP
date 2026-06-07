@@ -24,12 +24,13 @@ import com.axiserp.report.application.dto.response.DashboardResponse;
 import com.axiserp.report.application.dto.response.InventoryReportResponse;
 import com.axiserp.report.application.dto.response.TopProductsReportResponse;
 import com.axiserp.report.application.dto.response.FrequentCustomerReportResponse;
-import com.axiserp.report.application.service.CsvExportService;
-import com.axiserp.report.application.service.ExcelExportService;
-import com.axiserp.report.application.service.PdfExportService;
-import com.axiserp.report.application.service.ReportAuditService;
 import com.axiserp.report.domain.model.ExportLog;
+import com.axiserp.report.ports.input.ExportInventoryExcelUseCase;
+import com.axiserp.report.ports.input.ExportSalesCsvUseCase;
+import com.axiserp.report.ports.input.ExportSalesPdfUseCase;
 import com.axiserp.report.ports.input.GenerateDashboardUseCase;
+import com.axiserp.report.ports.input.GenerateFrequentCustomersReportUseCase;
+import com.axiserp.report.ports.input.GetExportAuditLogUseCase;
 import com.axiserp.report.ports.input.GenerateFrequentCustomersReportUseCase;
 import com.axiserp.report.ports.input.GenerateInventoryReportUseCase;
 import com.axiserp.report.ports.input.GenerateSalesReportUseCase;
@@ -46,10 +47,10 @@ class ReportControllerTest {
     @Mock private GenerateTopProductsReportUseCase generateTopProductsReportUseCase;
     @Mock private GenerateDashboardUseCase generateDashboardUseCase;
     @Mock private GenerateFrequentCustomersReportUseCase generateFrequentCustomersReportUseCase;
-    @Mock private PdfExportService pdfExportService;
-    @Mock private ExcelExportService excelExportService;
-    @Mock private CsvExportService csvExportService;
-    @Mock private ReportAuditService reportAuditService;
+    @Mock private ExportSalesPdfUseCase exportSalesPdfUseCase;
+    @Mock private ExportInventoryExcelUseCase exportInventoryExcelUseCase;
+    @Mock private ExportSalesCsvUseCase exportSalesCsvUseCase;
+    @Mock private GetExportAuditLogUseCase getExportAuditLogUseCase;
 
     @BeforeEach
     void setUp() {
@@ -57,8 +58,8 @@ class ReportControllerTest {
                 .standaloneSetup(new ReportController(
                         generateSalesReportUseCase, generateInventoryReportUseCase,
                         generateTopProductsReportUseCase, generateDashboardUseCase,
-                        generateFrequentCustomersReportUseCase, pdfExportService,
-                        excelExportService, csvExportService, reportAuditService))
+                        generateFrequentCustomersReportUseCase, exportSalesPdfUseCase,
+                        exportInventoryExcelUseCase, exportSalesCsvUseCase, getExportAuditLogUseCase))
                 .build();
     }
 
@@ -123,7 +124,7 @@ class ReportControllerTest {
     @DisplayName("GET /api/v1/reports/sales/export/pdf - should return PDF")
     void exportPdf() throws Exception {
         byte[] pdfBytes = {1, 2, 3, 4, 5};
-        when(pdfExportService.exportSalesReport(any(), any(), any())).thenReturn(pdfBytes);
+        when(exportSalesPdfUseCase.exportSalesPdf(any(), any(), any())).thenReturn(pdfBytes);
 
         mockMvc.perform(get("/api/v1/reports/sales/export/pdf"))
                 .andExpect(status().isOk())
@@ -134,7 +135,7 @@ class ReportControllerTest {
     @DisplayName("GET /api/v1/reports/sales/export/csv - should return CSV")
     void exportCsv() throws Exception {
         byte[] csvBytes = {1, 2, 3};
-        when(csvExportService.exportSalesReport(any(), any(), any(), any(), any())).thenReturn(csvBytes);
+        when(exportSalesCsvUseCase.exportSalesCsv(any(), any(), any(), any(), any())).thenReturn(csvBytes);
 
         mockMvc.perform(get("/api/v1/reports/sales/export/csv"))
                 .andExpect(status().isOk())
@@ -158,7 +159,7 @@ class ReportControllerTest {
     @DisplayName("GET /api/v1/reports/audit - should return 200")
     void auditLog() throws Exception {
         var log = ExportLog.builder().id(UUID.randomUUID()).reportType("DAILY_SALES").build();
-        when(reportAuditService.getAuditLog(any(), any(), any())).thenReturn(List.of(log));
+        when(getExportAuditLogUseCase.getAuditLog(any(), any(), any())).thenReturn(List.of(log));
 
         mockMvc.perform(get("/api/v1/reports/audit"))
                 .andExpect(status().isOk())
