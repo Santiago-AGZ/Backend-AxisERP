@@ -105,7 +105,7 @@ jobs:
 
       - name: Upload Trivy filesystem results
         if: always() && inputs.run-trivy
-        uses: github/codeql-action/upload-sarif@v3.1.0
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: trivy-fs-${{ inputs.service }}.sarif
           category: trivy-fs-${{ inputs.service }}
@@ -161,7 +161,7 @@ jobs:
 
       - name: Upload Docker scan results
         if: always() && inputs.build-docker
-        uses: github/codeql-action/upload-sarif@v3.1.0
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: trivy-docker-${{ inputs.service }}.sarif
           category: trivy-docker-${{ inputs.service }}
