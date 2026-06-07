@@ -251,7 +251,7 @@
 					<execution>
 						<phase>package</phase>
 						<goals>
-							<goal>makeAggregate</goal>
+							<goal>makeAggregateBom</goal>
 						</goals>
 					</execution>
 				</executions>
