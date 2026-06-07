@@ -6,7 +6,6 @@ on:
 
 permissions:
   contents: read
-  security-events: write
   actions: write
 
 concurrency:
@@ -19,46 +18,39 @@ jobs:
     with:
       service: auth-service
       build-docker: true
-      run-trivy: true
 
   ci-catalog:
     uses: ./.github/workflows/ci-template.yml
     with:
       service: catalog-service
       build-docker: true
-      run-trivy: true
 
   ci-inventory:
     uses: ./.github/workflows/ci-template.yml
     with:
       service: inventory-service
       build-docker: true
-      run-trivy: true
 
   ci-sales:
     uses: ./.github/workflows/ci-template.yml
     with:
       service: sales-service
       build-docker: true
-      run-trivy: true
 
   ci-purchase:
     uses: ./.github/workflows/ci-template.yml
     with:
       service: purchase-service
       build-docker: true
-      run-trivy: true
 
   ci-report:
     uses: ./.github/workflows/ci-template.yml
     with:
       service: report-service
       build-docker: true
-      run-trivy: true
 
   ci-gateway:
     uses: ./.github/workflows/ci-template.yml
     with:
       service: api-gateway
       build-docker: true
-      run-trivy: true

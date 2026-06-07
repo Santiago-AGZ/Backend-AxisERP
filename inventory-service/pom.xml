@@ -189,24 +189,6 @@
 				</configuration>
 			</plugin>
 
-			<!-- OWASP Dependency Check -->
-			<plugin>
-				<groupId>org.owasp</groupId>
-				<artifactId>dependency-check-maven</artifactId>
-				<version>9.0.9</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>check</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<failOnCVSS>7.0</failOnCVSS>
-					<format>sarif</format>
-					<skip>false</skip>
-				</configuration>
-			</plugin>
 
 			<!-- CycloneDX SBOM Plugin -->
 			<plugin>

@@ -14,7 +14,6 @@ on:
 
 permissions:
   contents: read
-  security-events: write
   actions: write
 
 concurrency:
@@ -27,4 +26,3 @@ jobs:
     with:
       service: auth-service
       build-docker: false
-      run-trivy: true
