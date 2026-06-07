@@ -1,9 +1,6 @@
 package com.axiserp.inventory.infrastructure.config;
 
 import java.io.IOException;
-import java.time.Instant;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,11 +12,10 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+import com.axiserp.inventory.infrastructure.adapters.in.web.dto.ApiResponse;
 import com.axiserp.inventory.infrastructure.security.JwtAuthenticationFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -56,13 +52,8 @@ public class SecurityConfig {
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("error", "Unauthorized");
-        body.put("message", "Se requiere autenticacion para acceder a este recurso");
-        body.put("status", 401);
-        body.put("timestamp", Instant.now().toString());
-
-        objectMapper.writeValue(response.getOutputStream(), body);
+        var apiResponse = ApiResponse.error("UNAUTHORIZED", "Se requiere autenticacion para acceder a este recurso");
+        objectMapper.writeValue(response.getOutputStream(), apiResponse);
     }
 
     private void handleAccessDenied(HttpServletRequest request,
@@ -70,12 +61,7 @@ public class SecurityConfig {
         response.setStatus(HttpStatus.FORBIDDEN.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("error", "Forbidden");
-        body.put("message", "No tiene permisos para realizar esta operacion");
-        body.put("status", 403);
-        body.put("timestamp", Instant.now().toString());
-
-        objectMapper.writeValue(response.getOutputStream(), body);
+        var apiResponse = ApiResponse.error("FORBIDDEN", "No tiene permisos para realizar esta operacion");
+        objectMapper.writeValue(response.getOutputStream(), apiResponse);
     }
 }

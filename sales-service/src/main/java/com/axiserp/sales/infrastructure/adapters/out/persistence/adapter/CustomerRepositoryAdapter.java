@@ -73,6 +73,13 @@ public class CustomerRepositoryAdapter implements CustomerRepositoryPort {
                 .toList();
     }
 
+    @Override
+    public long countByFilters(String search, boolean includeInactive) {
+        boolean hasSearch = search != null && !search.isBlank();
+        String pattern = hasSearch ? "%" + search.toLowerCase() + "%" : "%";
+        return jpaCustomerRepository.countByFilters(hasSearch, pattern, includeInactive, CustomerEntity.CustomerStatus.ACTIVO);
+    }
+
     private Customer toDomain(CustomerEntity e) {
         return Customer.builder()
                 .id(e.getId())

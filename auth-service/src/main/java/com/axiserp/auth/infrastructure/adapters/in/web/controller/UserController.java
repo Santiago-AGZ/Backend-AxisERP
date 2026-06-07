@@ -22,7 +22,7 @@ import com.axiserp.auth.application.dto.request.CreateUserRequest;
 import com.axiserp.auth.application.dto.request.UpdateUserRequest;
 import com.axiserp.auth.application.dto.response.AuditLogResponse;
 import com.axiserp.auth.application.dto.response.UserResponse;
-import com.axiserp.auth.domain.model.PageResult;
+import com.axiserp.auth.application.shared.PageResult;
 import com.axiserp.auth.domain.model.User;
 import com.axiserp.auth.infrastructure.adapters.in.web.response.ApiResponse;
 import com.axiserp.auth.infrastructure.adapters.in.web.response.ApiResponse.PaginationMeta;

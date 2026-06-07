@@ -9,4 +9,5 @@ import com.axiserp.inventory.infrastructure.adapters.out.persistence.entity.Inve
 
 public interface JpaMovementRepository extends JpaRepository<InventoryMovementEntity, UUID> {
     List<InventoryMovementEntity> findByProductIdOrderByCreatedAtDesc(UUID productId);
+    long countByProductId(UUID productId);
 }

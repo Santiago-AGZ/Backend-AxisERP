@@ -64,6 +64,12 @@ public class SaleRepositoryAdapter implements SaleRepositoryPort {
                 .toList();
     }
 
+    @Override
+    public long countByFilters(UUID customerId, String status, UUID productId, UUID createdBy) {
+        SaleEntity.SaleStatus statusEnum = (status != null && !status.isBlank()) ? SaleEntity.SaleStatus.valueOf(status) : null;
+        return jpaSaleRepository.countByFilters(customerId, statusEnum, productId, createdBy);
+    }
+
     private Sale toDomain(SaleEntity entity) {
         List<SaleItem> items = entity.getItems() != null
                 ? entity.getItems().stream().map(this::itemToDomain).toList()

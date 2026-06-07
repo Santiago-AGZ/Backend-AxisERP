@@ -50,7 +50,7 @@ public class PurchaseEntity {
     @Column(nullable = false)
     private PurchaseStatus status;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "purchase_id")
     @Builder.Default
     private List<PurchaseItemEntity> items = new ArrayList<>();

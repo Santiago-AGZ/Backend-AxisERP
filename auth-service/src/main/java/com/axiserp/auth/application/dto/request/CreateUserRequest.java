@@ -15,7 +15,7 @@ public class CreateUserRequest {
     private String name;
 
     @NotBlank(message = "El correo electrónico es obligatorio")
-    @Email(message = "El correo no tiene un formato válido")
+    @Email(message = "formato de correo inválido")
     private String email;
 
     @NotBlank(message = "El rol es obligatorio")

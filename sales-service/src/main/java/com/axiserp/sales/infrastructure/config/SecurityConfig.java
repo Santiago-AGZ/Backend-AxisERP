@@ -1,9 +1,6 @@
 package com.axiserp.sales.infrastructure.config;
 
 import java.io.IOException;
-import java.time.Instant;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,6 +15,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.axiserp.sales.infrastructure.adapters.in.web.dto.ApiResponse;
 import com.axiserp.sales.infrastructure.security.JwtAuthenticationFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -54,12 +52,7 @@ public class SecurityConfig {
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("error", "Unauthorized");
-        body.put("message", "Se requiere autenticacion para acceder a este recurso");
-        body.put("status", 401);
-        body.put("timestamp", Instant.now().toString());
-
-        objectMapper.writeValue(response.getOutputStream(), body);
+        var apiResponse = ApiResponse.error("UNAUTHORIZED", "Se requiere autenticacion para acceder a este recurso");
+        objectMapper.writeValue(response.getOutputStream(), apiResponse);
     }
 }

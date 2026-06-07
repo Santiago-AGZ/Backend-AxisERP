@@ -19,17 +19,17 @@ import com.axiserp.report.application.dto.response.FrequentCustomerReportRespons
 import com.axiserp.report.application.dto.response.InventoryReportResponse;
 import com.axiserp.report.application.dto.response.SalesReportResponse;
 import com.axiserp.report.application.dto.response.TopProductsReportResponse;
-import com.axiserp.report.application.service.CsvExportService;
-import com.axiserp.report.application.service.ExcelExportService;
-import com.axiserp.report.application.service.PdfExportService;
-import com.axiserp.report.application.service.ReportAuditService;
-import com.axiserp.report.infrastructure.adapters.in.web.dto.ApiResponse;
 import com.axiserp.report.domain.model.ExportLog;
+import com.axiserp.report.infrastructure.adapters.in.web.dto.ApiResponse;
+import com.axiserp.report.ports.input.ExportInventoryExcelUseCase;
+import com.axiserp.report.ports.input.ExportSalesCsvUseCase;
+import com.axiserp.report.ports.input.ExportSalesPdfUseCase;
 import com.axiserp.report.ports.input.GenerateDashboardUseCase;
 import com.axiserp.report.ports.input.GenerateFrequentCustomersReportUseCase;
 import com.axiserp.report.ports.input.GenerateInventoryReportUseCase;
 import com.axiserp.report.ports.input.GenerateSalesReportUseCase;
 import com.axiserp.report.ports.input.GenerateTopProductsReportUseCase;
+import com.axiserp.report.ports.input.GetExportAuditLogUseCase;
 
 import lombok.RequiredArgsConstructor;
 
@@ -43,10 +43,10 @@ public class ReportController {
     private final GenerateTopProductsReportUseCase generateTopProductsReportUseCase;
     private final GenerateDashboardUseCase generateDashboardUseCase;
     private final GenerateFrequentCustomersReportUseCase generateFrequentCustomersReportUseCase;
-    private final PdfExportService pdfExportService;
-    private final ExcelExportService excelExportService;
-    private final CsvExportService csvExportService;
-    private final ReportAuditService reportAuditService;
+    private final ExportSalesPdfUseCase exportSalesPdfUseCase;
+    private final ExportInventoryExcelUseCase exportInventoryExcelUseCase;
+    private final ExportSalesCsvUseCase exportSalesCsvUseCase;
+    private final GetExportAuditLogUseCase getExportAuditLogUseCase;
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/sales")
@@ -95,10 +95,7 @@ public class ReportController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @RequestParam(required = false) UUID clientId) {
-        byte[] pdf = pdfExportService.exportSalesReport(startDate, endDate, clientId);
-        String filterParams = String.format("{\"startDate\":\"%s\",\"endDate\":\"%s\",\"clientId\":\"%s\"}",
-                startDate, endDate, clientId);
-        reportAuditService.logExport("DAILY_SALES", "PDF", null, (long) pdf.length, filterParams);
+        byte[] pdf = exportSalesPdfUseCase.exportSalesPdf(startDate, endDate, clientId);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);
         headers.setContentDispositionFormData("attachment", "reporte-ventas.pdf");
@@ -109,9 +106,7 @@ public class ReportController {
     @GetMapping("/inventory/export/excel")
     public ResponseEntity<byte[]> exportInventoryExcel(
             @RequestParam(required = false) UUID categoryId) {
-        byte[] excel = excelExportService.exportInventoryReport(categoryId);
-        String filterParams = categoryId != null ? String.format("{\"categoryId\":\"%s\"}", categoryId) : "{}";
-        reportAuditService.logExport("INVENTORY_STATUS", "EXCEL", null, (long) excel.length, filterParams);
+        byte[] excel = exportInventoryExcelUseCase.exportInventoryExcel(categoryId);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
         headers.setContentDispositionFormData("attachment", "reporte-inventario.xlsx");
@@ -137,10 +132,7 @@ public class ReportController {
             @RequestParam(required = false) String status,
             @RequestParam(required = false) UUID userId,
             @RequestParam(required = false) UUID clientId) {
-        byte[] csv = csvExportService.exportSalesReport(startDate, endDate, status, userId, clientId);
-        String filterParams = String.format("{\"startDate\":\"%s\",\"endDate\":\"%s\",\"status\":\"%s\",\"userId\":\"%s\",\"clientId\":\"%s\"}",
-                startDate, endDate, status, userId, clientId);
-        reportAuditService.logExport("DAILY_SALES", "CSV", null, (long) csv.length, filterParams);
+        byte[] csv = exportSalesCsvUseCase.exportSalesCsv(startDate, endDate, status, userId, clientId);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType("text/csv"));
         headers.setContentDispositionFormData("attachment", "reporte-ventas.csv");
@@ -153,7 +145,7 @@ public class ReportController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) java.time.LocalDateTime from,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) java.time.LocalDateTime to,
             @RequestParam(required = false) String reportType) {
-        var logs = reportAuditService.getAuditLog(from, to, reportType);
+        var logs = getExportAuditLogUseCase.getAuditLog(from, to, reportType);
         return ResponseEntity.ok(ApiResponse.ok(logs, "Historial de exportaciones"));
     }
 }

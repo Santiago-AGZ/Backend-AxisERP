@@ -14,6 +14,7 @@ import com.axiserp.catalog.domain.exception.CategoryNotFoundException;
 import com.axiserp.catalog.domain.exception.DuplicateCategoryException;
 import com.axiserp.catalog.domain.factory.CategoryFactory;
 import com.axiserp.catalog.domain.model.Category;
+import com.axiserp.catalog.domain.model.Category.CategoryStatus;
 import com.axiserp.catalog.ports.input.CreateCategoryUseCase;
 import com.axiserp.catalog.ports.output.CategoryRepositoryPort;
 
@@ -36,8 +37,11 @@ public class CreateCategoryUseCaseImpl implements CreateCategoryUseCase {
         }
 
         if (request.getParentId() != null) {
-            categoryRepositoryPort.findById(request.getParentId())
+            Category parent = categoryRepositoryPort.findById(request.getParentId())
                     .orElseThrow(() -> new CategoryNotFoundException("Categoria padre no encontrada"));
+            if (parent.isDeleted()) {
+                throw new IllegalArgumentException("No se puede asignar una categoria padre eliminada");
+            }
         }
 
         Category category = CategoryFactory.createNew(request.getName(), request.getDescription(), request.getParentId(), createdBy);

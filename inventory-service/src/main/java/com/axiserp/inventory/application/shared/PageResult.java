@@ -1,4 +1,4 @@
-package com.axiserp.inventory.domain.model;
+package com.axiserp.inventory.application.shared;
 
 import java.util.List;
 

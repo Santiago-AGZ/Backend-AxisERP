@@ -71,10 +71,10 @@ public class SaleController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size) {
 
-        List<SaleResponse> data = listSalesUseCase.list(customerId, status, productId, page - 1, size);
+        var result = listSalesUseCase.list(customerId, status, productId, page - 1, size);
         return ResponseEntity.ok(ApiResponse.paged(
-                data, "Ventas recuperadas exitosamente",
-                PaginationMeta.of(page, size, data.size())));
+                result.getContent(), "Ventas recuperadas exitosamente",
+                PaginationMeta.of(page, size, result.getTotalRecords())));
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'VENDEDOR')")

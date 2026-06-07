@@ -57,6 +57,11 @@ public class InventoryRepositoryAdapter implements InventoryRepositoryPort {
     }
 
     @Override
+    public long countMovementsByProductId(UUID productId) {
+        return jpaMovementRepository.countByProductId(productId);
+    }
+
+    @Override
     public List<Inventory> findAll(int page, int size) {
         return jpaInventoryRepository.findAll(PageRequest.of(page, size))
                 .stream()

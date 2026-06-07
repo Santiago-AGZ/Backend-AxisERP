@@ -14,6 +14,20 @@ import com.axiserp.sales.infrastructure.adapters.out.persistence.entity.Customer
 
 public interface JpaCustomerRepository extends JpaRepository<CustomerEntity, UUID> {
 
+    @Query("""
+            SELECT COUNT(c) FROM CustomerEntity c
+            WHERE (:includeInactive = true OR c.status = :active)
+              AND (:hasSearch = false
+                   OR LOWER(c.name) LIKE :pattern
+                   OR LOWER(c.documentNumber) LIKE :pattern
+                   OR LOWER(c.codigo) LIKE :pattern)
+            """)
+    long countByFilters(
+            @Param("hasSearch") boolean hasSearch,
+            @Param("pattern") String pattern,
+            @Param("includeInactive") boolean includeInactive,
+            @Param("active") CustomerStatus active);
+
     Optional<CustomerEntity> findByCodigo(String codigo);
 
     boolean existsByCodigo(String codigo);

@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.axiserp.catalog.application.dto.response.ProductResponse;
-import com.axiserp.catalog.domain.model.PageResult;
+import com.axiserp.catalog.application.shared.PageResult;
 
 public interface ListProductsUseCase {
     PageResult<ProductResponse> list(String search, String codigo, UUID categoryId, boolean includeInactive, int page, int size);

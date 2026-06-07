@@ -13,6 +13,7 @@ public interface InventoryRepositoryPort {
     InventoryMovement saveMovement(InventoryMovement movement);
     Optional<InventoryMovement> findMovementById(UUID movementId);
     List<InventoryMovement> findMovementsByProductId(UUID productId);
+    long countMovementsByProductId(UUID productId);
     List<Inventory> findAll(int page, int size);
     long countAll();
     List<Inventory> findLowStock(int page, int size);

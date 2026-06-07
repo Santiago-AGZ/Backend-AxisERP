@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.axiserp.catalog.application.dto.response.ProductResponse;
 import com.axiserp.catalog.domain.model.Category;
-import com.axiserp.catalog.domain.model.PageResult;
+import com.axiserp.catalog.application.shared.PageResult;
 import com.axiserp.catalog.domain.model.Product;
 import com.axiserp.catalog.ports.input.ListProductsUseCase;
 import com.axiserp.catalog.ports.output.CategoryRepositoryPort;

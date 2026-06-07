@@ -107,10 +107,10 @@ public class InventoryController {
     @PreAuthorize("hasAnyRole('ADMIN', 'INVENTARIO')")
     @GetMapping("/products/{productId}/movements")
     public ResponseEntity<ApiResponse<List<MovementResponse>>> listMovements(@PathVariable UUID productId) {
-        List<MovementResponse> data = listMovementsUseCase.listByProductId(productId);
+        var result = listMovementsUseCase.listByProductId(productId);
         return ResponseEntity.ok(ApiResponse.paged(
-                data, "Movimientos recuperados exitosamente",
-                PaginationMeta.of(1, data.size(), data.size())));
+                result.getContent(), "Movimientos recuperados exitosamente",
+                PaginationMeta.of(1, result.getContent().size(), result.getTotal())));
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'INVENTARIO')")

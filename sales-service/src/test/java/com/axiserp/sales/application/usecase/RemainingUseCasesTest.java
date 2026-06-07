@@ -82,9 +82,12 @@ class ListSalesUseCaseImplTest {
                 .thenReturn(List.of(
                         Sale.builder().status(SaleStatus.BORRADOR).items(List.of()).build(),
                         Sale.builder().status(SaleStatus.CONFIRMADA).items(List.of()).build()));
+        when(saleRepositoryPort.countByFilters(any(), any(), any(), any()))
+                .thenReturn(2L);
 
         var response = listSalesUseCase.list(null, null, null, 0, 10);
-        assertEquals(2, response.size());
+        assertEquals(2, response.getContent().size());
+        assertEquals(2, response.getTotalRecords());
     }
 
     @Test
@@ -92,9 +95,12 @@ class ListSalesUseCaseImplTest {
     void list_noResults() {
         when(saleRepositoryPort.findByFilters(any(), any(), any(), any(), anyInt(), anyInt()))
                 .thenReturn(List.of());
+        when(saleRepositoryPort.countByFilters(any(), any(), any(), any()))
+                .thenReturn(0L);
 
         var response = listSalesUseCase.list(null, null, null, 0, 10);
-        assertTrue(response.isEmpty());
+        assertTrue(response.getContent().isEmpty());
+        assertEquals(0, response.getTotalRecords());
     }
 }
 
@@ -270,9 +276,12 @@ class ListCustomersUseCaseImplTest {
                 .thenReturn(List.of(
                         Customer.builder().codigo("CLI-000001").status(CustomerStatus.ACTIVO).build(),
                         Customer.builder().codigo("CLI-000002").status(CustomerStatus.ACTIVO).build()));
+        when(customerRepositoryPort.countByFilters(any(), anyBoolean()))
+                .thenReturn(2L);
 
         var response = listCustomersUseCase.list(null, false, 0, 20);
-        assertEquals(2, response.size());
+        assertEquals(2, response.getContent().size());
+        assertEquals(2, response.getTotalRecords());
     }
 }
 

@@ -1,10 +1,9 @@
 package com.axiserp.sales.ports.input;
 
-import java.util.List;
-
 import com.axiserp.sales.application.dto.response.CustomerResponse;
+import com.axiserp.sales.application.dto.response.PaginatedResponse;
 
 public interface ListCustomersUseCase {
 
-    List<CustomerResponse> list(String search, boolean includeInactive, int page, int size);
+    PaginatedResponse<CustomerResponse> list(String search, boolean includeInactive, int page, int size);
 }

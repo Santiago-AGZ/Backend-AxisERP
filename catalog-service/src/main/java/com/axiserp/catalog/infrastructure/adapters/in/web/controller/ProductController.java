@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.axiserp.catalog.application.dto.request.CreateProductRequest;
 import com.axiserp.catalog.application.dto.request.UpdateProductRequest;
 import com.axiserp.catalog.application.dto.response.ProductResponse;
-import com.axiserp.catalog.domain.model.PageResult;
+import com.axiserp.catalog.application.shared.PageResult;
 import com.axiserp.catalog.infrastructure.adapters.in.web.dto.ApiResponse;
 import com.axiserp.catalog.infrastructure.adapters.in.web.dto.ApiResponse.PaginationMeta;
 import com.axiserp.catalog.ports.input.CreateProductUseCase;

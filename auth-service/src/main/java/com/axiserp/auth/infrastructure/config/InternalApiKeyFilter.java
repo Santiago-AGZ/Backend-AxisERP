@@ -34,7 +34,10 @@ public class InternalApiKeyFilter extends OncePerRequestFilter {
     private final String internalApiKey;
 
     public InternalApiKeyFilter(@Value("${internal.api.key:}") String internalApiKey) {
-        this.internalApiKey = internalApiKey;
+        this.internalApiKey = (internalApiKey == null || internalApiKey.isBlank()) ? null : internalApiKey;
+        if (this.internalApiKey == null) {
+            log.warn("INTERNAL_API_KEY not configured - inter-service auth disabled");
+        }
     }
 
     @Override
@@ -43,7 +46,7 @@ public class InternalApiKeyFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String key = request.getHeader("X-Internal-Api-Key");
-        if (key != null && !internalApiKey.isBlank() && internalApiKey.equals(key)) {
+        if (internalApiKey != null && key != null && internalApiKey.equals(key)) {
             UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                     SYSTEM_USER_ID, null, List.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
             SecurityContextHolder.getContext().setAuthentication(auth);

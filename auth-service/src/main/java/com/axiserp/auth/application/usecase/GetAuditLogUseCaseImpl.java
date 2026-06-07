@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.axiserp.auth.application.dto.response.AuditLogResponse;
 import com.axiserp.auth.domain.model.AuditLog;
-import com.axiserp.auth.domain.model.PageResult;
+import com.axiserp.auth.application.shared.PageResult;
 import com.axiserp.auth.ports.input.GetAuditLogUseCase;
 import com.axiserp.auth.ports.output.AuditLogRepositoryPort;
 

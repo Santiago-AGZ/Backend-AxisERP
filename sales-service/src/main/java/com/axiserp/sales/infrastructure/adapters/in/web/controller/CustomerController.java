@@ -74,11 +74,11 @@ public class CustomerController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size) {
 
-        List<CustomerResponse> data = listCustomersUseCase.list(search, includeInactive, page - 1, size);
+        var result = listCustomersUseCase.list(search, includeInactive, page - 1, size);
         return ResponseEntity.ok(ApiResponse.paged(
-                data,
+                result.getContent(),
                 "Clientes recuperados exitosamente",
-                PaginationMeta.of(page, size, data.size())));
+                PaginationMeta.of(page, size, result.getTotalRecords())));
     }
 
     @PreAuthorize("hasRole('ADMIN')")

@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.axiserp.auth.domain.model.AuditLog;
-import com.axiserp.auth.domain.model.PageResult;
+import com.axiserp.auth.application.shared.PageResult;
 
 /**
  * Port de salida para operaciones de persistencia del log de auditoría.

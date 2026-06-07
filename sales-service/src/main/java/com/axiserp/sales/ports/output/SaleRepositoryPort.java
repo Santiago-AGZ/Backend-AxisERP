@@ -22,4 +22,6 @@ public interface SaleRepositoryPort {
     List<Sale> findByFilters(UUID customerId, String status, UUID productId, UUID createdBy, int page, int size);
 
     List<Sale> findByCustomerId(UUID customerId, UUID createdBy);
+
+    long countByFilters(UUID customerId, String status, UUID productId, UUID createdBy);
 }

@@ -30,6 +30,20 @@ public interface JpaSaleRepository extends JpaRepository<SaleEntity, UUID> {
             @Param("createdBy") UUID createdBy,
             Pageable pageable);
 
+    @Query("""
+            SELECT COUNT(DISTINCT s) FROM SaleEntity s
+            LEFT JOIN s.items i
+            WHERE (:customerId IS NULL OR s.customerId = :customerId)
+              AND (:status IS NULL OR s.status = :status)
+              AND (:productId IS NULL OR i.productId = :productId)
+              AND (:createdBy IS NULL OR s.createdBy = :createdBy)
+            """)
+    long countByFilters(
+            @Param("customerId") UUID customerId,
+            @Param("status") SaleStatus status,
+            @Param("productId") UUID productId,
+            @Param("createdBy") UUID createdBy);
+
     Optional<SaleEntity> findBySaleNumber(String saleNumber);
 
     boolean existsByCustomerIdAndStatusIn(UUID customerId, List<SaleStatus> statuses);

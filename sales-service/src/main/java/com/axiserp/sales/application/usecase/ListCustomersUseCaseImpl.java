@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.axiserp.sales.application.dto.response.CustomerResponse;
+import com.axiserp.sales.application.dto.response.PaginatedResponse;
 import com.axiserp.sales.ports.input.ListCustomersUseCase;
 import com.axiserp.sales.ports.output.CustomerRepositoryPort;
 
@@ -17,10 +18,15 @@ public class ListCustomersUseCaseImpl implements ListCustomersUseCase {
     private final CustomerRepositoryPort customerRepositoryPort;
 
     @Override
-    public List<CustomerResponse> list(String search, boolean includeInactive, int page, int size) {
-        return customerRepositoryPort.findByFilters(search, includeInactive, page, size)
+    public PaginatedResponse<CustomerResponse> list(String search, boolean includeInactive, int page, int size) {
+        List<CustomerResponse> content = customerRepositoryPort.findByFilters(search, includeInactive, page, size)
                 .stream()
                 .map(CreateCustomerUseCaseImpl::toResponse)
                 .toList();
+        long total = customerRepositoryPort.countByFilters(search, includeInactive);
+        return PaginatedResponse.<CustomerResponse>builder()
+                .content(content)
+                .totalRecords(total)
+                .build();
     }
 }

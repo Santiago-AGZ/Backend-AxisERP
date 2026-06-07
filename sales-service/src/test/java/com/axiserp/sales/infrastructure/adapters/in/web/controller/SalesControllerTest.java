@@ -22,6 +22,7 @@ import com.axiserp.sales.application.dto.request.CreateCustomerRequest;
 import com.axiserp.sales.application.dto.request.UpdateCustomerRequest;
 import com.axiserp.sales.application.dto.response.CustomerResponse;
 import com.axiserp.sales.application.dto.response.InvoiceResponse;
+import com.axiserp.sales.application.dto.response.PaginatedResponse;
 import com.axiserp.sales.application.dto.response.SaleResponse;
 import com.axiserp.sales.application.service.ExcelExportService;
 import com.axiserp.sales.application.service.PdfExportService;
@@ -84,7 +85,10 @@ class SaleControllerTest {
     @DisplayName("GET /api/v1/sales - should return 200")
     void listSales_success() throws Exception {
         when(listSalesUseCase.list(any(), any(), any(), anyInt(), anyInt()))
-                .thenReturn(List.of());
+                .thenReturn(PaginatedResponse.<SaleResponse>builder()
+                        .content(List.of())
+                        .totalRecords(0)
+                        .build());
 
         mockMvc.perform(get("/api/v1/sales"))
                 .andExpect(status().isOk())
@@ -166,7 +170,10 @@ class CustomerControllerTest {
     @DisplayName("GET /api/v1/customers - should return 200")
     void listCustomers_success() throws Exception {
         when(listCustomersUseCase.list(any(), anyBoolean(), anyInt(), anyInt()))
-                .thenReturn(List.of());
+                .thenReturn(PaginatedResponse.<CustomerResponse>builder()
+                        .content(List.of())
+                        .totalRecords(0)
+                        .build());
 
         mockMvc.perform(get("/api/v1/customers"))
                 .andExpect(status().isOk())

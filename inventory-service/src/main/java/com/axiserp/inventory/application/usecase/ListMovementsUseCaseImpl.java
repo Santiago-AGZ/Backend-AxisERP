@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.axiserp.inventory.application.dto.response.MovementResponse;
 import com.axiserp.inventory.domain.model.InventoryMovement;
+import com.axiserp.inventory.application.shared.PageResult;
 import com.axiserp.inventory.ports.input.ListMovementsUseCase;
 import com.axiserp.inventory.ports.output.InventoryRepositoryPort;
 
@@ -25,12 +26,17 @@ public class ListMovementsUseCaseImpl implements ListMovementsUseCase {
 
     @Override
     @Transactional(readOnly = true)
-    public List<MovementResponse> listByProductId(UUID productId) {
+    public PageResult<MovementResponse> listByProductId(UUID productId) {
         List<InventoryMovement> movements = inventoryRepositoryPort.findMovementsByProductId(productId);
 
         log.debug("inventory_list_movements productId={} count={}", productId, movements.size());
 
-        return movements.stream().map(this::toResponse).toList();
+        List<MovementResponse> content = movements.stream().map(this::toResponse).toList();
+        long total = inventoryRepositoryPort.countMovementsByProductId(productId);
+        return PageResult.<MovementResponse>builder()
+                .content(content)
+                .total(total)
+                .build();
     }
 
     private MovementResponse toResponse(InventoryMovement movement) {

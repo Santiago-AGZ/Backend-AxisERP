@@ -18,7 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.axiserp.inventory.application.dto.response.ProductInventoryResponse;
 import com.axiserp.inventory.application.dto.response.ProductSummary;
 import com.axiserp.inventory.domain.model.Inventory;
-import com.axiserp.inventory.domain.model.PageResult;
+import com.axiserp.inventory.application.shared.PageResult;
 import com.axiserp.inventory.ports.output.CatalogServicePort;
 import com.axiserp.inventory.ports.output.InventoryRepositoryPort;
 

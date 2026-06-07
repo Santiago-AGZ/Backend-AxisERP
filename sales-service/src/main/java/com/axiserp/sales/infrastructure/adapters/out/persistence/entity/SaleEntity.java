@@ -49,7 +49,7 @@ public class SaleEntity {
     @Column(nullable = false, length = 20)
     private SaleStatus status;
 
-    @OneToMany(mappedBy = "sale", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(mappedBy = "sale", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @Builder.Default
     private List<SaleItemEntity> items = new ArrayList<>();
 

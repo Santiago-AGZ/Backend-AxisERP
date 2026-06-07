@@ -1,4 +1,4 @@
-package com.axiserp.catalog.domain.model;
+package com.axiserp.catalog.application.shared;
 
 import java.util.List;
 

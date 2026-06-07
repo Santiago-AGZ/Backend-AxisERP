@@ -23,4 +23,6 @@ public interface CustomerRepositoryPort {
     Customer save(Customer customer);
 
     List<Customer> findByFilters(String search, boolean includeInactive, int page, int size);
+
+    long countByFilters(String search, boolean includeInactive);
 }

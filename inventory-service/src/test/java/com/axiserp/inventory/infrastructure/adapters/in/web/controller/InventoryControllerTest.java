@@ -23,7 +23,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import com.axiserp.inventory.application.dto.request.InitializeInventoryRequest;
 import com.axiserp.inventory.application.dto.response.InventoryResponse;
 import com.axiserp.inventory.application.dto.response.MovementResponse;
-import com.axiserp.inventory.domain.model.PageResult;
+import com.axiserp.inventory.application.shared.PageResult;
 import com.axiserp.inventory.ports.input.GetDepletedAlertsUseCase;
 import com.axiserp.inventory.ports.input.GetInventoryUseCase;
 import com.axiserp.inventory.ports.input.GetLowStockAlertsUseCase;

@@ -1,4 +1,4 @@
-package com.axiserp.auth.domain.model;
+package com.axiserp.auth.application.shared;
 
 import java.util.List;
 
