@@ -87,7 +87,7 @@ public class RefreshTokenService {
     @Transactional
     public void revoke(String token) {
         refreshTokenRepositoryPort.deleteByToken(token);
-        log.info("refresh_token_revoked token={}", token);
+        log.info("refresh_token_revoked token_id=****{}", token != null && token.length() > 4 ? token.substring(token.length() - 4) : "none");
     }
 
     /**
