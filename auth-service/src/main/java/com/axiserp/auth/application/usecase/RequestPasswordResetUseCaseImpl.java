@@ -13,8 +13,8 @@ import com.axiserp.auth.domain.model.AuditLog.AuditAction;
 import com.axiserp.auth.domain.model.PasswordResetToken;
 import com.axiserp.auth.domain.model.User;
 import com.axiserp.auth.ports.input.RequestPasswordResetUseCase;
-import com.axiserp.auth.ports.output.EmailSenderPort;
 import com.axiserp.auth.ports.output.PasswordResetTokenRepositoryPort;
+import com.axiserp.auth.ports.output.SupabaseAuthPort;
 import com.axiserp.auth.ports.output.UserRepositoryPort;
 
 import lombok.RequiredArgsConstructor;
@@ -27,7 +27,7 @@ public class RequestPasswordResetUseCaseImpl implements RequestPasswordResetUseC
 
     private final UserRepositoryPort userRepositoryPort;
     private final PasswordResetTokenRepositoryPort passwordResetTokenRepositoryPort;
-    private final EmailSenderPort emailSenderPort;
+    private final SupabaseAuthPort supabaseAuthPort;
     private final AuditService auditService;
 
     @Override
@@ -55,7 +55,7 @@ public class RequestPasswordResetUseCaseImpl implements RequestPasswordResetUseC
 
         passwordResetTokenRepositoryPort.save(resetToken);
 
-        emailSenderPort.sendPasswordResetEmail(user.getEmail(), token);
+        supabaseAuthPort.sendPasswordReset(user.getEmail());
 
         auditService.log(AuditAction.PASSWORD_RESET_REQUEST, "AUTH", user.getId(),
                 user.getId(), user.getName(),

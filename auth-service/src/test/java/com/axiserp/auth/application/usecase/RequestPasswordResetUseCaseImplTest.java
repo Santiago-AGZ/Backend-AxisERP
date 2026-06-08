@@ -17,8 +17,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.axiserp.auth.application.service.AuditService;
 import com.axiserp.auth.domain.model.PasswordResetToken;
 import com.axiserp.auth.domain.model.User;
-import com.axiserp.auth.ports.output.EmailSenderPort;
 import com.axiserp.auth.ports.output.PasswordResetTokenRepositoryPort;
+import com.axiserp.auth.ports.output.SupabaseAuthPort;
 import com.axiserp.auth.ports.output.UserRepositoryPort;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,7 +31,7 @@ class RequestPasswordResetUseCaseImplTest {
     private PasswordResetTokenRepositoryPort passwordResetTokenRepositoryPort;
 
     @Mock
-    private EmailSenderPort emailSenderPort;
+    private SupabaseAuthPort supabaseAuthPort;
 
     @Mock
     private AuditService auditService;
@@ -66,7 +66,7 @@ class RequestPasswordResetUseCaseImplTest {
         verify(passwordResetTokenRepositoryPort).deleteByUserId(userId);
         verify(passwordResetTokenRepositoryPort).save(argThat(token ->
                 token.getUserId().equals(userId) && !token.isUsed()));
-        verify(emailSenderPort).sendPasswordResetEmail(eq("test@axiserp.com"), anyString());
+        verify(supabaseAuthPort).sendPasswordReset("test@axiserp.com");
         verify(auditService).log(any(), eq("AUTH"), eq(userId), eq(userId), eq("Test User"), any(), isNull(), isNull());
     }
 
@@ -78,6 +78,6 @@ class RequestPasswordResetUseCaseImplTest {
         requestPasswordResetUseCase.requestReset("unknown@axiserp.com");
 
         verify(passwordResetTokenRepositoryPort, never()).save(any());
-        verify(emailSenderPort, never()).sendPasswordResetEmail(any(), any());
+        verify(supabaseAuthPort, never()).sendPasswordReset(any());
     }
 }
