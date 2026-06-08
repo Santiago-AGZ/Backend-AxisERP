@@ -24,6 +24,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -38,6 +40,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final RestClient restClient;
     private final String jwksUrl;
     private final String internalApiKey;
+    private final String jwtSecret;
 
     private volatile PublicKey cachedPublicKey;
     private volatile String cachedKeyId;
@@ -45,9 +48,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     public JwtAuthenticationFilter(
             RestClient.Builder restClientBuilder,
             @Value("${jwt.jwks-uri}") String jwksUrl,
-            @Value("${internal.api.key:}") String internalApiKey) {
+            @Value("${internal.api.key:}") String internalApiKey,
+            @Value("${jwt.secret}") String jwtSecret) {
         this.jwksUrl = jwksUrl;
         this.internalApiKey = internalApiKey;
+        this.jwtSecret = jwtSecret;
         this.restClient = restClientBuilder.build();
     }
 
@@ -78,25 +83,48 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String kid = (String) header.get("kid");
             String alg = (String) header.get("alg");
 
-            PublicKey key = getPublicKey(kid, alg);
-            if (key == null) {
+            Claims claims = null;
+
+            // Try HS256 validation first (tokens from auth-service)
+            if ("HS256".equals(alg) && jwtSecret != null && !jwtSecret.isBlank()) {
+                try {
+                    var key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
+                    claims = Jwts.parser()
+                            .verifyWith(key)
+                            .build()
+                            .parseSignedClaims(token)
+                            .getPayload();
+                } catch (JwtException e) {
+                    log.debug("hs256_validation_failed path={}", request.getRequestURI());
+                }
+            }
+
+            // Fall back to ES256 via Supabase JWKS
+            if (claims == null) {
+                PublicKey key = getPublicKey(kid, alg);
+                if (key != null) {
+                    claims = Jwts.parser()
+                            .verifyWith(key)
+                            .build()
+                            .parseSignedClaims(token)
+                            .getPayload();
+                }
+            }
+
+            if (claims == null) {
                 filterChain.doFilter(request, response);
                 return;
             }
 
-            Claims claims = Jwts.parser()
-                    .verifyWith(key)
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload();
-
             String userId = claims.getSubject();
-            String role = null;
-            var appMeta = claims.get("app_metadata", Map.class);
-            if (appMeta != null && appMeta.containsKey("role")) {
-                role = String.valueOf(appMeta.get("role"));
+            String role = claims.get("role", String.class);
+            if (role == null || role.isBlank()) {
+                var appMeta = claims.get("app_metadata", Map.class);
+                if (appMeta != null && appMeta.containsKey("role")) {
+                    role = String.valueOf(appMeta.get("role"));
+                }
             }
-            if (role == null || role.isEmpty()) {
+            if (role == null || role.isBlank()) {
                 role = "VENDEDOR";
             }
 
