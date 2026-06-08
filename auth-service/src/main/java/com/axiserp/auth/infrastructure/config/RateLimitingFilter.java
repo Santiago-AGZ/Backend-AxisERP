@@ -44,7 +44,8 @@ public class RateLimitingFilter extends OncePerRequestFilter {
             HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
 
-        String clientIp = request.getRemoteAddr();
+        String xff = request.getHeader("X-Forwarded-For");
+        String clientIp = (xff != null && !xff.isBlank()) ? xff.split(",")[0].trim() : request.getRemoteAddr();
         Bucket bucket = ipBuckets.get(clientIp, k -> createBucket());
 
         if (bucket.tryConsume(1)) {
