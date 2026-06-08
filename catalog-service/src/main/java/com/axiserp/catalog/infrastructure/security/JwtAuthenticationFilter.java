@@ -49,7 +49,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             RestClient.Builder restClientBuilder,
             @Value("${jwt.jwks-uri}") String jwksUrl,
             @Value("${internal.api.key:}") String internalApiKey,
-            @Value("${jwt.secret}") String jwtSecret) {
+            @Value("${jwt.secret:}") String jwtSecret) {
         this.jwksUrl = jwksUrl;
         this.internalApiKey = internalApiKey;
         this.jwtSecret = jwtSecret;
