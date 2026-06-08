@@ -92,7 +92,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     .getPayload();
 
             String userId = claims.getSubject();
-            String userId = claims.getSubject();
             String role = null;
             var appMeta = claims.get("app_metadata", Map.class);
             if (appMeta != null && appMeta.containsKey("role")) {
