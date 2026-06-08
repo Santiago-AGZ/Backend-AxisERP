@@ -80,7 +80,7 @@ public class GenerateFrequentCustomersReportUseCaseImpl implements GenerateFrequ
 
         String filterParams = String.format("{\"startDate\":\"%s\",\"endDate\":\"%s\",\"limit\":%d}",
                 startDate, endDate, limit);
-        reportAuditService.logReportGeneration("CUSTOMER_FREQUENCY", "JSON", result.size(), filterParams);
+        reportAuditService.logReportGeneration("CUSTOMER_FREQUENCY", "CSV", result.size(), filterParams);
 
         return response;
     }
