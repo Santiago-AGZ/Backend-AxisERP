@@ -11,6 +11,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.ResourceAccessException;
 
 import com.axiserp.report.infrastructure.adapters.in.web.dto.ApiResponse;
 import com.axiserp.report.infrastructure.adapters.in.web.dto.ApiResponse.ApiError;
@@ -51,10 +53,25 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error("CONFLICT", ex.getMessage()));
     }
 
+    @ExceptionHandler(HttpServerErrorException.class)
+    public ResponseEntity<ApiResponse<Void>> handleHttpServerError(HttpServerErrorException ex) {
+        log.error("Error al llamar servicio externo: status={} body={}", ex.getStatusCode(), ex.getResponseBodyAsString(), ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error("EXTERNAL_SERVICE_ERROR",
+                        "Error al consultar servicio externo: " + ex.getStatusCode() + " - " + ex.getResponseBodyAsString()));
+    }
+
+    @ExceptionHandler(ResourceAccessException.class)
+    public ResponseEntity<ApiResponse<Void>> handleResourceAccess(ResourceAccessException ex) {
+        log.error("Error de conexion al llamar servicio externo: {}", ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error("EXTERNAL_TIMEOUT", "Tiempo de espera agotado al consultar servicio externo"));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleGeneric(Exception ex) {
-        log.error("Error no controlado: {}", ex.getMessage(), ex);
+        log.error("Error no controlado: {} - {}", ex.getClass().getName(), ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("INTERNAL_ERROR", "Error interno del servidor"));
+                .body(ApiResponse.error("INTERNAL_ERROR", "Error interno del servidor: " + ex.getClass().getSimpleName() + " - " + ex.getMessage()));
     }
 }
