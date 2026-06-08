@@ -31,6 +31,7 @@ import org.springframework.security.oauth2.server.resource.web.authentication.Be
 import org.springframework.security.web.SecurityFilterChain;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.axiserp.auth.infrastructure.security.JwtAuthenticationFilter;
 import com.axiserp.auth.infrastructure.adapters.in.web.response.ApiResponse;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -48,6 +49,7 @@ public class SecurityConfig {
     private final UserStatusFilter userStatusFilter;
     private final RateLimitingFilter rateLimitingFilter;
     private final InternalApiKeyFilter internalApiKeyFilter;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Value("${spring.security.oauth2.resourceserver.jwt.jwk-set-uri}")
     private String jwkSetUri;
@@ -72,10 +74,7 @@ public class SecurityConfig {
                                 "/v3/api-docs/**"
                         ).permitAll()
                         .anyRequest().authenticated())
-                .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(jwt -> jwt
-                                .jwtAuthenticationConverter(jwtAuthenticationConverter()))
-                        .authenticationEntryPoint(this::handleUnauthorized))
+                .addFilterBefore(jwtAuthenticationFilter, BearerTokenAuthenticationFilter.class)
                 .addFilterBefore(internalApiKeyFilter, BearerTokenAuthenticationFilter.class)
                 .addFilterBefore(userStatusFilter, BearerTokenAuthenticationFilter.class)
                 .addFilterBefore(firstLoginFilter, BearerTokenAuthenticationFilter.class)
