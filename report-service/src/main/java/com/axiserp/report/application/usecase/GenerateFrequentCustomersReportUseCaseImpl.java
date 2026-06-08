@@ -33,8 +33,8 @@ public class GenerateFrequentCustomersReportUseCaseImpl implements GenerateFrequ
         Map<String, CustomerAggregation> customerMap = new HashMap<>();
 
         for (JsonNode sale : allSales) {
-            String customerId = sale.has("createdBy") && !sale.get("createdBy").isNull()
-                    ? sale.get("createdBy").asText() : null;
+            String customerId = sale.has("customerId") && !sale.get("customerId").isNull()
+                    ? sale.get("customerId").asText() : null;
             if (customerId == null || customerId.isBlank()) continue;
 
             BigDecimal total = new BigDecimal(sale.get("total").asText("0"));

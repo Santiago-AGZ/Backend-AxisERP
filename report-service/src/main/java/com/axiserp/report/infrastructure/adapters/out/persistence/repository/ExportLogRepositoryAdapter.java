@@ -7,6 +7,7 @@ import com.axiserp.report.ports.output.ExportLogRepositoryPort;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,6 +20,7 @@ public class ExportLogRepositoryAdapter implements ExportLogRepositoryPort {
     private final JpaExportLogRepository jpaRepository;
 
     @Override
+    @Transactional
     public ExportLog save(ExportLog log) {
         ExportLogEntity entity = toEntity(log);
         ExportLogEntity saved = jpaRepository.save(entity);

@@ -44,7 +44,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     public JwtAuthenticationFilter(
             RestClient.Builder restClientBuilder,
-            @Value("${jwt.jwks-uri:https://hbtcusxbkkefphunarwn.supabase.co/auth/v1/.well-known/jwks.json}") String jwksUrl,
+            @Value("${jwt.jwks-uri}") String jwksUrl,
             @Value("${internal.api.key:}") String internalApiKey) {
         this.jwksUrl = jwksUrl;
         this.internalApiKey = internalApiKey;

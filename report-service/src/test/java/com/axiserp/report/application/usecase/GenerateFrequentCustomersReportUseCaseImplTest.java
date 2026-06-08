@@ -50,7 +50,7 @@ class GenerateFrequentCustomersReportUseCaseImplTest {
         sale1.put("id", UUID.randomUUID().toString());
         sale1.put("total", "100.00");
         sale1.put("status", "CONFIRMADA");
-        sale1.put("createdBy", customerId.toString());
+        sale1.put("customerId", customerId.toString());
         sale1.put("createdAt", "2026-06-04T10:00:00");
         salesData.add(sale1);
 
@@ -58,7 +58,7 @@ class GenerateFrequentCustomersReportUseCaseImplTest {
         sale2.put("id", UUID.randomUUID().toString());
         sale2.put("total", "50.00");
         sale2.put("status", "CONFIRMADA");
-        sale2.put("createdBy", customerId.toString());
+        sale2.put("customerId", customerId.toString());
         sale2.put("createdAt", "2026-06-05T10:00:00");
         salesData.add(sale2);
 

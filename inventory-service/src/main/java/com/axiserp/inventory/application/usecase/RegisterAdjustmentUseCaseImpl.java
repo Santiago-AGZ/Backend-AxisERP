@@ -48,13 +48,13 @@ public class RegisterAdjustmentUseCaseImpl implements RegisterAdjustmentUseCase 
         MovementType movementType;
 
         if (request.getAdjustmentType() == AdjustmentRequest.AdjustmentType.POSITIVO) {
-            inventory.setCurrentStock(previousStock + request.getQuantity());
+            inventory.addStock(request.getQuantity());
             movementType = MovementType.AJUSTE_POSITIVO;
         } else {
             if (!inventory.canExit(request.getQuantity())) {
                 throw new InsufficientStockException(request.getQuantity(), inventory.getCurrentStock());
             }
-            inventory.setCurrentStock(previousStock - request.getQuantity());
+            inventory.subtractStock(request.getQuantity());
             movementType = MovementType.AJUSTE_NEGATIVO;
         }
 

@@ -3,6 +3,7 @@ package com.axiserp.sales.application.usecase;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.axiserp.sales.application.dto.response.InvoiceResponse;
 import com.axiserp.sales.domain.exception.InvoiceNotFoundException;
@@ -22,6 +23,7 @@ public class GetInvoiceUseCaseImpl implements GetInvoiceUseCase {
     private final SaleRepositoryPort saleRepositoryPort;
 
     @Override
+    @Transactional(readOnly = true)
     public InvoiceResponse getById(UUID id) {
         Invoice invoice = invoiceRepositoryPort.findById(id)
                 .orElseThrow(() -> new InvoiceNotFoundException(id));
@@ -30,6 +32,7 @@ public class GetInvoiceUseCaseImpl implements GetInvoiceUseCase {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public InvoiceResponse getBySaleId(UUID saleId) {
         checkSaleOwnership(saleId);
         Invoice invoice = invoiceRepositoryPort.findBySaleId(saleId)

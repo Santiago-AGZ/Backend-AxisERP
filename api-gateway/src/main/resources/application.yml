@@ -23,6 +23,6 @@ management:
 server:
   port: 8080
   error:
-    include-exception: true
-    include-message: always
-    include-stacktrace: always
+    include-exception: false
+    include-message: never
+    include-stacktrace: never

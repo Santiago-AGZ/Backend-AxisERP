@@ -48,7 +48,7 @@ public class DeactivateCategoryUseCaseImpl implements DeactivateCategoryUseCase 
             throw new CategoryHasProductsException(activeProductCount);
         }
 
-        Category deleted = CategoryFactory.softDelete(existing, updatedBy);
+        Category deleted = CategoryFactory.deactivate(existing, updatedBy);
         Category saved = categoryRepositoryPort.save(deleted);
 
         log.info("category_deleted id={} name={} updatedBy={}", saved.getId(), saved.getName(), updatedBy);

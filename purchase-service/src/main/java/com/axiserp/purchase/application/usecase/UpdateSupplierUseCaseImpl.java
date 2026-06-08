@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.axiserp.purchase.application.dto.request.UpdateSupplierRequest;
 import com.axiserp.purchase.application.dto.response.SupplierResponse;
@@ -25,6 +26,7 @@ public class UpdateSupplierUseCaseImpl implements UpdateSupplierUseCase {
     private final SupplierRepositoryPort supplierRepositoryPort;
 
     @Override
+    @Transactional
     public SupplierResponse execute(UUID id, UpdateSupplierRequest request) {
         Supplier supplier = supplierRepositoryPort.findById(id)
                 .orElseThrow(() -> new SupplierNotFoundException(id));

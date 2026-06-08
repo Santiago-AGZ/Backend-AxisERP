@@ -53,10 +53,10 @@ public class ReverseMovementUseCaseImpl implements ReverseMovementUseCase {
             if (!inventory.canExit(original.getQuantity())) {
                 throw new InsufficientStockException(original.getQuantity(), inventory.getCurrentStock());
             }
-            inventory.setCurrentStock(previousStock - original.getQuantity());
+            inventory.subtractStock(original.getQuantity());
         } else {
             // Original removed stock (SALIDA, AJUSTE_NEGATIVO) → reversal adds it back
-            inventory.setCurrentStock(previousStock + original.getQuantity());
+            inventory.addStock(original.getQuantity());
         }
 
         Inventory saved = inventoryRepositoryPort.save(inventory);

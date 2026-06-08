@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.axiserp.purchase.application.dto.response.SupplierResponse;
 import com.axiserp.purchase.domain.exception.SupplierNotFoundException;
@@ -25,6 +26,7 @@ public class DeactivateSupplierUseCaseImpl implements DeactivateSupplierUseCase 
     private final SupplierRepositoryPort supplierRepositoryPort;
 
     @Override
+    @Transactional
     public SupplierResponse execute(UUID id) {
         Supplier supplier = supplierRepositoryPort.findById(id)
                 .orElseThrow(() -> new SupplierNotFoundException(id));
