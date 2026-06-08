@@ -74,7 +74,10 @@ public class SecurityConfig {
                                 "/v3/api-docs/**"
                         ).permitAll()
                         .anyRequest().authenticated())
-                .addFilterBefore(jwtAuthenticationFilter, BearerTokenAuthenticationFilter.class)
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwt -> jwt
+                                .jwtAuthenticationConverter(jwtAuthenticationConverter()))
+                        .authenticationEntryPoint(this::handleUnauthorized))
                 .addFilterBefore(internalApiKeyFilter, BearerTokenAuthenticationFilter.class)
                 .addFilterBefore(userStatusFilter, BearerTokenAuthenticationFilter.class)
                 .addFilterBefore(firstLoginFilter, BearerTokenAuthenticationFilter.class)
