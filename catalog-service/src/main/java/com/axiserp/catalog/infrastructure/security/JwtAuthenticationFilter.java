@@ -117,12 +117,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
 
             String userId = claims.getSubject();
-            String role = claims.get("role", String.class);
+            String role = null;
+            var appMeta = claims.get("app_metadata", Map.class);
+            if (appMeta != null && appMeta.containsKey("role")) {
+                role = String.valueOf(appMeta.get("role"));
+            }
             if (role == null || role.isBlank()) {
-                var appMeta = claims.get("app_metadata", Map.class);
-                if (appMeta != null && appMeta.containsKey("role")) {
-                    role = String.valueOf(appMeta.get("role"));
-                }
+                role = claims.get("role", String.class);
             }
             if (role == null || role.isBlank()) {
                 role = "VENDEDOR";

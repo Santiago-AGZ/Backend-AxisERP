@@ -97,7 +97,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (appMeta != null && appMeta.containsKey("role")) {
                 role = String.valueOf(appMeta.get("role"));
             }
-            if (role == null || role.isEmpty()) {
+            if (role == null || role.isBlank()) {
+                role = claims.get("role", String.class);
+            }
+            if (role == null || role.isBlank()) {
                 role = "VENDEDOR";
             }
 
@@ -175,4 +178,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return base64 + "=".repeat(padding);
     }
 }
+
 
