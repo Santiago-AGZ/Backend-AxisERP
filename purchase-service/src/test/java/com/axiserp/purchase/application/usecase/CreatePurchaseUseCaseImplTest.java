@@ -97,7 +97,7 @@ class CreatePurchaseUseCaseImplTest {
         assertEquals(0, response.getSubtotal().compareTo(new BigDecimal("500.00")));
         assertEquals(0, response.getTax().compareTo(new BigDecimal("95.00")));
         assertEquals(0, response.getTotal().compareTo(new BigDecimal("595.00")));
-        assertTrue(response.getPurchaseNumber().startsWith("PO-"));
+        assertTrue(response.getPurchaseNumber().startsWith("COM-"));
         verify(purchaseRepositoryPort).save(any());
         verify(auditService).logCreate(eq("PURCHASE"), any(), eq(createdBy), anyString());
     }

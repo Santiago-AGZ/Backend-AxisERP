@@ -118,7 +118,7 @@ public class CreateSaleUseCaseImpl implements CreateSaleUseCase {
         }
 
         // 10. Generate sale number
-        String saleNumber = "VN-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        String saleNumber = "VTA-" + java.time.Year.now().getValue() + "-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
 
         // 11. Create sale with BORRADOR status
         Sale sale = Sale.builder()

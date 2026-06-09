@@ -94,7 +94,7 @@ public class CreatePurchaseUseCaseImpl implements CreatePurchaseUseCase {
         BigDecimal total = subtotal.add(tax);
 
         // 9 & 10. Generate purchase number and build Purchase
-        String purchaseNumber = "PO-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        String purchaseNumber = "COM-" + java.time.Year.now().getValue() + "-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
 
         Purchase purchase = Purchase.builder()
                 .id(purchaseId)

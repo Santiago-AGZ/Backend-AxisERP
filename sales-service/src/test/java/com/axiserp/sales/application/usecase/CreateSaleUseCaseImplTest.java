@@ -91,7 +91,7 @@ class CreateSaleUseCaseImplTest {
         assertEquals(1, response.getItems().size());
         assertEquals(0, response.getTotal().compareTo(new BigDecimal("595.00")));
         assertEquals(0, response.getDiscount().compareTo(BigDecimal.ZERO));
-        assertTrue(response.getSaleNumber().startsWith("VN-"));
+        assertTrue(response.getSaleNumber().startsWith("VTA-"));
         verify(saleRepositoryPort).save(any());
     }
 

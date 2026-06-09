@@ -29,7 +29,10 @@ public class CreateCustomerUseCaseImpl implements CreateCustomerUseCase {
     @Override
     @Transactional
     public CustomerResponse create(CreateCustomerRequest request, UUID createdBy) {
-        if (customerRepositoryPort.existsByCodigo(request.getCodigo())) {
+        String codigo = request.getCodigo();
+        if (codigo == null || codigo.isBlank()) {
+            codigo = "CLI-" + java.time.Year.now().getValue() + "-" + UUID.randomUUID().toString().substring(0, 6).toUpperCase();
+        } else if (customerRepositoryPort.existsByCodigo(codigo)) {
             throw new IllegalStateException("Ya existe un cliente con el código: " + request.getCodigo());
         }
         if (customerRepositoryPort.existsByDocumentNumber(request.getDocumentNumber())) {
@@ -41,7 +44,7 @@ public class CreateCustomerUseCaseImpl implements CreateCustomerUseCase {
         }
 
         Customer customer = Customer.builder()
-                .codigo(request.getCodigo())
+                .codigo(codigo)
                 .name(request.getName())
                 .documentType(request.getDocumentType())
                 .documentNumber(request.getDocumentNumber())
