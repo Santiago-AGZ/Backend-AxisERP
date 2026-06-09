@@ -22,6 +22,7 @@ import com.axiserp.sales.domain.exception.SaleNotFoundException;
 import com.axiserp.sales.domain.exception.SaleNotModifiableException;
 import com.axiserp.sales.infrastructure.adapters.in.web.dto.ApiResponse;
 import com.axiserp.sales.infrastructure.adapters.in.web.dto.ApiResponse.ApiError;
+import com.fasterxml.jackson.core.JsonParseException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -61,6 +62,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleBadRequest(RuntimeException ex) {
         return ResponseEntity.badRequest()
                 .body(ApiResponse.error("BAD_REQUEST", ex.getMessage()));
+    }
+
+    @ExceptionHandler(JsonParseException.class)
+    public ResponseEntity<ApiResponse<Void>> handleJsonParse(JsonParseException ex) {
+        log.warn("json_parse_error: {}", ex.getMessage());
+        return ResponseEntity.badRequest()
+                .body(ApiResponse.error("BAD_REQUEST", "Formato JSON inválido"));
     }
 
     @ExceptionHandler(AccessDeniedException.class)

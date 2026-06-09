@@ -20,6 +20,7 @@ import com.axiserp.auth.domain.exception.UserLockedException;
 import com.axiserp.auth.domain.exception.UserNotFoundException;
 import com.axiserp.auth.infrastructure.adapters.in.web.response.ApiResponse;
 import com.axiserp.auth.infrastructure.adapters.in.web.response.ApiResponse.ApiError;
+import com.fasterxml.jackson.core.JsonParseException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -79,6 +80,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleIllegalArgument(IllegalArgumentException ex) {
         return ResponseEntity.badRequest()
                 .body(ApiResponse.error("BAD_REQUEST", ex.getMessage()));
+    }
+
+    @ExceptionHandler(JsonParseException.class)
+    public ResponseEntity<ApiResponse<Void>> handleJsonParse(JsonParseException ex) {
+        log.warn("json_parse_error: {}", ex.getMessage());
+        return ResponseEntity.badRequest()
+                .body(ApiResponse.error("BAD_REQUEST", "Formato JSON inválido"));
     }
 
     @ExceptionHandler(IllegalStateException.class)
