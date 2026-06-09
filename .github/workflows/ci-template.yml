@@ -53,20 +53,17 @@ jobs:
         run: mvn -f ${{ inputs.service }}/pom.xml clean verify -Dfailsafe.rerunFailingTestsCount=1
 
       - name: SonarCloud Analysis
-        if: inputs.build-docker
+        if: inputs.build-docker && env.SONAR_TOKEN != ''
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        working-directory: ${{ inputs.service }}
         run: |
-          if [ -n "$SONAR_TOKEN" ]; then
-            mvn -f ${{ inputs.service }}/pom.xml sonar:sonar \
-              -Dsonar.projectKey=axiserp_backend \
-              -Dsonar.organization=santiago-agz \
-              -Dsonar.host.url=https://sonarcloud.io \
-              -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
-              -Dsonar.projectName=${{ inputs.service }}
-          else
-            echo "SONAR_TOKEN not set. Skipping SonarCloud analysis."
-          fi
+          mvn sonar:sonar \
+            -Dsonar.projectKey=axiserp_backend \
+            -Dsonar.organization=santiago-agz \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
+            -Dsonar.projectName=${{ inputs.service }}
 
       - name: Upload test results
         if: always()
