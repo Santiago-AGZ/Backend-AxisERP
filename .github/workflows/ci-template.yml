@@ -151,6 +151,7 @@ jobs:
             image \
             --severity CRITICAL,HIGH \
             --exit-code 1 \
+            --timeout 30m \
             --format table \
             santiago666/${{ inputs.service }}:ci-${{ github.sha }}
 
@@ -163,6 +164,7 @@ jobs:
             aquasec/trivy:0.71.0 \
             image \
             --severity CRITICAL,HIGH \
+            --timeout 30m \
             --format json \
             --output /tmp/trivy-${{ inputs.service }}.json \
             santiago666/${{ inputs.service }}:ci-${{ github.sha }}
