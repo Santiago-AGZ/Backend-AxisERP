@@ -20,7 +20,49 @@ jobs:
     uses: ./.github/workflows/ci-template.yml
     with:
       service: auth-service
-      build-docker: true
+      build-docker: false
+    secrets: inherit
+
+  ci-catalog:
+    uses: ./.github/workflows/ci-template.yml
+    with:
+      service: catalog-service
+      build-docker: false
+    secrets: inherit
+
+  ci-inventory:
+    uses: ./.github/workflows/ci-template.yml
+    with:
+      service: inventory-service
+      build-docker: false
+    secrets: inherit
+
+  ci-sales:
+    uses: ./.github/workflows/ci-template.yml
+    with:
+      service: sales-service
+      build-docker: false
+    secrets: inherit
+
+  ci-purchase:
+    uses: ./.github/workflows/ci-template.yml
+    with:
+      service: purchase-service
+      build-docker: false
+    secrets: inherit
+
+  ci-report:
+    uses: ./.github/workflows/ci-template.yml
+    with:
+      service: report-service
+      build-docker: false
+    secrets: inherit
+
+  ci-gateway:
+    uses: ./.github/workflows/ci-template.yml
+    with:
+      service: api-gateway
+      build-docker: false
     secrets: inherit
 
   ci-catalog:

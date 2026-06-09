@@ -109,19 +109,6 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Pre-pull base images (avoid Docker Hub rate limit)
-        if: inputs.build-docker
-        continue-on-error: true
-        run: |
-          BASE_IMAGES=$(grep '^FROM ' "${{ inputs.service }}/Dockerfile" | awk '{print $2}')
-          for img in $BASE_IMAGES; do
-            echo "Pulling $img..."
-            for i in 1 2 3; do
-              docker pull "$img" && break
-              echo "Retry $i/3 for $img..." && sleep $((i * 5))
-            done
-          done
-
       - name: Lint Dockerfile with hadolint
         if: inputs.build-docker
         uses: hadolint/hadolint-action@v3.1.0
@@ -141,9 +128,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=min
           provenance: false
-          secrets: |
-            "DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}"
-            "DOCKER_PASSWORD=${{ secrets.DOCKER_PASSWORD }}"
 
       - name: Verify Docker image build
         if: inputs.build-docker
