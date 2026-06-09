@@ -129,7 +129,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @SuppressWarnings("unchecked")
             var keys = (List<Map<String, Object>>) jwks.get("keys");
             for (var key : keys) {
-                if ((kid == null || kid.equals(key.get("kid"))) && alg.equals(key.get("alg"))) {
+                if ((kid == null || kid.equals(key.get("kid"))) && alg != null && alg.equals(key.get("alg"))) {
                     PublicKey pk = buildEcPublicKey(key);
                     cachedPublicKey = pk;
                     cachedKeyId = (String) key.get("kid");

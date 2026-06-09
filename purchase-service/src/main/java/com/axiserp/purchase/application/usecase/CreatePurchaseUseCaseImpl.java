@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.axiserp.purchase.application.dto.request.CreatePurchaseRequest;
 import com.axiserp.purchase.application.dto.request.PurchaseItemRequest;
-import com.axiserp.purchase.application.dto.response.PurchaseItemResponse;
+import com.axiserp.purchase.application.dto.mapper.PurchaseMapper;
 import com.axiserp.purchase.application.dto.response.PurchaseResponse;
 import com.axiserp.purchase.domain.exception.DuplicateProductInPurchaseException;
 import com.axiserp.purchase.domain.exception.SupplierInactiveException;
@@ -116,37 +116,6 @@ public class CreatePurchaseUseCaseImpl implements CreatePurchaseUseCase {
         auditService.logCreate("PURCHASE", saved.getId(), createdBy, "purchase_number=" + saved.getPurchaseNumber());
         log.info("purchase_created id={} purchaseNumber={} supplierId={} total={}",
                 saved.getId(), saved.getPurchaseNumber(), saved.getSupplierId(), saved.getTotal());
-        return toResponse(saved);
-    }
-
-    private PurchaseResponse toResponse(Purchase purchase) {
-        List<PurchaseItemResponse> itemResponses = purchase.getItems().stream()
-                .map(item -> PurchaseItemResponse.builder()
-                        .id(item.getId())
-                        .productId(item.getProductId())
-                        .productName(item.getProductName())
-                        .quantity(item.getQuantity())
-                        .receivedQuantity(item.getReceivedQuantity())
-                        .pendingQuantity(item.pendingQuantity())
-                        .unitPrice(item.getUnitPrice())
-                        .subtotal(item.getSubtotal())
-                        .build())
-                .toList();
-
-        return PurchaseResponse.builder()
-                .id(purchase.getId())
-                .supplierId(purchase.getSupplierId())
-                .purchaseNumber(purchase.getPurchaseNumber())
-                .status(purchase.getStatus())
-                .items(itemResponses)
-                .subtotal(purchase.getSubtotal())
-                .tax(purchase.getTax())
-                .total(purchase.getTotal())
-                .notes(purchase.getNotes())
-                .createdBy(purchase.getCreatedBy())
-                .updatedBy(purchase.getUpdatedBy())
-                .createdAt(purchase.getCreatedAt())
-                .updatedAt(purchase.getUpdatedAt())
-                .build();
+        return PurchaseMapper.toResponse(saved);
     }
 }

@@ -33,6 +33,6 @@ public class Purchase {
     private LocalDateTime updatedAt;
 
     public boolean isModifiable() {
-        return status != PurchaseStatus.CANCELADA && status != PurchaseStatus.PAGADA;
+        return status != null && status != PurchaseStatus.CANCELADA && status != PurchaseStatus.PAGADA;
     }
 }
