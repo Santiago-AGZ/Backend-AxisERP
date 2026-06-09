@@ -40,5 +40,5 @@ jobs:
           fi
           mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
             -Dsonar.projectKey=Santiago-AGZ_Backend-AxisERP \
-            -Dsonar.organization=santiago-agz \
+            -Dsonar.organization=santiago-alvarez-gutierrezaxiserp-backend \
             -Dsonar.host.url=https://sonarcloud.io
