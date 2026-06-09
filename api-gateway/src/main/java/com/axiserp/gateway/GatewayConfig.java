@@ -32,7 +32,7 @@ public class GatewayConfig {
     @Value("${REPORT_SERVICE_URL:http://report-service:8085}")
     private String reportServiceUrl;
 
-    @Value("${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173}")
+    @Value("${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173,https://frontend-axis-erp.vercel.app}")
     private List<String> allowedOrigins;
 
     @Bean
