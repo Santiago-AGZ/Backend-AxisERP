@@ -32,13 +32,13 @@ public class GatewayConfig {
     @Value("${REPORT_SERVICE_URL:http://report-service:8085}")
     private String reportServiceUrl;
 
-    @Value("${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173,https://frontend-axis-erp.vercel.app}")
+    @Value("${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173,https://frontend-axis-erp.vercel.app,https://*.vercel.app}")
     private List<String> allowedOrigins;
 
     @Bean
     public CorsWebFilter corsWebFilter() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(allowedOrigins);
+        config.setAllowedOriginPatterns(allowedOrigins);
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
