@@ -57,8 +57,7 @@ public class TokenController {
             @Valid @RequestBody LogoutRequest request,
             Authentication authentication) {
         try {
-            String principal = authentication.getPrincipal().toString();
-            UUID userId = UUID.fromString(principal);
+            UUID userId = UUID.fromString(authentication.getName());
 
             // Blacklist access token JTI if available (OAuth2 flow)
             if (authentication.getCredentials() instanceof Jwt jwt) {
@@ -77,9 +76,14 @@ public class TokenController {
 
             log.info("user_logout_success user_id={}", userId);
             return ResponseEntity.ok(ApiResponse.ok(null, "Sesion cerrada exitosamente"));
+        } catch (IllegalArgumentException e) {
+            log.warn("user_logout_validation_failed error={}", e.getMessage());
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("VALIDATION_ERROR", e.getMessage()));
         } catch (Exception e) {
-            log.error("user_logout_failed error={}", e.getMessage(), e);
-            throw new IllegalArgumentException("No se pudo cerrar la sesion: " + e.getMessage());
+            log.error("user_logout_failed error={}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error("LOGOUT_ERROR", "No se pudo cerrar la sesion"));
         }
     }
 
@@ -132,7 +136,7 @@ public class TokenController {
     public ResponseEntity<ApiResponse<Map<String, Object>>> validateToken(
             Authentication authentication) {
         try {
-            UUID userId = UUID.fromString((String) authentication.getPrincipal());
+            UUID userId = UUID.fromString(authentication.getName());
 
             Map<String, Object> tokenInfo = new HashMap<>();
             tokenInfo.put("userId", userId.toString());
