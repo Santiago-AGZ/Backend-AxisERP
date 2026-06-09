@@ -52,7 +52,7 @@ jobs:
           cache-dependency-path: '**/pom.xml'
 
       - name: Build and test
-        run: mvn -f ${{ inputs.service }}/pom.xml clean verify -Dfailsafe.rerunFailingTestsCount=1
+        run: mvn -f ${{ inputs.service }}/pom.xml clean verify -Dfailsafe.rerunFailingTestsCount=1 -Dmaven.wagon.http.retryHandler.count=3
 
       - name: SonarCloud Analysis
         if: inputs.build-docker
