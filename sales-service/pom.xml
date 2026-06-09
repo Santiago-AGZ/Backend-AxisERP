@@ -18,7 +18,7 @@
 	<version>0.0.1-SNAPSHOT</version>
 
 	<name>sales-service</name>
-	<description>AxisERP Catalog Service</description>
+	<description>AxisERP Sales Service</description>
 
 	<properties>
 		<java.version>21</java.version>

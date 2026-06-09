@@ -26,6 +26,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4.1.7
+        with:
+          fetch-depth: 0
 
       - name: Validate service structure
         run: |
@@ -63,11 +65,12 @@ jobs:
             exit 0
           fi
           mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-            -Dsonar.projectKey=Santiago-AGZ_Backend-AxisERP \
+            -Dsonar.projectKey=Santiago-AGZ_Backend-AxisERP-${{ inputs.service }} \
             -Dsonar.organization=santiago-alvarez-gutierrezaxiserp-backend \
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
-            -Dsonar.projectName=${{ inputs.service }}
+            -Dsonar.projectName=${{ inputs.service }} \
+            -Dsonar.qualitygate.wait=true
 
       - name: Upload test results
         if: always()
@@ -137,9 +140,31 @@ jobs:
           echo "=== Trivy: ${{ inputs.service }} image ==="
           docker run --rm \
             -v /var/run/docker.sock:/var/run/docker.sock:ro \
-            aquasec/trivy:0.71.0 \
+            aquasecurity/trivy:0.71.0 \
             image \
             --severity CRITICAL,HIGH \
             --exit-code 1 \
             --format table \
             ${{ inputs.service }}:ci-${{ github.sha }}
+
+      - name: Save Trivy JSON report
+        if: inputs.build-docker
+        run: |
+          docker run --rm \
+            -v /var/run/docker.sock:/var/run/docker.sock:ro \
+            -v /tmp:/tmp \
+            aquasecurity/trivy:0.71.0 \
+            image \
+            --severity CRITICAL,HIGH \
+            --format json \
+            --output /tmp/trivy-${{ inputs.service }}.json \
+            ${{ inputs.service }}:ci-${{ github.sha }}
+
+      - name: Upload Trivy report
+        if: always() && inputs.build-docker
+        uses: actions/upload-artifact@v4.3.1
+        with:
+          name: trivy-report-${{ inputs.service }}
+          path: /tmp/trivy-${{ inputs.service }}.json
+          retention-days: 30
+          if-no-files-found: warn
