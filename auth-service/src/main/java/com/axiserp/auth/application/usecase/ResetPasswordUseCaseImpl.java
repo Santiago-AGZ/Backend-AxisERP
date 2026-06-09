@@ -1,5 +1,8 @@
 package com.axiserp.auth.application.usecase;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -76,7 +79,7 @@ public class ResetPasswordUseCaseImpl implements ResetPasswordUseCase {
                 .used(true)
                 .expiresAt(resetToken.getExpiresAt())
                 .createdAt(resetToken.getCreatedAt())
-                .usedAt(java.time.LocalDateTime.now())
+                .usedAt(LocalDateTime.now(ZoneOffset.UTC))
                 .ipAddress(resetToken.getIpAddress())
                 .build();
         passwordResetTokenRepositoryPort.save(usedToken);
