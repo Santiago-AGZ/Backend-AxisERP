@@ -155,7 +155,7 @@ public class TokenController {
             log.error("token_validation_error error={}", e.getMessage(), e);
             Map<String, Object> errorInfo = new HashMap<>();
             errorInfo.put("valid", false);
-            return ResponseEntity.ok(ApiResponse.ok(errorInfo, "Token inválido"));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.ok(errorInfo, "Token inválido"));
         }
     }
 

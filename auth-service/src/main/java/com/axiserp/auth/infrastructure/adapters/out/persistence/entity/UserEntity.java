@@ -1,6 +1,7 @@
 package com.axiserp.auth.infrastructure.adapters.out.persistence.entity;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 import jakarta.persistence.Column;
@@ -71,8 +72,8 @@ public class UserEntity {
 
     @PrePersist
     protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now(ZoneOffset.UTC);
+        this.updatedAt = LocalDateTime.now(ZoneOffset.UTC);
         if (this.status == null) {
             this.status = UserStatus.PENDIENTE;
         }
@@ -80,7 +81,7 @@ public class UserEntity {
 
     @PreUpdate
     protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now(ZoneOffset.UTC);
     }
 
     public enum UserStatus {

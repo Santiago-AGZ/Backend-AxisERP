@@ -1,6 +1,7 @@
 package com.axiserp.auth.application.service;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -41,7 +42,7 @@ public class RefreshTokenService {
      */
     public String create(UUID userId, String ipAddress, String userAgent) {
         String token = UUID.randomUUID().toString();
-        LocalDateTime expiresAt = LocalDateTime.now().plusDays(refreshTokenExpiryDays);
+        LocalDateTime expiresAt = LocalDateTime.now(ZoneOffset.UTC).plusDays(refreshTokenExpiryDays);
 
         RefreshToken refreshToken = new RefreshToken(userId, token, expiresAt);
         refreshTokenRepositoryPort.save(refreshToken);

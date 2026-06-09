@@ -1,6 +1,7 @@
 package com.axiserp.auth.application.usecase;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -50,7 +51,7 @@ public class LogoutUseCaseImpl implements LogoutUseCase {
 
         if (storedToken != null) {
             storedToken.setStatus(RefreshToken.TokenStatus.REVOKED);
-            storedToken.setRevokedAt(LocalDateTime.now());
+            storedToken.setRevokedAt(LocalDateTime.now(ZoneOffset.UTC));
             refreshTokenRepositoryPort.save(storedToken);
         }
 
@@ -59,7 +60,7 @@ public class LogoutUseCaseImpl implements LogoutUseCase {
                 .tokenType("refresh")
                 .userId(UUID.fromString(userId))
                 .reason("LOGOUT")
-                .expiresAt(LocalDateTime.now().plusDays(7))
+                .expiresAt(LocalDateTime.now(ZoneOffset.UTC).plusDays(7))
                 .build();
         tokenBlacklistRepositoryPort.save(blacklist);
 

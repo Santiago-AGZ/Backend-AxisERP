@@ -1,6 +1,7 @@
 package com.axiserp.auth.infrastructure.adapters.out.persistence.entity;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 import jakarta.persistence.Column;
@@ -57,10 +58,10 @@ public class TokenBlacklistEntity {
     @PrePersist
     protected void onCreate() {
         if (this.createdAt == null) {
-            this.createdAt = LocalDateTime.now();
+            this.createdAt = LocalDateTime.now(ZoneOffset.UTC);
         }
         if (this.revokedAt == null) {
-            this.revokedAt = LocalDateTime.now();
+            this.revokedAt = LocalDateTime.now(ZoneOffset.UTC);
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.axiserp.auth.domain.model;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 import lombok.AllArgsConstructor;
@@ -24,7 +25,7 @@ public class PasswordResetToken {
     private String ipAddress;
 
     public boolean isExpired() {
-        return LocalDateTime.now().isAfter(this.expiresAt);
+        return LocalDateTime.now(ZoneOffset.UTC).isAfter(this.expiresAt);
     }
 
     public boolean isValid() {
