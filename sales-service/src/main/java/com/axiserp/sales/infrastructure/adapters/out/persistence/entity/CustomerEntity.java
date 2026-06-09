@@ -79,7 +79,7 @@ public class CustomerEntity {
     }
 
     public enum CustomerStatus {
-        ACTIVO, INACTIVO
+        ACTIVO, INACTIVO, ELIMINADO
     }
 
     public enum DocumentType {

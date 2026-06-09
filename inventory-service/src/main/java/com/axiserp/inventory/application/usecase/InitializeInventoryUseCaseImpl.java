@@ -44,7 +44,18 @@ public class InitializeInventoryUseCaseImpl implements InitializeInventoryUseCas
             throw new InventoryAlreadyInitializedException(request.getProductId());
         }
 
-        if (request.getMaxStock() > 0 && request.getMaxStock() <= request.getMinStock()) {
+        // Validate stock limits are non-negative
+        if (request.getMinStock() < 0) {
+            throw new InvalidStockConfigException("El stock minimo no puede ser negativo");
+        }
+        if (request.getMaxStock() != null && request.getMaxStock() < 0) {
+            throw new InvalidStockConfigException("El stock maximo no puede ser negativo");
+        }
+        if (request.getInitialStock() < 0) {
+            throw new InvalidStockConfigException("El stock inicial no puede ser negativo");
+        }
+
+        if (request.getMaxStock() != null && request.getMaxStock() > 0 && request.getMaxStock() <= request.getMinStock()) {
             throw new InvalidStockConfigException(
                     "El stock maximo (" + request.getMaxStock() + ") debe ser mayor que el stock minimo (" + request.getMinStock() + ")");
         }

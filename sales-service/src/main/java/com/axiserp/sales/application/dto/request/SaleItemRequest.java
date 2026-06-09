@@ -31,7 +31,4 @@ public class SaleItemRequest {
     @NotNull(message = "El precio unitario es obligatorio")
     @DecimalMin(value = "0.01", message = "El precio unitario debe ser mayor que cero")
     private BigDecimal unitPrice;
-
-    @DecimalMin(value = "0.0", inclusive = true, message = "El descuento no puede ser negativo")
-    private BigDecimal discount = BigDecimal.ZERO;
 }

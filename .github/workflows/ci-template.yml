@@ -69,7 +69,8 @@ jobs:
             -Dsonar.organization=santiago-alvarez-gutierrezaxiserp-backend \
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
-            -Dsonar.projectName=${{ inputs.service }}
+            -Dsonar.projectName=${{ inputs.service }} \
+            -Dsonar.qualitygate.wait=true
 
       - name: Upload test results
         if: always()

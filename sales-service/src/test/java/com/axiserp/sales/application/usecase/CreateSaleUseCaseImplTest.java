@@ -72,15 +72,13 @@ class CreateSaleUseCaseImplTest {
                         .productName("Product Test")
                         .quantity(5)
                         .unitPrice(new BigDecimal("100.00"))
-                        .discount(BigDecimal.ZERO)
                         .build()))
-                .discount(BigDecimal.ZERO)
                 .build();
     }
 
     @Test
-    @DisplayName("Should create sale successfully")
-    void create_success() {
+    @DisplayName("Should create sale when customer is active")
+    void create_withActiveCustomer_success() {
         when(customerRepositoryPort.findById(customerId)).thenReturn(Optional.of(activeCustomer));
         when(catalogServicePort.findProductSummary(productId)).thenReturn(
                 new ProductSummary(productId, "Product Test", "PROD-001", "ACTIVO"));
@@ -92,6 +90,7 @@ class CreateSaleUseCaseImplTest {
         assertEquals(SaleStatus.BORRADOR.name(), response.getStatus());
         assertEquals(1, response.getItems().size());
         assertEquals(0, response.getTotal().compareTo(new BigDecimal("595.00")));
+        assertEquals(0, response.getDiscount().compareTo(BigDecimal.ZERO));
         assertTrue(response.getSaleNumber().startsWith("VN-"));
         verify(saleRepositoryPort).save(any());
     }
@@ -123,69 +122,11 @@ class CreateSaleUseCaseImplTest {
         CreateSaleRequest dupRequest = CreateSaleRequest.builder()
                 .customerId(customerId)
                 .items(List.of(
-                        SaleItemRequest.builder().productId(productId).productName("A").quantity(1).unitPrice(new BigDecimal("10")).discount(BigDecimal.ZERO).build(),
-                        SaleItemRequest.builder().productId(productId).productName("A dup").quantity(1).unitPrice(new BigDecimal("10")).discount(BigDecimal.ZERO).build()))
-                .discount(BigDecimal.ZERO)
+                        SaleItemRequest.builder().productId(productId).productName("A").quantity(1).unitPrice(new BigDecimal("10")).build(),
+                        SaleItemRequest.builder().productId(productId).productName("A dup").quantity(1).unitPrice(new BigDecimal("10")).build()))
                 .build();
 
         assertThrows(DuplicateProductInSaleException.class,
                 () -> createSaleUseCase.create(dupRequest, createdBy, false));
-    }
-
-    @Test
-    @DisplayName("Should throw IllegalArgumentException for discount without admin")
-    void create_discountWithoutAdmin_throws() {
-        when(customerRepositoryPort.findById(customerId)).thenReturn(Optional.of(activeCustomer));
-
-        CreateSaleRequest discRequest = CreateSaleRequest.builder()
-                .customerId(customerId)
-                .items(List.of(SaleItemRequest.builder().productId(productId).productName("A").quantity(1).unitPrice(new BigDecimal("10")).discount(BigDecimal.ZERO).build()))
-                .discount(new BigDecimal("5.00"))
-                .build();
-
-        assertThrows(IllegalArgumentException.class,
-                () -> createSaleUseCase.create(discRequest, createdBy, false));
-    }
-
-    @Test
-    @DisplayName("Should create sale with discount when admin")
-    void create_withDiscountAsAdmin_success() {
-        when(customerRepositoryPort.findById(customerId)).thenReturn(Optional.of(activeCustomer));
-        when(catalogServicePort.findProductSummary(productId)).thenReturn(
-                new ProductSummary(productId, "Product Test", "PROD-001", "ACTIVO"));
-        when(saleRepositoryPort.save(any())).thenAnswer(inv -> inv.getArgument(0));
-
-        CreateSaleRequest discRequest = CreateSaleRequest.builder()
-                .customerId(customerId)
-                .items(List.of(SaleItemRequest.builder()
-                        .productId(productId).productName("A").quantity(5)
-                        .unitPrice(new BigDecimal("100.00")).discount(BigDecimal.ZERO).build()))
-                .discount(new BigDecimal("50.00"))
-                .build();
-
-        var response = createSaleUseCase.create(discRequest, createdBy, true);
-
-        assertNotNull(response);
-        assertEquals(0, response.getDiscount().compareTo(new BigDecimal("50.00")));
-        verify(saleRepositoryPort).save(any());
-    }
-
-    @Test
-    @DisplayName("Should throw when discount exceeds 30%")
-    void create_discountExceeds30percent_throws() {
-        when(customerRepositoryPort.findById(customerId)).thenReturn(Optional.of(activeCustomer));
-        when(catalogServicePort.findProductSummary(productId)).thenReturn(
-                new ProductSummary(productId, "Product Test", "PROD-001", "ACTIVO"));
-
-        CreateSaleRequest discRequest = CreateSaleRequest.builder()
-                .customerId(customerId)
-                .items(List.of(SaleItemRequest.builder()
-                        .productId(productId).productName("A").quantity(5)
-                        .unitPrice(new BigDecimal("100.00")).discount(BigDecimal.ZERO).build()))
-                .discount(new BigDecimal("200.00"))
-                .build();
-
-        assertThrows(IllegalArgumentException.class,
-                () -> createSaleUseCase.create(discRequest, createdBy, true));
     }
 }

@@ -51,8 +51,10 @@ public class CreateUserUseCaseImpl implements CreateUserUseCase {
                     admin.getStatus().name().toLowerCase());
         }
 
-        var role = roleRepositoryPort.findByName(request.getRole())
-                .orElseThrow(() -> new IllegalArgumentException("Rol no válido: " + request.getRole()));
+        // Default role if not specified
+        String roleName = request.getRole() != null ? request.getRole() : "VENDEDOR";
+        var role = roleRepositoryPort.findByName(roleName)
+                .orElseThrow(() -> new IllegalArgumentException("Rol no válido: " + roleName));
 
         SupabaseUser supabaseUser = supabaseAuthPort.createUser(
                 request.getEmail(), role.getName(), request.getName(), createdBy);

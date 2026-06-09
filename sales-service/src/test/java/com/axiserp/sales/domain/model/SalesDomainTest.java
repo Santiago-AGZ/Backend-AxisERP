@@ -91,11 +91,19 @@ class CustomerDomainTest {
     }
 
     @Test
-    @DisplayName("isActive should return false for INACTIVO")
+    @DisplayName("isActive should return false for INACTIVO, isDeleted false")
     void isActive_inactivo() {
         Customer c = Customer.builder().status(CustomerStatus.INACTIVO).build();
         assertFalse(c.isActive());
+        assertFalse(c.isDeleted());
+    }
+
+    @Test
+    @DisplayName("isDeleted should return true for ELIMINADO")
+    void isDeleted_eliminado() {
+        Customer c = Customer.builder().status(CustomerStatus.ELIMINADO).build();
         assertTrue(c.isDeleted());
+        assertFalse(c.isActive());
     }
 }
 

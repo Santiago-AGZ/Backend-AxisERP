@@ -79,17 +79,7 @@ public class CreateSaleUseCaseImpl implements CreateSaleUseCase {
             }
         }
 
-        // 3.5 Validate discount permissions
-        BigDecimal saleDiscount = request.getDiscount() != null ? request.getDiscount() : BigDecimal.ZERO;
-        boolean hasDiscount = saleDiscount.compareTo(BigDecimal.ZERO) > 0;
-        boolean hasItemDiscount = request.getItems().stream()
-                .anyMatch(item -> item.getDiscount() != null && item.getDiscount().compareTo(BigDecimal.ZERO) > 0);
-
-        if ((hasDiscount || hasItemDiscount) && !isAdmin) {
-            throw new IllegalArgumentException("Los descuentos requieren autorizacion del ADMIN");
-        }
-
-        // 4 & 5 & 6. Validate quantities/prices and calculate item subtotals
+        // 4. Calculate item subtotals (backend-computed, no discount from request)
         List<SaleItem> items = request.getItems().stream()
                 .map(itemReq -> {
                     if (itemReq.getQuantity() <= 0) {
@@ -98,10 +88,8 @@ public class CreateSaleUseCaseImpl implements CreateSaleUseCase {
                     if (itemReq.getUnitPrice() == null || itemReq.getUnitPrice().compareTo(BigDecimal.ZERO) <= 0) {
                         throw new IllegalArgumentException("El precio unitario debe ser mayor que cero");
                     }
-                    BigDecimal itemDiscount = itemReq.getDiscount() != null ? itemReq.getDiscount() : BigDecimal.ZERO;
                     BigDecimal itemSubtotal = itemReq.getUnitPrice()
                             .multiply(BigDecimal.valueOf(itemReq.getQuantity()))
-                            .subtract(itemDiscount)
                             .setScale(2, RoundingMode.HALF_UP);
 
                     return SaleItem.builder()
@@ -109,25 +97,19 @@ public class CreateSaleUseCaseImpl implements CreateSaleUseCase {
                             .productName(itemReq.getProductName())
                             .quantity(itemReq.getQuantity())
                             .unitPrice(itemReq.getUnitPrice())
-                            .discount(itemDiscount)
+                            .discount(BigDecimal.ZERO)
                             .subtotal(itemSubtotal)
                             .build();
                 })
                 .toList();
 
-        // 7 & 8 & 9. Calculate totals
+        // 5. Calculate totals (backend-computed)
         BigDecimal subtotal = items.stream()
                 .map(SaleItem::getSubtotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        if (hasDiscount) {
-            BigDecimal maxDiscount = subtotal.multiply(new BigDecimal("0.30"));
-            if (saleDiscount.compareTo(maxDiscount) > 0) {
-                throw new IllegalArgumentException("El descuento no puede exceder el 30% del subtotal");
-            }
-        }
-
-        BigDecimal taxBase = subtotal.subtract(saleDiscount);
+        BigDecimal saleDiscount = BigDecimal.ZERO;
+        BigDecimal taxBase = subtotal;
         BigDecimal tax = taxBase.multiply(TAX_RATE).setScale(2, RoundingMode.HALF_UP);
         BigDecimal total = taxBase.add(tax).setScale(2, RoundingMode.HALF_UP);
 

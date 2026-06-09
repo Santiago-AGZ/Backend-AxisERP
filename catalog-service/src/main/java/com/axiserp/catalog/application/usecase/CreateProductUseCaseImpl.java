@@ -40,6 +40,12 @@ public class CreateProductUseCaseImpl implements CreateProductUseCase {
             throw new DuplicateCodigoException();
         }
 
+        if (request.getSalePrice().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("El precio de venta debe ser mayor que cero");
+        }
+        if (request.getPurchasePrice().compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("El costo no puede ser negativo");
+        }
         if (request.getSalePrice().compareTo(request.getPurchasePrice()) < 0) {
             throw new InvalidPriceException();
         }

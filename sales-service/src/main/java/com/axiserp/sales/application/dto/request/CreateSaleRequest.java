@@ -27,7 +27,5 @@ public class CreateSaleRequest {
     @Valid
     private List<SaleItemRequest> items;
 
-    private BigDecimal discount = BigDecimal.ZERO;
-
     private String notes;
 }

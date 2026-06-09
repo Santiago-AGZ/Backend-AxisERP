@@ -33,6 +33,6 @@ public class Customer {
     }
 
     public boolean isDeleted() {
-        return this.status == CustomerStatus.INACTIVO;
+        return this.status == CustomerStatus.ELIMINADO;
     }
 }
