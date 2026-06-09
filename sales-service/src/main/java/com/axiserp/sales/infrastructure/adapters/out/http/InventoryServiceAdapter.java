@@ -11,6 +11,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -57,6 +59,12 @@ public class InventoryServiceAdapter implements InventoryServicePort {
         } catch (HttpClientErrorException e) {
             log.error("inventory_exit_client_error productId={} status={} body={}", productId, e.getStatusCode(), e.getResponseBodyAsString());
             throw new InsufficientStockException("Error al descontar stock para el producto: " + productId + ". " + e.getMessage());
+        } catch (ResourceAccessException e) {
+            log.error("inventory_exit_connection_error productId={} url={} error={}", productId, url, e.getMessage());
+            throw new InsufficientStockException("Error de conexión con el servicio de inventario para el producto: " + productId + ". Verifique que el servicio de inventario esté disponible.");
+        } catch (HttpServerErrorException e) {
+            log.error("inventory_exit_server_error productId={} status={} body={}", productId, e.getStatusCode(), e.getResponseBodyAsString());
+            throw new InsufficientStockException("Error del servidor de inventario para el producto: " + productId + ". El servicio de inventario respondió con error.");
         }
     }
 
@@ -81,6 +89,12 @@ public class InventoryServiceAdapter implements InventoryServicePort {
         } catch (HttpClientErrorException e) {
             log.error("inventory_return_client_error productId={} status={} body={}", productId, e.getStatusCode(), e.getResponseBodyAsString());
             throw new RuntimeException("Error al registrar devolucion de stock para el producto: " + productId + ". " + e.getMessage(), e);
+        } catch (ResourceAccessException e) {
+            log.error("inventory_return_connection_error productId={} url={} error={}", productId, url, e.getMessage());
+            throw new RuntimeException("Error de conexión con el servicio de inventario al registrar devolución para el producto: " + productId, e);
+        } catch (HttpServerErrorException e) {
+            log.error("inventory_return_server_error productId={} status={} body={}", productId, e.getStatusCode(), e.getResponseBodyAsString());
+            throw new RuntimeException("Error del servidor de inventario al registrar devolución para el producto: " + productId, e);
         }
     }
 
