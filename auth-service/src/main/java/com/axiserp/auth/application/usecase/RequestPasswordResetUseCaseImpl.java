@@ -1,6 +1,7 @@
 package com.axiserp.auth.application.usecase;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -50,7 +51,7 @@ public class RequestPasswordResetUseCaseImpl implements RequestPasswordResetUseC
                 .userId(user.getId())
                 .token(token)
                 .used(false)
-                .expiresAt(LocalDateTime.now().plusHours(24))
+                .expiresAt(LocalDateTime.now(ZoneOffset.UTC).plusHours(24))
                 .build();
 
         passwordResetTokenRepositoryPort.save(resetToken);
