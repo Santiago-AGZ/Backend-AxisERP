@@ -1,0 +1,41 @@
+name: Release & Versioning
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4.1.7
+        with:
+          fetch-depth: 0
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          PREVIOUS_TAG=$(git tag --sort=-version:refname | head -n 2 | tail -n 1)
+          echo "## What's Changed" > changelog.md
+          if [ -n "$PREVIOUS_TAG" ]; then
+            git log $PREVIOUS_TAG..HEAD --oneline --pretty=format:"- %s (%h)" >> changelog.md
+          else
+            git log --oneline --pretty=format:"- %s (%h)" >> changelog.md
+          fi
+          echo "" >> changelog.md
+          echo "**Full Changelog:** https://github.com/${{ github.repository }}/commits/${{ github.ref_name }}" >> changelog.md
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Release ${{ github.ref_name }}
+          body_path: changelog.md
+          draft: false
+          prerelease: false
+          generate_release_notes: true
