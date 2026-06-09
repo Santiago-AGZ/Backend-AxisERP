@@ -42,7 +42,7 @@ jobs:
           echo "Service structure validated"
 
       - name: Set up JDK ${{ inputs.java-version }}
-        uses: actions/setup-java@v4.1.0
+        uses: actions/setup-java@v5.2.0
         with:
           java-version: ${{ inputs.java-version }}
           distribution: temurin
