@@ -71,6 +71,10 @@ public class GatewayConfig {
             .route("report-service", r -> r
                 .path("/api/v1/reports/**")
                 .uri(reportServiceUrl))
+            .route("dashboard-service", r -> r
+                .path("/api/v1/dashboard")
+                .filters(f -> f.rewritePath("/api/v1/dashboard", "/api/v1/reports/dashboard"))
+                .uri(reportServiceUrl))
             .build();
     }
 }
