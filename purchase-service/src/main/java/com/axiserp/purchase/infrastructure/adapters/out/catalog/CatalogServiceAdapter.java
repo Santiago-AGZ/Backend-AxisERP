@@ -5,7 +5,9 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
 import com.axiserp.purchase.ports.output.CatalogServicePort;
@@ -37,11 +39,16 @@ public class CatalogServiceAdapter implements CatalogServicePort {
     @Retry(name = CB_NAME)
     @CircuitBreaker(name = CB_NAME, fallbackMethod = "productExistsFallback")
     public boolean productExists(UUID productId) {
-        restClient.get()
-                .uri("/api/v1/productos/{id}", productId)
-                .retrieve()
-                .toBodilessEntity();
-        return true;
+        try {
+            restClient.get()
+                    .uri("/api/v1/productos/{id}", productId)
+                    .retrieve()
+                    .toBodilessEntity();
+            return true;
+        } catch (HttpClientErrorException.NotFound e) {
+            log.warn("catalog_product_not_found productId={}", productId);
+            return false;
+        }
     }
 
     @SuppressWarnings("unused")
