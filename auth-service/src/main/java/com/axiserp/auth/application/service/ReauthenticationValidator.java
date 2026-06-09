@@ -26,6 +26,9 @@ public class ReauthenticationValidator {
         User user = userRepositoryPort.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
 
+        if (user.getPasswordHash() == null) {
+            throw new IllegalArgumentException("La contraseña local no está configurada. Use Supabase Auth para gestionar este usuario.");
+        }
         if (!passwordEncoder.matches(rawPassword, user.getPasswordHash())) {
             throw new IllegalArgumentException("La contraseña proporcionada no es correcta");
         }
