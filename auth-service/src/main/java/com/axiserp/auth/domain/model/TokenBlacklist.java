@@ -1,6 +1,7 @@
 package com.axiserp.auth.domain.model;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 import lombok.AllArgsConstructor;
@@ -37,10 +38,10 @@ public class TokenBlacklist {
         this.token = tokenJti;
         this.userId = userId;
         this.expiresAt = expiresAt;
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now(ZoneOffset.UTC);
     }
 
     public boolean isExpired() {
-        return LocalDateTime.now().isAfter(expiresAt);
+        return LocalDateTime.now(ZoneOffset.UTC).isAfter(expiresAt);
     }
 }

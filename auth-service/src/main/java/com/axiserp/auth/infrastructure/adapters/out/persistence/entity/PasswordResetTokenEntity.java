@@ -1,6 +1,7 @@
 package com.axiserp.auth.infrastructure.adapters.out.persistence.entity;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 import jakarta.persistence.Column;
@@ -52,7 +53,7 @@ public class PasswordResetTokenEntity {
 
     @PrePersist
     protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now(ZoneOffset.UTC);
         this.used = false;
     }
 }

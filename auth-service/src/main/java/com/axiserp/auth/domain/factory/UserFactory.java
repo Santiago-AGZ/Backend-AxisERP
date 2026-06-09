@@ -1,6 +1,7 @@
 package com.axiserp.auth.domain.factory;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 import com.axiserp.auth.domain.model.User;
@@ -23,8 +24,8 @@ public class UserFactory {
                 .failedLoginAttempts(0)
                 .createdBy(createdBy)
                 .lastLoginAt(null)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
+                .createdAt(LocalDateTime.now(ZoneOffset.UTC))
+                .updatedAt(LocalDateTime.now(ZoneOffset.UTC))
                 .deletedAt(null)
                 .build();
     }
@@ -40,7 +41,7 @@ public class UserFactory {
                 .updatedBy(updatedBy)
                 .lastLoginAt(existing.getLastLoginAt())
                 .createdAt(existing.getCreatedAt())
-                .updatedAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now(ZoneOffset.UTC))
                 .deletedAt(existing.getDeletedAt())
                 .build();
     }
@@ -56,7 +57,7 @@ public class UserFactory {
                 .updatedBy(updatedBy)
                 .lastLoginAt(existing.getLastLoginAt())
                 .createdAt(existing.getCreatedAt())
-                .updatedAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now(ZoneOffset.UTC))
                 .deletedAt(null)
                 .build();
     }
@@ -72,7 +73,7 @@ public class UserFactory {
                 .updatedBy(updatedBy)
                 .lastLoginAt(existing.getLastLoginAt())
                 .createdAt(existing.getCreatedAt())
-                .updatedAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now(ZoneOffset.UTC))
                 .deletedAt(existing.getDeletedAt())
                 .build();
     }
@@ -88,8 +89,8 @@ public class UserFactory {
                 .updatedBy(updatedBy)
                 .lastLoginAt(existing.getLastLoginAt())
                 .createdAt(existing.getCreatedAt())
-                .updatedAt(LocalDateTime.now())
-                .deletedAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now(ZoneOffset.UTC))
+                .deletedAt(LocalDateTime.now(ZoneOffset.UTC))
                 .build();
     }
 
@@ -105,8 +106,8 @@ public class UserFactory {
                 .updatedBy(updatedBy)
                 .lastLoginAt(existing.getLastLoginAt())
                 .createdAt(existing.getCreatedAt())
-                .updatedAt(LocalDateTime.now())
-                .deletedAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now(ZoneOffset.UTC))
+                .deletedAt(LocalDateTime.now(ZoneOffset.UTC))
                 .build();
     }
 
@@ -141,7 +142,7 @@ public class UserFactory {
                 .updatedBy(existing.getId())
                 .lastLoginAt(existing.getLastLoginAt())
                 .createdAt(existing.getCreatedAt())
-                .updatedAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now(ZoneOffset.UTC))
                 .deletedAt(existing.getDeletedAt())
                 .build();
     }
@@ -155,7 +156,7 @@ public class UserFactory {
                 .status(existing.getStatus())
                 .createdBy(existing.getCreatedBy())
                 .updatedBy(existing.getId())
-                .lastLoginAt(LocalDateTime.now())
+                .lastLoginAt(LocalDateTime.now(ZoneOffset.UTC))
                 .createdAt(existing.getCreatedAt())
                 .updatedAt(existing.getUpdatedAt())
                 .deletedAt(existing.getDeletedAt())

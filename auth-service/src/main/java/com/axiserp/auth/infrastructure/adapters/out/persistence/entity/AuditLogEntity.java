@@ -1,6 +1,7 @@
 package com.axiserp.auth.infrastructure.adapters.out.persistence.entity;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 import jakarta.persistence.Column;
@@ -64,7 +65,7 @@ public class AuditLogEntity {
 
     @PrePersist
     protected void onCreate() {
-        this.timestamp = LocalDateTime.now();
+        this.timestamp = LocalDateTime.now(ZoneOffset.UTC);
     }
 
     public enum AuditAction {
