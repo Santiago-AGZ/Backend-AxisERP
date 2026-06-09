@@ -85,7 +85,7 @@ jobs:
 
       - name: Lint Dockerfile with hadolint
         if: inputs.build-docker
-        uses: hadolint/hadolint-action@v3.1.0
+        uses: hadolint/hadolint-action@v3.3.0
         with:
           dockerfile: ${{ inputs.service }}/Dockerfile
           ignore: DL3008,DL3009
