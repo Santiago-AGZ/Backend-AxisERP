@@ -62,9 +62,9 @@ jobs:
             echo "SONAR_TOKEN not configured. Skipping SonarCloud analysis."
             exit 0
           fi
-          mvn sonar:sonar \
-            -Dsonar.projectKey=axiserp_backend \
-            -Dsonar.organization=santiago-agz \
+          mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+            -Dsonar.projectKey=Santiago-AGZ_Backend-AxisERP \
+            -Dsonar.organization=santiago-alvarez-gutierrez \
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
             -Dsonar.projectName=${{ inputs.service }}
