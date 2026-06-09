@@ -16,12 +16,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.axiserp.auth.application.dto.request.LoginRequest;
 import com.axiserp.auth.application.dto.request.PasswordResetRequest;
+import com.axiserp.auth.application.dto.request.ResetPasswordRequest;
 import com.axiserp.auth.application.dto.response.LoginResponse;
 import com.axiserp.auth.application.dto.response.UserInfoResponse;
 import com.axiserp.auth.infrastructure.adapters.in.web.response.ApiResponse;
 import com.axiserp.auth.ports.input.AuthenticateUserUseCase;
 import com.axiserp.auth.ports.input.GetUserInfoUseCase;
 import com.axiserp.auth.ports.input.RequestPasswordResetUseCase;
+import com.axiserp.auth.ports.input.ResetPasswordUseCase;
 
 import lombok.RequiredArgsConstructor;
 
@@ -33,6 +35,7 @@ public class AuthController {
     private final GetUserInfoUseCase getUserInfoUseCase;
     private final AuthenticateUserUseCase authenticateUserUseCase;
     private final RequestPasswordResetUseCase requestPasswordResetUseCase;
+    private final ResetPasswordUseCase resetPasswordUseCase;
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<LoginResponse>> login(
@@ -59,6 +62,13 @@ public class AuthController {
         requestPasswordResetUseCase.requestReset(request.email());
         return ResponseEntity.ok(ApiResponse.ok(null,
                 "Si el correo existe, recibiras un enlace de recuperacion"));
+    }
+
+    @PostMapping("/password-reset/confirm")
+    public ResponseEntity<ApiResponse<Void>> confirmPasswordReset(
+            @Valid @RequestBody ResetPasswordRequest request) {
+        resetPasswordUseCase.resetPassword(request.getToken(), request.getNewPassword());
+        return ResponseEntity.ok(ApiResponse.ok(null, "Contraseña actualizada exitosamente"));
     }
 
     private static String getClientIp(HttpServletRequest request) {
