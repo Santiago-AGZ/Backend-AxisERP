@@ -53,11 +53,15 @@ jobs:
         run: mvn -f ${{ inputs.service }}/pom.xml clean verify -Dfailsafe.rerunFailingTestsCount=1
 
       - name: SonarCloud Analysis
-        if: inputs.build-docker && env.SONAR_TOKEN != ''
+        if: inputs.build-docker
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         working-directory: ${{ inputs.service }}
         run: |
+          if [ -z "$SONAR_TOKEN" ]; then
+            echo "SONAR_TOKEN not configured. Skipping SonarCloud analysis."
+            exit 0
+          fi
           mvn sonar:sonar \
             -Dsonar.projectKey=axiserp_backend \
             -Dsonar.organization=santiago-agz \
