@@ -127,7 +127,7 @@ public class TokenController {
     public ResponseEntity<ApiResponse<Map<String, Object>>> validateToken(
             Authentication authentication) {
         try {
-            UUID userId = UUID.fromString((String) authentication.getPrincipal());
+            UUID userId = UUID.fromString(authentication.getName());
 
             Map<String, Object> tokenInfo = new HashMap<>();
             tokenInfo.put("userId", userId.toString());
