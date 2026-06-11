@@ -141,6 +141,7 @@ services:
       - SALES_SERVICE_URL=http://sales-service:8084
       - PURCHASE_SERVICE_URL=http://purchase-service:8086
       - REPORT_SERVICE_URL=http://report-service:8085
+      - CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173
     depends_on:
       - auth-service
       - catalog-service

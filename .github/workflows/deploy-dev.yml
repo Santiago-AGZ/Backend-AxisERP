@@ -1,0 +1,64 @@
+name: Deploy to Azure Dev (Preview)
+
+on:
+  pull_request:
+    branches: [master]
+    types: [opened, synchronize, reopened]
+
+env:
+  ACR_NAME: axiserp
+  ACR_SERVER: axiserp.azurecr.io
+  RESOURCE_GROUP: axiserp-dev
+  CONTAINERAPPS_ENV: axiserp-env-dev
+
+jobs:
+  build-preview:
+    strategy:
+      fail-fast: false
+      matrix:
+        service: [auth-service, catalog-service, inventory-service, sales-service, purchase-service, report-service, api-gateway]
+
+    runs-on: ubuntu-latest
+    environment: development
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Compile & Test
+        run: mvn -pl ${{ matrix.service }} -am clean test -q
+
+      - name: Docker Build
+        run: |
+          docker build \
+            -t ${{ env.ACR_SERVER }}/${{ matrix.service }}:pr-${{ github.event.number }} \
+            -f docker/Dockerfile.${{ matrix.service == 'api-gateway' && 'gateway' || (matrix.service | replace('-service', '')) }} \
+            .
+
+      - name: Login to ACR
+        uses: azure/docker-login@v2
+        with:
+          login-server: ${{ env.ACR_SERVER }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      - name: Push Preview Image
+        run: docker push ${{ env.ACR_SERVER }}/${{ matrix.service }}:pr-${{ github.event.number }}
+
+  comment-pr:
+    needs: build-preview
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `✅ **Build complete for PR #${context.issue.number}**\n\nImages pushed to ACR with tag \`pr-${context.issue.number}\`\n\nDeploy to dev environment: pending manual approval.`
+            })

@@ -18,6 +18,7 @@ import com.axiserp.sales.domain.exception.DuplicateDocumentException;
 import com.axiserp.sales.domain.exception.DuplicateProductInSaleException;
 import com.axiserp.sales.domain.exception.InsufficientStockException;
 import com.axiserp.sales.domain.exception.InvoiceNotFoundException;
+import com.axiserp.sales.domain.exception.SaleAccessDeniedException;
 import com.axiserp.sales.domain.exception.SaleNotFoundException;
 import com.axiserp.sales.domain.exception.SaleNotModifiableException;
 import com.axiserp.sales.infrastructure.adapters.in.web.dto.ApiResponse;
@@ -71,10 +72,10 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error("BAD_REQUEST", "Formato JSON inválido"));
     }
 
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ApiResponse<Void>> handleAccessDenied(AccessDeniedException ex) {
+    @ExceptionHandler({AccessDeniedException.class, SaleAccessDeniedException.class})
+    public ResponseEntity<ApiResponse<Void>> handleAccessDenied(RuntimeException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(ApiResponse.error("FORBIDDEN", "No tiene permisos para realizar esta operación"));
+                .body(ApiResponse.error("FORBIDDEN", ex.getMessage()));
     }
 
     @ExceptionHandler(IllegalStateException.class)

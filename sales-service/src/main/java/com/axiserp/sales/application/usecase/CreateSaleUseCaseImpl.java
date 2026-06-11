@@ -21,6 +21,7 @@ import com.axiserp.sales.application.service.AuditService;
 import com.axiserp.sales.domain.exception.CustomerInactiveException;
 import com.axiserp.sales.domain.exception.CustomerNotFoundException;
 import com.axiserp.sales.domain.exception.DuplicateProductInSaleException;
+import com.axiserp.sales.domain.exception.SaleAccessDeniedException;
 import com.axiserp.sales.domain.model.Customer;
 import com.axiserp.sales.domain.model.Sale;
 import com.axiserp.sales.domain.model.SaleItem;
@@ -79,7 +80,7 @@ public class CreateSaleUseCaseImpl implements CreateSaleUseCase {
             }
         }
 
-        // 4. Calculate item subtotals (backend-computed, no discount from request)
+        // 4. Calculate item subtotals (backend-computed)
         List<SaleItem> items = request.getItems().stream()
                 .map(itemReq -> {
                     if (itemReq.getQuantity() <= 0) {
@@ -108,14 +109,38 @@ public class CreateSaleUseCaseImpl implements CreateSaleUseCase {
                 .map(SaleItem::getSubtotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        BigDecimal saleDiscount = BigDecimal.ZERO;
-        BigDecimal taxBase = subtotal;
+        BigDecimal saleDiscount = request.getDiscount() != null ? request.getDiscount() : BigDecimal.ZERO;
+        if (saleDiscount.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("El descuento no puede ser negativo");
+        }
+        if (saleDiscount.compareTo(new BigDecimal("100")) > 0) {
+            throw new IllegalArgumentException("El descuento no puede superar el 100%");
+        }
+
+        // RN-014: Discounts >30% require ADMIN role
+        BigDecimal maxAutoDiscount = subtotal.multiply(new BigDecimal("0.30")).setScale(2, RoundingMode.HALF_UP);
+        if (saleDiscount.compareTo(maxAutoDiscount) > 0 && !isAdmin) {
+            log.warn("discount_not_authorized discount={} maxAllowed={} userId={}", saleDiscount, maxAutoDiscount, createdBy);
+            throw new SaleAccessDeniedException(
+                    "Descuentos superiores al 30% requieren autorizacion del rol ADMIN. "
+                    + "Descuento solicitado: " + saleDiscount + "%. Maximo automatico: " + maxAutoDiscount);
+        }
+
+        BigDecimal discountAmount = subtotal.multiply(saleDiscount)
+                .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
+        BigDecimal taxBase = subtotal.subtract(discountAmount);
+        if (taxBase.compareTo(BigDecimal.ZERO) < 0) {
+            taxBase = BigDecimal.ZERO;
+        }
         BigDecimal tax = taxBase.multiply(TAX_RATE).setScale(2, RoundingMode.HALF_UP);
         BigDecimal total = taxBase.add(tax).setScale(2, RoundingMode.HALF_UP);
 
         if (total.compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException("El total de la venta no puede ser negativo");
         }
+
+        // 6. Update saleDiscount to the actual discount amount
+        saleDiscount = discountAmount;
 
         // 10. Generate sale number
         String saleNumber = "VTA-" + java.time.Year.now().getValue() + "-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();

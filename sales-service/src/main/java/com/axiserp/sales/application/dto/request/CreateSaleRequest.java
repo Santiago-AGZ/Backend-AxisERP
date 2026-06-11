@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.UUID;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -28,4 +30,8 @@ public class CreateSaleRequest {
     private List<SaleItemRequest> items;
 
     private String notes;
+
+    @DecimalMin(value = "0", message = "El descuento no puede ser negativo")
+    @DecimalMax(value = "100", message = "El descuento no puede superar el 100%")
+    private BigDecimal discount;
 }

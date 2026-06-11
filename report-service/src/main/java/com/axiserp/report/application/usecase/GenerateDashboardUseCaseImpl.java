@@ -8,27 +8,38 @@ import com.axiserp.report.ports.output.SalesServicePort;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.StreamSupport;
 
 @Service
 @RequiredArgsConstructor
 public class GenerateDashboardUseCaseImpl implements GenerateDashboardUseCase {
 
+    private static final Logger log = LoggerFactory.getLogger(GenerateDashboardUseCaseImpl.class);
+    private static final int MAX_SALES_PAGES = 2;
+    private static final int RECENT_SALES_LIMIT = 10;
+    private static final int TIMEOUT_SECONDS = 3;
+
     private final SalesServicePort salesServicePort;
     private final InventoryServicePort inventoryServicePort;
 
     @Override
     public DashboardResponse execute() {
+        long start = System.currentTimeMillis();
         LocalDate today = LocalDate.now();
 
-        // Fetch today's sales
+        // Step 1: Fetch today's sales (sequential — depends on pagination)
         List<JsonNode> todaySales = fetchTodaySales(today);
+
         BigDecimal todayRevenue = BigDecimal.ZERO;
         long pendingSalesCount = 0;
         List<RecentSale> recentSales = new ArrayList<>();
@@ -40,12 +51,10 @@ public class GenerateDashboardUseCaseImpl implements GenerateDashboardUseCase {
             if (!"ANULADA".equals(status)) {
                 todayRevenue = todayRevenue.add(total);
             }
-
             if ("PENDIENTE".equals(status)) {
                 pendingSalesCount++;
             }
-
-            if (recentSales.size() < 10) {
+            if (recentSales.size() < RECENT_SALES_LIMIT) {
                 String createdAtStr = sale.has("createdAt") && !sale.get("createdAt").isNull()
                         ? sale.get("createdAt").asText() : null;
                 recentSales.add(new RecentSale(
@@ -57,28 +66,30 @@ public class GenerateDashboardUseCaseImpl implements GenerateDashboardUseCase {
                 ));
             }
         }
-
         recentSales.sort(Comparator.comparing(RecentSale::createdAt).reversed());
 
-        // Fetch low stock alerts
+        // Step 2: Fetch alerts and customers count IN PARALLEL
+        CompletableFuture<Long> futureLowStock = CompletableFuture.supplyAsync(() -> fetchLowStockCount());
+        CompletableFuture<Long> futureTotalCustomers = CompletableFuture.supplyAsync(() -> fetchTotalCustomers());
+
         long lowStockCount = 0;
-        JsonNode alertResponse = inventoryServicePort.fetchAlerts(1, 100);
-        if (alertResponse != null) {
-            JsonNode alertData = alertResponse.get("data");
-            if (alertData != null && alertData.isArray()) {
-                lowStockCount = StreamSupport.stream(alertData.spliterator(), false).count();
-            }
+        long totalCustomers = 0;
+
+        try {
+            lowStockCount = futureLowStock.get(TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            log.warn("dashboard_lowstock_timeout: {}", e.getMessage());
         }
 
-        // Fetch customers count
-        long totalCustomers = 0;
-        JsonNode customerResponse = salesServicePort.fetchCustomers(null, false, 1, 1);
-        if (customerResponse != null) {
-            JsonNode pagination = customerResponse.get("pagination");
-            if (pagination != null) {
-                totalCustomers = pagination.get("totalRecords").asLong(0);
-            }
+        try {
+            totalCustomers = futureTotalCustomers.get(TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            log.warn("dashboard_customers_timeout: {}", e.getMessage());
         }
+
+        long elapsed = System.currentTimeMillis() - start;
+        log.info("dashboard_generated elapsed={}ms revenue={} sales={} pending={} lowStock={} customers={}",
+                elapsed, todayRevenue, todaySales.size(), pendingSalesCount, lowStockCount, totalCustomers);
 
         return new DashboardResponse(
                 todayRevenue,
@@ -86,27 +97,62 @@ public class GenerateDashboardUseCaseImpl implements GenerateDashboardUseCase {
                 pendingSalesCount,
                 lowStockCount,
                 totalCustomers,
-                recentSales.size() > 10 ? recentSales.subList(0, 10) : recentSales
+                recentSales.size() > RECENT_SALES_LIMIT ? recentSales.subList(0, RECENT_SALES_LIMIT) : recentSales
         );
     }
 
     private List<JsonNode> fetchTodaySales(LocalDate today) {
         List<JsonNode> allSales = new ArrayList<>();
-        for (int page = 0; page < 5; page++) {
-            JsonNode response = salesServicePort.fetchSales(today, today, null, null, null, page + 1, 50);
-            if (response == null) break;
+        for (int page = 0; page < MAX_SALES_PAGES; page++) {
+            try {
+                JsonNode response = salesServicePort.fetchSales(today, today, null, null, null, page + 1, 50);
+                if (response == null) break;
 
-            JsonNode data = response.get("data");
-            if (data == null || !data.isArray() || data.isEmpty()) break;
+                JsonNode data = response.get("data");
+                if (data == null || !data.isArray() || data.isEmpty()) break;
 
-            StreamSupport.stream(data.spliterator(), false).forEach(allSales::add);
+                data.forEach(allSales::add);
 
-            JsonNode pagination = response.get("pagination");
-            if (pagination == null) break;
+                JsonNode pagination = response.get("pagination");
+                if (pagination == null) break;
 
-            int totalPages = pagination.has("totalPages") ? pagination.get("totalPages").asInt() : 1;
-            if (page >= totalPages - 1) break;
+                int totalPages = pagination.has("totalPages") ? pagination.get("totalPages").asInt() : 1;
+                if (page >= totalPages - 1) break;
+            } catch (Exception e) {
+                log.warn("dashboard_fetch_sales_page_{}_failed: {}", page + 1, e.getMessage());
+                break;
+            }
         }
         return allSales;
+    }
+
+    private long fetchLowStockCount() {
+        try {
+            JsonNode alertResponse = inventoryServicePort.fetchAlerts(1, 100);
+            if (alertResponse != null) {
+                JsonNode alertData = alertResponse.get("data");
+                if (alertData != null && alertData.isArray()) {
+                    return StreamSupport.stream(alertData.spliterator(), false).count();
+                }
+            }
+        } catch (Exception e) {
+            log.warn("dashboard_fetch_lowstock_failed: {}", e.getMessage());
+        }
+        return 0;
+    }
+
+    private long fetchTotalCustomers() {
+        try {
+            JsonNode customerResponse = salesServicePort.fetchCustomers(null, false, 1, 1);
+            if (customerResponse != null) {
+                JsonNode pagination = customerResponse.get("pagination");
+                if (pagination != null) {
+                    return pagination.get("totalRecords").asLong(0);
+                }
+            }
+        } catch (Exception e) {
+            log.warn("dashboard_fetch_customers_failed: {}", e.getMessage());
+        }
+        return 0;
     }
 }
