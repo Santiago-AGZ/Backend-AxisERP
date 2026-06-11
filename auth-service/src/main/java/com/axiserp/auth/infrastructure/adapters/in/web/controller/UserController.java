@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.axiserp.auth.application.dto.request.CreateUserRequest;
+import com.axiserp.auth.application.dto.request.PasswordConfirmationRequest;
 import com.axiserp.auth.application.dto.request.UpdateUserRequest;
 import com.axiserp.auth.application.dto.response.AuditLogResponse;
 import com.axiserp.auth.application.dto.response.UserResponse;
@@ -104,10 +105,10 @@ public class UserController {
     @PatchMapping("/usuarios/{id}/desactivar")
     public ResponseEntity<ApiResponse<UserResponse>> deactivateUser(
             @PathVariable UUID id,
-            @RequestParam String currentPassword,
+            @Valid @RequestBody PasswordConfirmationRequest request,
             Authentication authentication) {
         UUID adminId = UUID.fromString((String) authentication.getPrincipal());
-        return ResponseEntity.ok(ApiResponse.ok(deactivateUserUseCase.deactivate(id, adminId, currentPassword), "Usuario desactivado exitosamente"));
+        return ResponseEntity.ok(ApiResponse.ok(deactivateUserUseCase.deactivate(id, adminId, request.currentPassword()), "Usuario desactivado exitosamente"));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -139,10 +140,10 @@ public class UserController {
     @DeleteMapping("/usuarios/{id}")
     public ResponseEntity<ApiResponse<UserResponse>> deleteUser(
             @PathVariable UUID id,
-            @RequestParam String currentPassword,
+            @Valid @RequestBody PasswordConfirmationRequest request,
             Authentication authentication) {
         UUID adminId = UUID.fromString((String) authentication.getPrincipal());
-        return ResponseEntity.ok(ApiResponse.ok(deleteUserUseCase.delete(id, adminId, currentPassword), "Usuario eliminado exitosamente"));
+        return ResponseEntity.ok(ApiResponse.ok(deleteUserUseCase.delete(id, adminId, request.currentPassword()), "Usuario eliminado exitosamente"));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
