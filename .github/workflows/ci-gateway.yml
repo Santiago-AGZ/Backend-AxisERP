@@ -6,6 +6,7 @@ on:
   pull_request:
     branches: [master]
     paths: [api-gateway/**]
+  workflow_dispatch:
 jobs:
   ci:
     uses: ./.github/workflows/template-ci.yml
