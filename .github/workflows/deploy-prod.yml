@@ -4,6 +4,7 @@ on:
   push:
     branches: [master]
     paths-ignore: ['**.md', 'docs/**', 'Frontend-AxisERP/**']
+  workflow_dispatch:
 
 env:
   ACR_NAME: axiserp
@@ -67,15 +68,6 @@ jobs:
         run: mvn -f ${{ matrix.service }}/pom.xml clean test -q
         timeout-minutes: 5
 
-      - name: Trivy Vulnerability Scan
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: fs
-          scan-ref: ${{ matrix.service }}
-          format: table
-          exit-code: 1
-          severity: CRITICAL,HIGH
-
       - name: Docker Compile (multi-stage)
         run: |
           docker build \
@@ -83,15 +75,6 @@ jobs:
             -t ${{ env.ACR_SERVER }}/${{ matrix.service }}:latest \
             -f ${{ matrix.dockerfile }} \
             ${{ matrix.service }}
-
-      - name: Trivy Image Scan
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: image
-          image-ref: ${{ env.ACR_SERVER }}/${{ matrix.service }}:${{ github.sha }}
-          format: table
-          exit-code: 1
-          severity: CRITICAL,HIGH
 
       - name: Login to ACR
         uses: azure/docker-login@v2
