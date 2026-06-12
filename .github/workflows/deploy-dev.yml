@@ -30,14 +30,14 @@ jobs:
           cache: maven
 
       - name: Compile & Test
-        run: mvn -pl ${{ matrix.service }} -am clean test -q
+        run: mvn -f ${{ matrix.service }}/pom.xml clean test -q
 
       - name: Docker Build
         run: |
           docker build \
             -t ${{ env.ACR_SERVER }}/${{ matrix.service }}:pr-${{ github.event.number }} \
             -f ${{ matrix.service }}/Dockerfile \
-            .
+            ${{ matrix.service }}
 
       - name: Login to ACR
         uses: azure/docker-login@v2

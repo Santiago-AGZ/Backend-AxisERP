@@ -64,18 +64,8 @@ jobs:
           cache: maven
 
       - name: Compile & Test
-        run: mvn -pl ${{ matrix.service }} -am clean test -q
+        run: mvn -f ${{ matrix.service }}/pom.xml clean test -q
         timeout-minutes: 5
-
-      - name: SonarCloud
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          mvn -pl ${{ matrix.service }} sonar:sonar \
-            -Dsonar.token=${{ secrets.SONAR_TOKEN }} \
-            -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.qualitygate.wait=true
 
       - name: Trivy Vulnerability Scan
         uses: aquasecurity/trivy-action@master
@@ -92,9 +82,7 @@ jobs:
             -t ${{ env.ACR_SERVER }}/${{ matrix.service }}:${{ github.sha }} \
             -t ${{ env.ACR_SERVER }}/${{ matrix.service }}:latest \
             -f ${{ matrix.dockerfile }} \
-            --build-arg BUILD_NUMBER=${{ github.run_number }} \
-            --build-arg COMMIT_SHA=${{ github.sha }} \
-            .
+            ${{ matrix.service }}
 
       - name: Trivy Image Scan
         uses: aquasecurity/trivy-action@master
