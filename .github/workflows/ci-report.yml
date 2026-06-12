@@ -13,3 +13,4 @@ jobs:
     with:
       service: report-service
       port: 8085
+    secrets: inherit

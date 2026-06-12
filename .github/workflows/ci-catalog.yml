@@ -13,3 +13,4 @@ jobs:
     with:
       service: catalog-service
       port: 8082
+    secrets: inherit

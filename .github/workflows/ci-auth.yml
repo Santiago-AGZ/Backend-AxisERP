@@ -17,3 +17,4 @@ jobs:
     with:
       service: auth-service
       port: 8081
+    secrets: inherit

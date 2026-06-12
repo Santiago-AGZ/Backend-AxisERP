@@ -13,3 +13,4 @@ jobs:
     with:
       service: sales-service
       port: 8084
+    secrets: inherit

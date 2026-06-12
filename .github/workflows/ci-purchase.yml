@@ -13,3 +13,4 @@ jobs:
     with:
       service: purchase-service
       port: 8086
+    secrets: inherit
