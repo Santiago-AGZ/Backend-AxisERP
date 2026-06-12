@@ -4,9 +4,7 @@ env:
   ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
 
 on:
-  pull_request:
-    branches: [master]
-    types: [opened, synchronize, reopened]
+  workflow_dispatch:
 
 env:
   ACR_NAME: axiserp

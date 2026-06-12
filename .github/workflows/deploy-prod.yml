@@ -4,9 +4,6 @@ env:
   ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
 
 on:
-  push:
-    branches: [master]
-    paths-ignore: ['**.md', 'docs/**', 'Frontend-AxisERP/**']
   workflow_dispatch:
 
 env:
