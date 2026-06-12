@@ -1,8 +1,10 @@
-# AxisERP - CI: auth-service
 trigger:
-  branches: [master]
+  branches:
+    include:
+      - master
   paths:
-    include: [auth-service/**]
+    include:
+      - auth-service/**
 
 jobs:
   - template: template.yml

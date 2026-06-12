@@ -1,7 +1,11 @@
 trigger:
-  branches: [master]
+  branches:
+    include:
+      - master
   paths:
-    include: [sales-service/**]
+    include:
+      - sales-service/**
+
 jobs:
   - template: template.yml
     parameters:

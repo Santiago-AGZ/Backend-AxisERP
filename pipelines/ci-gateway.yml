@@ -1,7 +1,11 @@
 trigger:
-  branches: [master]
+  branches:
+    include:
+      - master
   paths:
-    include: [api-gateway/**]
+    include:
+      - api-gateway/**
+
 jobs:
   - template: template.yml
     parameters:

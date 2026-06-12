@@ -1,7 +1,11 @@
 trigger:
-  branches: [master]
+  branches:
+    include:
+      - master
   paths:
-    include: [inventory-service/**]
+    include:
+      - inventory-service/**
+
 jobs:
   - template: template.yml
     parameters:
