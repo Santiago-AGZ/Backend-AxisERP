@@ -1,0 +1,14 @@
+name: CI - Purchase Service
+on:
+  push:
+    branches: [master]
+    paths: [purchase-service/**]
+  pull_request:
+    branches: [master]
+    paths: [purchase-service/**]
+jobs:
+  ci:
+    uses: ./.github/workflows/template-ci.yml
+    with:
+      service: purchase-service
+      port: 8086

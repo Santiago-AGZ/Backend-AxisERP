@@ -1,0 +1,14 @@
+name: CI - API Gateway
+on:
+  push:
+    branches: [master]
+    paths: [api-gateway/**]
+  pull_request:
+    branches: [master]
+    paths: [api-gateway/**]
+jobs:
+  ci:
+    uses: ./.github/workflows/template-ci.yml
+    with:
+      service: api-gateway
+      port: 8080

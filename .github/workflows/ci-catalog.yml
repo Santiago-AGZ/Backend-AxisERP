@@ -1,0 +1,14 @@
+name: CI - Catalog Service
+on:
+  push:
+    branches: [master]
+    paths: [catalog-service/**]
+  pull_request:
+    branches: [master]
+    paths: [catalog-service/**]
+jobs:
+  ci:
+    uses: ./.github/workflows/template-ci.yml
+    with:
+      service: catalog-service
+      port: 8082

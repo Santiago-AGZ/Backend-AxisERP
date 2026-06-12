@@ -1,0 +1,14 @@
+name: CI - Inventory Service
+on:
+  push:
+    branches: [master]
+    paths: [inventory-service/**]
+  pull_request:
+    branches: [master]
+    paths: [inventory-service/**]
+jobs:
+  ci:
+    uses: ./.github/workflows/template-ci.yml
+    with:
+      service: inventory-service
+      port: 8083

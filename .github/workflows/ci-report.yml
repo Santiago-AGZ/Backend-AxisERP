@@ -1,0 +1,14 @@
+name: CI - Report Service
+on:
+  push:
+    branches: [master]
+    paths: [report-service/**]
+  pull_request:
+    branches: [master]
+    paths: [report-service/**]
+jobs:
+  ci:
+    uses: ./.github/workflows/template-ci.yml
+    with:
+      service: report-service
+      port: 8085

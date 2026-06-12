@@ -191,12 +191,12 @@ jobs:
           ingress: external
           environmentVariables: >-
             server-port=8080
-            auth-service-url=http://auth-service:8081
-            catalog-service-url=http://catalog-service:8082
-            inventory-service-url=http://inventory-service:8083
-            sales-service-url=http://sales-service:8084
-            purchase-service-url=http://purchase-service:8086
-            report-service-url=http://report-service:8085
+            auth-service-url=http://auth-service
+            catalog-service-url=http://catalog-service
+            inventory-service-url=http://inventory-service
+            sales-service-url=http://sales-service
+            purchase-service-url=http://purchase-service
+            report-service-url=http://report-service
             cors-allowed-origins=${{ vars.CORS_ALLOWED_ORIGINS }}
 
       - name: Smoke Test

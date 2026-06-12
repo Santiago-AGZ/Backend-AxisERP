@@ -1,0 +1,14 @@
+name: CI - Sales Service
+on:
+  push:
+    branches: [master]
+    paths: [sales-service/**]
+  pull_request:
+    branches: [master]
+    paths: [sales-service/**]
+jobs:
+  ci:
+    uses: ./.github/workflows/template-ci.yml
+    with:
+      service: sales-service
+      port: 8084
