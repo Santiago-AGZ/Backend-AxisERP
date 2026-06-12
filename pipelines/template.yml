@@ -10,7 +10,9 @@ parameters:
 jobs:
   - job: Build_${{ replace(parameters.service, '-', '_') }}
     displayName: 'CI: ${{ parameters.service }}'
-    pool: ubuntu-latest
+    pool:
+      name: Azure Pipelines
+      vmImage: ubuntu-latest
 
     steps:
       - checkout: self
