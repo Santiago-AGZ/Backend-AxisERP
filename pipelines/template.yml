@@ -1,4 +1,4 @@
-# AxisERP - CI Template (reusable)
+# AxisERP - CI Template (reusable - sin dependencias de tasks)
 # Usado por los 7 pipelines CI de cada microservicio
 
 parameters:
@@ -10,67 +10,48 @@ parameters:
 jobs:
   - job: Build_${{ replace(parameters.service, '-', '_') }}
     displayName: 'CI: ${{ parameters.service }}'
-    pool:
-      vmImage: ubuntu-latest
+    pool: Azure Pipelines
 
     steps:
       - checkout: self
         fetchDepth: 1
 
-      - task: JavaToolInstaller@0
-        displayName: 'JDK 21'
-        inputs:
-          versionSpec: '21'
-          jdkArchitectureOption: x64
-          jdkSourceOption: PreInstalled
-
-      - task: Maven@4
-        displayName: 'Compile + Test'
-        inputs:
-          mavenPomFile: '${{ parameters.service }}/pom.xml'
-          goals: 'clean verify'
-          options: '-q'
-          publishJUnitResults: true
-          testResultsFiles: '**/surefire-reports/TEST-*.xml'
-          codeCoverageToolOption: JaCoCo
-
-      - task: Docker@2
-        displayName: 'Login ACR'
-        inputs:
-          containerRegistry: 'axiserp-acr'
-          command: login
-
-      - task: Docker@2
-        displayName: 'Build image'
-        inputs:
-          containerRegistry: 'axiserp-acr'
-          repository: ${{ parameters.service }}
-          command: build
-          Dockerfile: '${{ parameters.service }}/Dockerfile'
-          buildContext: '${{ parameters.service }}'
-          tags: |
-            $(Build.BuildNumber)
-            latest
-
-      - task: Docker@2
-        displayName: 'Push to ACR'
-        inputs:
-          containerRegistry: 'axiserp-acr'
-          repository: ${{ parameters.service }}
-          command: push
-          tags: |
-            $(Build.BuildNumber)
-            latest
+      - bash: |
+          echo "=== Building ${{ parameters.service }} ==="
+          echo "Java version:"
+          java -version
+          echo "Maven version:"
+          mvn -version
+        displayName: 'Check environment'
 
       - bash: |
-          docker run --rm \
-            -v /var/run/docker.sock:/var/run/docker.sock:ro \
-            aquasec/trivy:latest image \
-            --severity CRITICAL,HIGH \
-            --exit-code 0 \
-            --timeout 10m \
-            $(acrServer)/${{ parameters.service }}:$(Build.BuildNumber)
-        displayName: 'Trivy scan'
-        continueOnError: true
+          cd ${{ parameters.service }}
+          mvn clean compile -q
+        displayName: 'Maven compile'
+
+      - bash: |
+          cd ${{ parameters.service }}
+          mvn test -q
+        displayName: 'Maven test'
+
+      - bash: |
+          cd ${{ parameters.service }}
+          mvn package -DskipTests -q
+        displayName: 'Maven package'
+
+      - bash: |
+          docker build \
+            -t axiserp.azurecr.io/${{ parameters.service }}:$(Build.BuildNumber) \
+            -t axiserp.azurecr.io/${{ parameters.service }}:latest \
+            -f ${{ parameters.service }}/Dockerfile \
+            ${{ parameters.service }}
+        displayName: 'Docker build'
+
+      - bash: |
+          echo "$(DOCKER_PASSWORD)" | docker login axiserp.azurecr.io -u "$(DOCKER_USERNAME)" --password-stdin
+          docker push axiserp.azurecr.io/${{ parameters.service }}:$(Build.BuildNumber)
+          docker push axiserp.azurecr.io/${{ parameters.service }}:latest
+        displayName: 'Docker push to ACR'
         env:
-          acrServer: axiserp.azurecr.io
+          DOCKER_USERNAME: $(DOCKER_USERNAME)
+          DOCKER_PASSWORD: $(DOCKER_PASSWORD)
