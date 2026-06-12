@@ -1,0 +1,9 @@
+trigger:
+  branches: [master]
+  paths:
+    include: [inventory-service/**]
+jobs:
+  - template: template.yml
+    parameters:
+      service: inventory-service
+      port: 8083

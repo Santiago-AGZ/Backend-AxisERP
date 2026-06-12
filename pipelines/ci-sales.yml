@@ -1,0 +1,9 @@
+trigger:
+  branches: [master]
+  paths:
+    include: [sales-service/**]
+jobs:
+  - template: template.yml
+    parameters:
+      service: sales-service
+      port: 8084

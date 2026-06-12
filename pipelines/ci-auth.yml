@@ -1,0 +1,11 @@
+# AxisERP - CI: auth-service
+trigger:
+  branches: [master]
+  paths:
+    include: [auth-service/**]
+
+jobs:
+  - template: template.yml
+    parameters:
+      service: auth-service
+      port: 8081

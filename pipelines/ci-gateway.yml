@@ -1,0 +1,9 @@
+trigger:
+  branches: [master]
+  paths:
+    include: [api-gateway/**]
+jobs:
+  - template: template.yml
+    parameters:
+      service: api-gateway
+      port: 8080

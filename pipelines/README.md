@@ -1,208 +1,228 @@
-# AxisERP DevOps - Operational Documentation
+# AxisERP - Pipeline DevOps
 
-## Architecture
+> Evidencia R.A.2 | Desarrollo de Software III | Practicas DevOps
 
-```
-┌──────────────────────────────────────────────────────────────┐
-│                    AZURE CONTAINER APPS                       │
-│                                                              │
-│  ┌─────────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐ │
-│  │ API GATEWAY │  │   AUTH   │  │ CATALOG  │  │INVENTORY │ │
-│  │   :8080     │  │  :8081   │  │  :8082   │  │  :8083   │ │
-│  │  EXTERNAL   │  │ EXTERNAL │  │ INTERNAL │  │ INTERNAL │ │
-│  └──────┬──────┘  └──────────┘  └──────────┘  └──────────┘ │
-│         │                                                    │
-│         │  ┌──────────┐  ┌──────────┐  ┌──────────┐        │
-│         ├─►│  SALES   │  │ PURCHASE │  │  REPORT  │        │
-│         │  │  :8084   │  │  :8086   │  │  :8085   │        │
-│         │  │ INTERNAL │  │ INTERNAL │  │ INTERNAL │        │
-│         │  └──────────┘  └──────────┘  └──────────┘        │
-│         │                                                    │
-│  ┌──────┴──────────────────────────────────────────────┐    │
-│  │              ACR: axiserp.azurecr.io                  │    │
-│  │  7 repos: auth,catalog,inventory,sales,purchase,     │    │
-│  │           report,api-gateway                          │    │
-│  └──────────────────────────────────────────────────────┘    │
-└──────────────────────────────────────────────────────────────┘
-```
+---
 
-## CI/CD Flow
+## Datos del Proyecto
 
-```
-┌──────────┐    ┌───────────┐    ┌──────────┐    ┌──────────┐
-│  PUSH to │───►│ CI PIPELINE│───►│ ACR PUSH │───►│ CD (DEV) │
-│   main   │    │Build+Test+ │    │  images  │    │  auto    │
-│          │    │Docker+Scan │    │          │    │          │
-└──────────┘    └───────────┘    └──────────┘    └────┬─────┘
-                                                       │
-                                          ┌────────────┘
-                                          ▼
-                                   ┌──────────────┐
-                                   │ INTEGRATION  │
-                                   │    TESTS     │
-                                   └──────┬───────┘
-                                          │
-                              ┌───────────┴───────────┐
-                              ▼                       ▼
-                      ┌──────────────┐       ┌──────────────┐
-                      │   STAGING    │       │  PRODUCTION  │
-                      │ (approval)   │──────►│  (approval)  │
-                      └──────────────┘       └──────────────┘
-```
-
-## Pipeline Files
-
-| File | Purpose |
+| Item | Descripcion |
 |---|---|
-| `ci-prod.yml` | CI: Compile -> Test -> Docker Build -> Push ACR -> Trivy Scan -> SBOM |
-| `cd-prod.yml` | CD: Dev (auto) -> Integration Tests -> Staging (approval) -> Prod (approval) |
-| `cd-template-env.yml` | Reusable CD template for environment-aware deployments |
-| `variables-dev.yml` | Development environment variables |
-| `variables-staging.yml` | Staging environment variables |
-| `variables-prod.yml` | Production environment variables |
+| **Nombre del proyecto** | AxisERP |
+| **Alcance** | Plataforma ERP empresarial con 7 microservicios |
+| **Objetivo** | Implementar CI/CD automatizado con pipelines independientes por microservicio |
+| **Arquitectura** | Microservicios + DDD + Hexagonal + Clean Architecture |
+| **Integrantes** | (completar) |
 
-## Azure DevOps Setup
+---
 
-### 1. Service Connections (Project Settings > Service Connections)
+## 1. Que es un Pipeline?
 
-```bash
-# Azure Resource Manager
-Name: axiserp-azure
-Type: Azure Resource Manager
-Scope: Subscription (48482985-813d-4a7c-a283-350c1d90799c)
+Un Pipeline en programacion es una secuencia de pasos o procesos conectados entre si, donde la salida de un paso se convierte en la entrada del siguiente. Su objetivo es automatizar tareas, organizar flujos de trabajo y reducir errores manuales.
 
-# Docker Registry
-Name: axiserp-acr-service-connection
-Type: Docker Registry
-Registry: axiserp.azurecr.io
-Docker ID: axiserp
-Password: (ACR admin password)
-```
+**Ejemplo:** Cuando un programador sube cambios al repositorio:
+1. Se descarga el codigo
+2. Se compila el proyecto
+3. Se ejecutan pruebas automaticas
+4. Si las pruebas son exitosas, se genera una version lista para produccion
+5. La aplicacion se despliega automaticamente en el servidor
 
-### 2. Variable Groups (Library > Variable Groups)
+---
 
-Create 3 groups:
+## 2. Para que sirve un Pipeline?
 
-**axiserp-dev** (import from `variables-dev.yml`)
-**axiserp-staging** (import from `variables-staging.yml`)
-**axiserp-prod** (import from `variables-prod.yml`)
+- Automatizar procesos repetitivos
+- Ejecutar pruebas automaticas
+- Integrar y desplegar aplicaciones (CI/CD)
+- Mejorar la eficiencia y la calidad del software
+- Reducir errores humanos
 
-**axiserp-prod-secrets** (mark as secret):
-| Variable | Value |
-|---|---|
-| SUPABASE_URL | https://hbtcusxbkkefphunarwn.supabase.co |
-| SUPABASE_JWT_ISSUER | https://hbtcusxbkkefphunarwn.supabase.co/auth/v1 |
-| AUTH_DB_URL | jdbc:postgresql://ep-wispy-voice... |
-| CATALOG_DB_URL | jdbc:postgresql://ep-rapid-night... |
-| INVENTORY_DB_URL | jdbc:postgresql://ep-still-resonance... |
-| SALES_DB_URL | jdbc:postgresql://ep-misty-waterfall... |
-| PURCHASE_DB_URL | jdbc:postgresql://ep-quiet-union... |
-| REPORT_DB_URL | jdbc:postgresql://ep-flat-dream... |
-| TEST_ADMIN_EMAIL | santiagoalvarez374@gmail.com |
-| TEST_ADMIN_PASSWORD | Admin123! |
+---
 
-### 3. Environments (Environments)
+## 3. Pasos para Crear el Pipeline de AxisERP
 
-```
-axiserp-staging    -> Approvals: 1 required
-axiserp-production -> Approvals: 2 required, Branch control: main only
-```
+### 3.1 Definir el objetivo
 
-### 4. Create Pipelines
+Automatizar la construccion, prueba, empaquetado en Docker y despliegue a Azure de los 7 microservicios de AxisERP, asegurando que solo el servicio modificado se reconstruya y despliegue.
 
-1. Go to **Pipelines > New Pipeline**
-2. Select **Azure Repos Git** (your repo)
-3. Choose **Existing Azure Pipelines YAML file**
-4. Path: `/pipelines/ci-prod.yml` -> Save
-5. Repeat for `/pipelines/cd-prod.yml`
+### 3.2 Identificar las Etapas
 
-## Service Registry
+Cada pipeline de AxisERP tiene 4 etapas:
 
-| Service | Port | Ingress | DB | Auth |
-|---|---|---|---|---|
-| api-gateway | 8080 | External | None | None |
-| auth-service | 8081 | External | auth_db (Neon) | Supabase JWT ES256 |
-| catalog-service | 8082 | Internal | catalog_db (Neon) | JWT + internal-api-key |
-| inventory-service | 8083 | Internal | inventory_db (Neon) | JWT + internal-api-key |
-| sales-service | 8084 | Internal | sales_db (Neon) | JWT + internal-api-key |
-| purchase-service | 8086 | Internal | purchase_db (Neon) | JWT + internal-api-key |
-| report-service | 8085 | Internal | report_db (Neon) | JWT + internal-api-key |
-
-## Environment Variables Standard
-
-**ALL variables MUST be lower-kebab-case:**
-
-```
-auth-db-url          supabase-url
-auth-db-username     supabase-jwt-issuer
-auth-db-password     supabase-service-role-key
-internal-api-key     supabase-anon-key
-jwt-secret           server-port
-jwt-access-expiration   jpa-ddl-auto
-jwt-refresh-expiration
-```
-
-## Docker Standards
-
-- Multi-stage builds (maven:3.9-eclipse-temurin-21 -> eclipse-temurin:21-jre-alpine)
-- Non-root user (appuser, UID 1001)
-- HEALTHCHECK on /actuator/health
-- ENTRYPOINT: ["java", "-jar", "app.jar"] (no shell interpolation)
-- EXPOSE must match targetPort in Azure Container App
-
-## Common Operations
-
-### Build specific service locally
-```bash
-docker build -t axiserp.azurecr.io/auth-service:latest -f auth-service/Dockerfile auth-service/
-```
-
-### Push to ACR
-```bash
-az acr login --name axiserp
-docker push axiserp.azurecr.io/auth-service:latest
-```
-
-### Update env vars on a service
-```bash
-az containerapp update --name auth-service -g axiserp-prod \
-  --set-env-vars server-port=8081 jpa-ddl-auto=validate
-```
-
-### Set secrets
-```bash
-az containerapp secret set --name auth-service -g axiserp-prod \
-  --secrets internal-api-key="your-key-here"
-```
-
-### Check service logs
-```bash
-az containerapp logs show --name auth-service -g axiserp-prod --tail 50
-```
-
-### Restart a service
-```bash
-az containerapp revision restart --name auth-service -g axiserp-prod \
-  --revision auth-service--0000004
-```
-
-## Troubleshooting
-
-| Symptom | Cause | Fix |
+| Etapa | Descripcion | Herramienta |
 |---|---|---|
-| "This Container App is stopped" (404) | Scaled to zero | Set `--min-replicas 1` |
-| ImagePullBackOff | Stale ACR credentials | `az containerapp registry set` |
-| Gateway 500/timeout | Wrong service URL | Use `http://service-name` without port |
-| Health 503 | Mail health fails | Verify `management.health.mail.enabled=false` |
-| DB connection fails | Missing env var/secret | Check all `${db-url}`, `${db-username}`, `${db-password}` |
+| **Descargar codigo** | Clonar el repositorio desde Azure Repos | `checkout` |
+| **Compilar + Probar** | Maven compile + JUnit + JaCoCo | `Maven@4` |
+| **Empaquetar Docker** | Construir imagen multi-stage | `Docker@2` |
+| **Publicar en ACR** | Push a Azure Container Registry | `Docker@2` |
+| **Desplegar** | Actualizar Azure Container App | `AzureCLI@2` |
+| **Monitorear** | Health check + smoke tests | `curl` |
 
-## Current Production URLs
+### 3.3 Establecer el flujo de ejecucion
 
 ```
-Gateway: https://api-gateway.bravefield-65bde8ce.brazilsouth.azurecontainerapps.io
-Auth:    https://auth-service.bravefield-65bde8ce.brazilsouth.azurecontainerapps.io
+┌──────────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐
+│  CODIGO      │───►│  COMPILAR    │───►│  EMPAQUETAR  │───►│  PUBLICAR    │
+│  FUENTE      │    │  + PROBAR    │    │  (DOCKER)    │    │  (ACR)       │
+└──────────────┘    └──────────────┘    └──────────────┘    └──────┬───────┘
+                                                                    │
+                                                                    ▼
+┌──────────────┐    ┌──────────────┐                         ┌──────────────┐
+│  MONITOREAR  │◄───│  DESPLEGAR   │◄────────────────────────│  IMAGEN EN   │
+│  (HEALTH)    │    │  (AZURE)     │                         │  REGISTRY    │
+└──────────────┘    └──────────────┘                         └──────────────┘
 ```
 
-## Postman Collection
+### 3.4 Automatizar cada Etapa
 
-Use `postman/AxisERP_Azure.postman_environment.json` for API testing.
+#### CI Pipeline (construye y publica)
+
+Cada microservicio tiene su propio pipeline que solo se dispara cuando cambian sus archivos:
+
+```yaml
+# Ejemplo: ci-catalog.yml
+trigger:
+  branches: [master]
+  paths:
+    include: [catalog-service/**]    # Solo si cambia catalog
+
+jobs:
+  - template: template.yml            # Template reutilizable
+    parameters:
+      service: catalog-service
+```
+
+El **template.yml** contiene los pasos automatizados:
+
+| Paso | Que hace | Script/Herramienta |
+|---|---|---|
+| **1. Descargar codigo** | `git checkout` del repo | Azure DevOps `checkout` |
+| **2. Compilar** | `mvn clean compile` | `Maven@4` |
+| **3. Ejecutar pruebas** | JUnit + JaCoCo (cobertura) | `Maven@4` |
+| **4. Construir Docker** | `docker build` multi-stage | `Docker@2` |
+| **5. Publicar en ACR** | `docker push` a `axiserp.azurecr.io` | `Docker@2` |
+| **6. Escanear seguridad** | Trivy CRITICAL + HIGH | `aquasec/trivy` |
+
+#### CD Pipeline (despliega)
+
+Despliega a 3 ambientes con aprobaciones:
+
+```
+┌──────────┐     ┌──────────┐     ┌──────────┐
+│   DEV    │────►│ STAGING  │────►│   PROD   │
+│(automatico)   │(1 aprobar)│    │(2 aprobar)│
+└──────────┘     └──────────┘     └──────────┘
+```
+
+### 3.5 Monitorear Resultados
+
+Al final de cada despliegue se ejecutan pruebas automaticas:
+
+- `GET /actuator/health` → verifica que el servicio este UP
+- `POST /api/v1/auth/login` → verifica que Supabase funcione
+- `GET /api/v1/productos` → verifica que catalog responda
+- `GET /api/v1/inventory/products` → verifica que inventory responda
+
+Si alguna prueba falla, el pipeline se detiene y notifica el error.
+
+---
+
+## 4. Herramientas Utilizadas
+
+| Categoria | Herramienta |
+|---|---|
+| **Lenguaje** | Java 21 |
+| **Framework** | Spring Boot 3.5.x |
+| **Base de datos** | PostgreSQL (Neon Serverless, 7 DBs) |
+| **Autenticacion** | Supabase Auth (JWT ES256) |
+| **Contenedores** | Docker (multi-stage builds) |
+| **Registry** | Azure Container Registry (`axiserp.azurecr.io`) |
+| **Orquestacion** | Azure Container Apps (7 servicios) |
+| **CI/CD** | Azure DevOps Pipelines |
+| **Calidad** | SonarCloud, Trivy, JaCoCo |
+| **API Gateway** | Spring Cloud Gateway |
+| **Control de versiones** | Git (Azure Repos) |
+
+---
+
+## 5. Pipelines del Proyecto
+
+### Pipelines CI (7 pipelines - 1 por microservicio)
+
+| Pipeline | Archivo | Trigger | Construye |
+|---|---|---|---|
+| CI-Auth | `ci-auth.yml` | `auth-service/**` | auth-service |
+| CI-Catalog | `ci-catalog.yml` | `catalog-service/**` | catalog-service |
+| CI-Inventory | `ci-inventory.yml` | `inventory-service/**` | inventory-service |
+| CI-Sales | `ci-sales.yml` | `sales-service/**` | sales-service |
+| CI-Purchase | `ci-purchase.yml` | `purchase-service/**` | purchase-service |
+| CI-Report | `ci-report.yml` | `report-service/**` | report-service |
+| CI-Gateway | `ci-gateway.yml` | `api-gateway/**` | api-gateway |
+
+### Pipeline CD (1 pipeline con environments)
+
+| Pipeline | Archivo | Ambientes |
+|---|---|---|
+| CD | `cd.yml` | Dev (auto) → Staging (1 approver) → Prod (2 approvers) |
+
+### Templates (2 reutilizables)
+
+| Archivo | Funcion |
+|---|---|
+| `template.yml` | Pasos CI comunes (compile + docker + push + scan) |
+| `cd-deploy.yml` | Pasos CD comunes (deploy a Azure + health check) |
+
+---
+
+## 6. Ventajas de este Diseno
+
+- **Automatizacion**: cada push a master dispara CI y CD automaticamente
+- **Menos errores**: las pruebas se ejecutan antes de desplegar
+- **Despliegue selectivo**: solo se reconstruye el servicio que cambio
+- **Rollback instantaneo**: `az containerapp update --image :version-anterior`
+- **Seguridad**: Trivy escanea vulnerabilidades CRITICAL y HIGH
+- **Trazabilidad**: cada build tiene un tag unico en ACR
+- **Aprobaciones**: staging y produccion requieren aprobacion humana
+
+---
+
+## 7. Variables de Entorno Estandar
+
+Todas normalizadas en **lower-kebab-case**:
+
+```
+auth-db-url, auth-db-username, auth-db-password
+supabase-url, supabase-jwt-issuer, supabase-anon-key
+jwt-secret, jwt-access-expiration, jwt-refresh-expiration
+internal-api-key, server-port, jpa-ddl-auto
+catalog-service-url, inventory-service-url, sales-service-url
+purchase-service-url, report-service-url, auth-service-url
+```
+
+---
+
+## 8. Arquitectura de Despliegue
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                 AZURE CONTAINER APPS                     │
+│                                                         │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌─────────┐ │
+│  │ GATEWAY  │  │   AUTH   │  │ CATALOG  │  │INVENTORY│ │
+│  │  :8080   │  │  :8081   │  │  :8082   │  │  :8083  │ │
+│  │ EXTERNAL │  │ INTERNAL │  │ INTERNAL │  │INTERNAL │ │
+│  └──────────┘  └──────────┘  └──────────┘  └─────────┘ │
+│                                                         │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐              │
+│  │  SALES   │  │ PURCHASE │  │  REPORT  │              │
+│  │  :8084   │  │  :8086   │  │  :8085   │              │
+│  │ INTERNAL │  │ INTERNAL │  │ INTERNAL │              │
+│  └──────────┘  └──────────┘  └──────────┘              │
+└─────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────┐
+│              ACR: axiserp.azurecr.io                      │
+│  7 repositorios de imagenes Docker                       │
+└─────────────────────────────────────────────────────────┘
+```

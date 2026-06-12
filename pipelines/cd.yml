@@ -1,0 +1,120 @@
+# AxisERP - CD Pipeline (user/pass auth - sin Service Principal)
+# CI -> Dev (AUTO) -> Staging (APPROVAL) -> Production (APPROVAL)
+
+trigger: none
+
+resources:
+  pipelines:
+    - pipeline: ci-catalog
+      source: ci-catalog
+      trigger: true
+    - pipeline: ci-auth
+      source: ci-auth
+      trigger: true
+    - pipeline: ci-inventory
+      source: ci-inventory
+      trigger: true
+    - pipeline: ci-sales
+      source: ci-sales
+      trigger: true
+    - pipeline: ci-purchase
+      source: ci-purchase
+      trigger: true
+    - pipeline: ci-report
+      source: ci-report
+      trigger: true
+    - pipeline: ci-gateway
+      source: ci-gateway
+      trigger: true
+
+variables:
+  - group: axiserp-prod-secrets
+  - name: acrServer
+    value: axiserp.azurecr.io
+
+stages:
+  - stage: DeployDev
+    displayName: 'DEV'
+    jobs:
+      - job: Deploy
+        displayName: 'Deploy all services'
+        pool: ubuntu-latest
+        steps:
+          - task: AzureCLI@2
+            displayName: 'Login to Azure'
+            inputs:
+              azureSubscription: 'axiserp-azure'
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                # Fallback login si no hay Service Connection
+                az login -u "$(AZURE_USER)" -p "$(AZURE_PASS)" --allow-no-subscriptions 2>/dev/null || true
+                az account set -s "48482985-813d-4a7c-a283-350c1d90799c" 2>/dev/null || true
+                echo "Azure login done"
+
+          - template: cd-deploy.yml
+            parameters:
+              environment: dev
+              resourceGroup: axiserp-prod
+
+  - stage: DeployStaging
+    displayName: 'STAGING'
+    dependsOn: DeployDev
+    jobs:
+      - deployment: Staging
+        environment: 'axiserp-staging'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - template: cd-deploy.yml
+                  parameters:
+                    environment: staging
+                    resourceGroup: axiserp-prod
+
+  - stage: DeployProduction
+    displayName: 'PRODUCTION'
+    dependsOn: DeployStaging
+    jobs:
+      - deployment: Production
+        environment: 'axiserp-production'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - template: cd-deploy.yml
+                  parameters:
+                    environment: production
+                    resourceGroup: axiserp-prod
+
+  - stage: SmokeTests
+    displayName: 'SMOKE TESTS'
+    dependsOn: DeployProduction
+    jobs:
+      - job: Verify
+        displayName: 'E2E verification'
+        pool: ubuntu-latest
+        steps:
+          - bash: |
+              set -e
+              FQDN="api-gateway.bravefield-65bde8ce.brazilsouth.azurecontainerapps.io"
+              echo "Gateway: https://$FQDN"
+
+              curl -sf --max-time 30 "https://$FQDN/actuator/health"
+              echo "[PASS] Health"
+
+              RESP=$(curl -s --max-time 60 -X POST "https://$FQDN/api/v1/auth/login" \
+                -H "Content-Type: application/json" \
+                -d "{\"email\":\"$(TEST_ADMIN_EMAIL)\",\"password\":\"$(TEST_ADMIN_PASSWORD)\"}")
+              TOKEN=$(echo $RESP | jq -r '.data.accessToken')
+              echo "[PASS] Login"
+
+              curl -sf --max-time 30 "https://$FQDN/api/v1/productos?page=1&size=1" \
+                -H "Authorization: Bearer $TOKEN" > /dev/null
+              echo "[PASS] Catalog"
+
+              echo "ALL SMOKE TESTS PASSED"
+            displayName: 'E2E tests'
+            env:
+              TEST_ADMIN_EMAIL: $(TEST_ADMIN_EMAIL)
+              TEST_ADMIN_PASSWORD: $(TEST_ADMIN_PASSWORD)

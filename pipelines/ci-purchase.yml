@@ -1,0 +1,9 @@
+trigger:
+  branches: [master]
+  paths:
+    include: [purchase-service/**]
+jobs:
+  - template: template.yml
+    parameters:
+      service: purchase-service
+      port: 8086

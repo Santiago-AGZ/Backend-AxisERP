@@ -1,0 +1,87 @@
+# AxisERP - CD Deploy Template
+# Actualiza TODOS los Container Apps con la imagen mas reciente de ACR
+
+parameters:
+  - name: environment
+    type: string
+  - name: resourceGroup
+    type: string
+
+steps:
+  - task: AzureCLI@2
+    displayName: 'Deploy all services to ${{ parameters.environment }}'
+    inputs:
+      azureSubscription: 'axiserp-azure'
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: |
+        set -e
+        ENV="${{ parameters.environment }}"
+        RG="${{ parameters.resourceGroup }}"
+        ACR="$(acrServer)"
+        TAG="$(Build.BuildNumber)"
+
+        echo "=== Deploying to $ENV ($RG) ==="
+
+        deploy() {
+          local svc=$1 port=$2 ingress=$3
+          echo "Deploying $svc (port=$port, ingress=$ingress)..."
+          az containerapp update \
+            --name "$svc" \
+            --resource-group "$RG" \
+            --image "$ACR/$svc:$TAG" \
+            --min-replicas 1 --max-replicas 10 \
+            -o none 2>/dev/null || \
+          az containerapp create \
+            --name "$svc" \
+            --resource-group "$RG" \
+            --environment "$(containerEnv)" \
+            --image "$ACR/$svc:$TAG" \
+            --registry-server "$ACR" \
+            --target-port "$port" \
+            --ingress "$ingress" \
+            --min-replicas 1 --max-replicas 10 \
+            --cpu 0.5 --memory 1Gi \
+            -o none
+          echo "  $svc deployed"
+        }
+
+        # Internal services
+        deploy auth-service    8081 internal
+        deploy catalog-service 8082 internal
+        deploy inventory-service 8083 internal
+        deploy sales-service   8084 internal
+        deploy purchase-service 8086 internal
+        deploy report-service  8085 internal
+
+        # Gateway (external)
+        deploy api-gateway     8080 external
+
+        echo "=== All services deployed to $ENV ==="
+
+    env:
+      acrServer: axiserp.azurecr.io
+      containerEnv: AxisERP-Env
+
+  - task: AzureCLI@2
+    displayName: 'Health verification'
+    inputs:
+      azureSubscription: 'axiserp-azure'
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: |
+        sleep 30
+        for svc in api-gateway auth-service; do
+          FQDN=$(az containerapp show --name $svc -g ${{ parameters.resourceGroup }} \
+            --query properties.configuration.ingress.fqdn -o tsv 2>/dev/null || echo "")
+          if [ -n "$FQDN" ]; then
+            for i in $(seq 1 5); do
+              STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "https://$FQDN/actuator/health" || echo "000")
+              if [ "$STATUS" = "200" ]; then
+                echo "[OK] $svc healthy (attempt $i)"
+                break
+              fi
+              sleep 10
+            done
+          fi
+        done

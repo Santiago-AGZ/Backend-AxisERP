@@ -1,0 +1,9 @@
+trigger:
+  branches: [master]
+  paths:
+    include: [report-service/**]
+jobs:
+  - template: template.yml
+    parameters:
+      service: report-service
+      port: 8085

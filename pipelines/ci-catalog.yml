@@ -1,0 +1,9 @@
+trigger:
+  branches: [master]
+  paths:
+    include: [catalog-service/**]
+jobs:
+  - template: template.yml
+    parameters:
+      service: catalog-service
+      port: 8082
