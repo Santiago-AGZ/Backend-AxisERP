@@ -15,9 +15,6 @@ on:
       ACR_PASSWORD:
         required: true
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   build:
     name: ${{ inputs.service }}
