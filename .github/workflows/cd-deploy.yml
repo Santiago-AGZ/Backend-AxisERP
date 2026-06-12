@@ -1,0 +1,56 @@
+name: CD - Deploy to Azure
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - auth-service/**
+      - catalog-service/**
+      - inventory-service/**
+      - sales-service/**
+      - purchase-service/**
+      - report-service/**
+      - api-gateway/**
+  workflow_dispatch:
+
+env:
+  ACR_SERVER: axiserp.azurecr.io
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to Azure
+        run: |
+          az login -u "${{ secrets.AZURE_USER }}" -p "${{ secrets.AZURE_PASS }}" --allow-no-subscriptions
+          az account set -s "48482985-813d-4a7c-a283-350c1d90799c"
+
+      - name: Deploy all services
+        run: |
+          deploy() {
+            local svc=$1 port=$2 ingress=$3
+            echo "=== Deploying $svc ==="
+            az containerapp update \
+              --name "$svc" \
+              --resource-group axiserp-prod \
+              --image "$ACR_SERVER/$svc:latest" \
+              --min-replicas 1 --max-replicas 10 \
+              -o none 2>/dev/null && echo "  Updated: $svc" || echo "  No changes for: $svc"
+          }
+
+          deploy auth-service    8081 internal
+          deploy catalog-service 8082 internal
+          deploy inventory-service 8083 internal
+          deploy sales-service   8084 internal
+          deploy purchase-service 8086 internal
+          deploy report-service  8085 internal
+          deploy api-gateway     8080 external
+
+      - name: Health Check
+        run: |
+          sleep 30
+          FQDN="api-gateway.bravefield-65bde8ce.brazilsouth.azurecontainerapps.io"
+          curl -sf --max-time 30 "https://$FQDN/actuator/health" && echo "Gateway: UP" || echo "Gateway: DOWN"
