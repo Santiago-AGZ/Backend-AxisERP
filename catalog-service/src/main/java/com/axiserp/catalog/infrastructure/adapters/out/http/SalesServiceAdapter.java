@@ -24,10 +24,10 @@ public class SalesServiceAdapter implements SalesServicePort {
 
     private final RestTemplate restTemplate;
 
-    @Value("${sales.service.url}")
+    @Value("${sales-service-url}")
     private String salesServiceUrl;
 
-    @Value("${internal.api.key}")
+    @Value("${internal-api-key}")
     private String internalApiKey;
 
     @Override

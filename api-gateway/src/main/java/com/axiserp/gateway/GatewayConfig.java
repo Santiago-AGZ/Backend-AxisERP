@@ -10,22 +10,22 @@ import java.util.List;
 @Configuration
 public class GatewayConfig {
 
-    @Value("${AUTH_SERVICE_URL:http://auth-service:8081}")
+    @Value("${auth-service-url:http://auth-service:8081}")
     private String authServiceUrl;
 
-    @Value("${CATALOG_SERVICE_URL:http://catalog-service:8082}")
+    @Value("${catalog-service-url:http://catalog-service:8082}")
     private String catalogServiceUrl;
 
-    @Value("${INVENTORY_SERVICE_URL:http://inventory-service:8083}")
+    @Value("${inventory-service-url:http://inventory-service:8083}")
     private String inventoryServiceUrl;
 
-    @Value("${SALES_SERVICE_URL:http://sales-service:8084}")
+    @Value("${sales-service-url:http://sales-service:8084}")
     private String salesServiceUrl;
 
-    @Value("${PURCHASE_SERVICE_URL:http://purchase-service:8086}")
+    @Value("${purchase-service-url:http://purchase-service:8086}")
     private String purchaseServiceUrl;
 
-    @Value("${REPORT_SERVICE_URL:http://report-service:8085}")
+    @Value("${report-service-url:http://report-service:8085}")
     private String reportServiceUrl;
 
     @Bean

@@ -21,6 +21,6 @@ USER appuser
 EXPOSE 8086
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
-  CMD wget -qO- http://localhost:${PORT:-8086}/actuator/health || exit 1
+  CMD wget -qO- http://localhost:8086/actuator/health || exit 1
 
-ENTRYPOINT ["sh", "-c", "java -jar -Dserver.port=${PORT:-8086} app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]

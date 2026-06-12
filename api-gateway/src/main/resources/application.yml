@@ -39,7 +39,7 @@ management:
         include: gateway,health,info
 
 server:
-  port: 8080
+  port: ${server-port:8080}
   error:
     include-exception: false
     include-message: never

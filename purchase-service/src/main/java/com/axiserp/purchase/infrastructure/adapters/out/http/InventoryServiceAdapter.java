@@ -23,8 +23,8 @@ public class InventoryServiceAdapter implements InventoryServicePort {
 
     public InventoryServiceAdapter(
             RestClient.Builder restClientBuilder,
-            @Value("${inventory.service.url:http://localhost:8087}") String inventoryServiceUrl,
-            @Value("${internal.api.key:}") String internalApiKey) {
+            @Value("${inventory-service-url:http://inventory-service:8083}") String inventoryServiceUrl,
+            @Value("${internal-api-key:}") String internalApiKey) {
         this.restClient = restClientBuilder
                 .baseUrl(inventoryServiceUrl)
                 .defaultHeader("X-Internal-Api-Key", internalApiKey)

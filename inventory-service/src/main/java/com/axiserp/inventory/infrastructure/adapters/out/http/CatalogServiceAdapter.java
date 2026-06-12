@@ -31,10 +31,10 @@ public class CatalogServiceAdapter implements CatalogServicePort {
 
     private final RestTemplate restTemplate;
 
-    @Value("${catalog.service.url}")
+    @Value("${catalog-service-url}")
     private String catalogServiceUrl;
 
-    @Value("${internal.api.key:}")
+    @Value("${internal-api-key:}")
     private String internalApiKey;
 
     @Override

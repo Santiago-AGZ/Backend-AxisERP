@@ -20,10 +20,10 @@ public class CatalogServiceAdapter implements CatalogServicePort {
 
     private final RestTemplate restTemplate;
 
-    @Value("${catalog.service.url}")
+    @Value("${catalog-service-url}")
     private String baseUrl;
 
-    @Value("${internal.api.key}")
+    @Value("${internal-api-key}")
     private String apiKey;
 
     private HttpEntity<Void> createAuthEntity() {

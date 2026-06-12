@@ -40,6 +40,6 @@ if [ $FAILED -eq 0 ]; then
 else
   echo "✗ $FAILED service(s) are down"
   echo ""
-  echo "Run: docker-compose up -d"
+  echo "Run: docker compose up -d"
   exit 1
 fi

@@ -29,10 +29,10 @@ public class InventoryServiceAdapter implements InventoryServicePort {
 
     private final RestTemplate restTemplate;
 
-    @Value("${inventory.service.url}")
+    @Value("${inventory-service-url}")
     private String inventoryServiceUrl;
 
-    @Value("${internal.api.key:}")
+    @Value("${internal-api-key:}")
     private String internalApiKey;
 
     @Override

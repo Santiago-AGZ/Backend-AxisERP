@@ -12,7 +12,7 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 public class RestTemplateConfig {
 
-    @Value("${internal.api.key:}")
+    @Value("${internal-api-key:}")
     private String internalApiKey;
 
     @Bean

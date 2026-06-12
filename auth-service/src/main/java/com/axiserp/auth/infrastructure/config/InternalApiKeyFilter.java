@@ -23,7 +23,7 @@ import jakarta.servlet.http.HttpServletResponse;
  * Los microservicios (catalog, inventory, purchase, sales) usan este mecanismo
  * para consultar el auth-service sin necesidad de token JWT de usuario.
  *
- * El header X-Internal-Api-Key debe coincidir con la variable INTERNAL_API_KEY.
+ * El header X-Internal-Api-Key debe coincidir con la variable internal-api-key.
  */
 @Component
 public class InternalApiKeyFilter extends OncePerRequestFilter {
@@ -33,10 +33,10 @@ public class InternalApiKeyFilter extends OncePerRequestFilter {
 
     private final String internalApiKey;
 
-    public InternalApiKeyFilter(@Value("${internal.api.key:}") String internalApiKey) {
+    public InternalApiKeyFilter(@Value("${internal-api-key:}") String internalApiKey) {
         this.internalApiKey = (internalApiKey == null || internalApiKey.isBlank()) ? null : internalApiKey;
         if (this.internalApiKey == null) {
-            log.warn("INTERNAL_API_KEY not configured - inter-service auth disabled");
+            log.warn("internal-api-key not configured - inter-service auth disabled");
         }
     }
 

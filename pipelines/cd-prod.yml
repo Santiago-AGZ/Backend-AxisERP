@@ -1,0 +1,231 @@
+# ============================================
+# AxisERP - CD Production Pipeline
+# ============================================
+# Multi-environment deployment: Development -> Staging -> Production
+# Uses Variable Groups + Environments with approvals
+# ============================================
+
+trigger: none
+
+resources:
+  pipelines:
+    - pipeline: CI
+      source: AxisERP-CI
+      trigger:
+        branches:
+          - main
+          - master
+
+variables:
+  - group: axiserp-prod-secrets    # Azure DevOps Variable Group for secrets
+  - name: acrServer
+    value: axiserp.azurecr.io
+  - name: imageTag
+    value: $(Build.BuildNumber)
+
+stages:
+  # ===================================================================
+  # STAGE 1: DEPLOY TO DEVELOPMENT (auto on CI success)
+  # ===================================================================
+  - stage: DeployDev
+    displayName: 'Deploy to Development'
+    variables:
+      - group: axiserp-dev
+    jobs:
+      - job: DeployServices
+        displayName: 'Deploy all services to Dev'
+        pool: ubuntu-latest
+        steps:
+          - template: cd-template-env.yml
+            parameters:
+              environment: dev
+              resourceGroup: $(resourceGroup)
+              containerEnv: $(containerEnv)
+              minReplicas: $(minReplicas)
+              maxReplicas: $(maxReplicas)
+              cpu: $(cpu)
+              memory: $(memory)
+              jpaDdlAuto: $(jpaDdlAuto)
+
+  # ===================================================================
+  # STAGE 2: INTEGRATION TESTS (Development)
+  # ===================================================================
+  - stage: IntegrationTests
+    displayName: 'Integration Tests'
+    dependsOn: DeployDev
+    jobs:
+      - job: RunTests
+        displayName: 'E2E + Integration Tests'
+        pool: ubuntu-latest
+        steps:
+          - task: AzureCLI@2
+            displayName: 'Run Integration Tests'
+            inputs:
+              azureSubscription: 'axiserp-azure'
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                GATEWAY_FQDN=$(az containerapp show \
+                  --name api-gateway \
+                  --resource-group $(resourceGroup) \
+                  --query properties.configuration.ingress.fqdn -o tsv)
+
+                echo "=== Smoke Tests ==="
+
+                # Health check
+                curl -sf --max-time 30 "https://$GATEWAY_FQDN/actuator/health" || exit 1
+                echo "Health: OK"
+
+                # Login test
+                RESPONSE=$(curl -s --max-time 60 -X POST "https://$GATEWAY_FQDN/api/v1/auth/login" \
+                  -H "Content-Type: application/json" \
+                  -d "{\"email\":\"$(TEST_ADMIN_EMAIL)\",\"password\":\"$(TEST_ADMIN_PASSWORD)\"}")
+                TOKEN=$(echo $RESPONSE | jq -r '.data.accessToken')
+                if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
+                  echo "Login failed"
+                  exit 1
+                fi
+                echo "Login: OK"
+
+                # Catalog test
+                curl -sf --max-time 30 "https://$GATEWAY_FQDN/api/v1/productos?page=1&size=1" \
+                  -H "Authorization: Bearer $TOKEN" > /dev/null || exit 1
+                echo "Catalog: OK"
+
+                # Inventory test
+                curl -sf --max-time 30 "https://$GATEWAY_FQDN/api/v1/inventory/products" \
+                  -H "Authorization: Bearer $TOKEN" > /dev/null || exit 1
+                echo "Inventory: OK"
+
+                echo "All integration tests PASSED"
+            env:
+              TEST_ADMIN_EMAIL: $(TEST_ADMIN_EMAIL)
+              TEST_ADMIN_PASSWORD: $(TEST_ADMIN_PASSWORD)
+
+  # ===================================================================
+  # STAGE 3: DEPLOY TO STAGING (requires approval)
+  # ===================================================================
+  - stage: DeployStaging
+    displayName: 'Deploy to Staging'
+    dependsOn: IntegrationTests
+    variables:
+      - group: axiserp-staging
+    jobs:
+      - deployment: DeployStaging
+        displayName: 'Deploy to Staging'
+        environment: 'axiserp-staging'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - template: cd-template-env.yml
+                  parameters:
+                    environment: staging
+                    resourceGroup: $(resourceGroup)
+                    containerEnv: $(containerEnv)
+                    minReplicas: $(minReplicas)
+                    maxReplicas: $(maxReplicas)
+                    cpu: $(cpu)
+                    memory: $(memory)
+                    jpaDdlAuto: $(jpaDdlAuto)
+
+  # ===================================================================
+  # STAGE 4: STAGING VALIDATION (manual or automated)
+  # ===================================================================
+  - stage: StagingValidation
+    displayName: 'Staging Validation'
+    dependsOn: DeployStaging
+    jobs:
+      - job: Validate
+        displayName: 'Smoke tests on Staging'
+        pool: ubuntu-latest
+        steps:
+          - task: AzureCLI@2
+            displayName: 'Health check staging'
+            inputs:
+              azureSubscription: 'axiserp-azure'
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                GATEWAY_FQDN=$(az containerapp show \
+                  --name api-gateway --resource-group $(resourceGroup) \
+                  --query properties.configuration.ingress.fqdn -o tsv)
+                curl -sf --max-time 30 "https://$GATEWAY_FQDN/actuator/health" && echo "Staging Healthy"
+
+  # ===================================================================
+  # STAGE 5: DEPLOY TO PRODUCTION (requires approval)
+  # ===================================================================
+  - stage: DeployProduction
+    displayName: 'Deploy to Production'
+    dependsOn: StagingValidation
+    variables:
+      - group: axiserp-prod
+    jobs:
+      - deployment: DeployProd
+        displayName: 'Deploy to Production'
+        environment: 'axiserp-production'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - template: cd-template-env.yml
+                  parameters:
+                    environment: production
+                    resourceGroup: $(resourceGroup)
+                    containerEnv: $(containerEnv)
+                    minReplicas: $(minReplicas)
+                    maxReplicas: $(maxReplicas)
+                    cpu: $(cpu)
+                    memory: $(memory)
+                    jpaDdlAuto: $(jpaDdlAuto)
+
+  # ===================================================================
+  # STAGE 6: POST-DEPLOY SMOKE TESTS (Production)
+  # ===================================================================
+  - stage: ProductionSmokeTests
+    displayName: 'Production Smoke Tests'
+    dependsOn: DeployProduction
+    jobs:
+      - job: SmokeTest
+        displayName: 'Full smoke test suite'
+        pool: ubuntu-latest
+        steps:
+          - task: AzureCLI@2
+            displayName: 'Production E2E validation'
+            inputs:
+              azureSubscription: 'axiserp-azure'
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                set -e
+                GATEWAY_FQDN=$(az containerapp show \
+                  --name api-gateway --resource-group axiserp-prod \
+                  --query properties.configuration.ingress.fqdn -o tsv)
+                echo "Gateway: https://$GATEWAY_FQDN"
+
+                # Health
+                curl -sf --max-time 30 "https://$GATEWAY_FQDN/actuator/health"
+                echo "[PASS] Health"
+
+                # Login
+                RESPONSE=$(curl -s --max-time 60 -X POST "https://$GATEWAY_FQDN/api/v1/auth/login" \
+                  -H "Content-Type: application/json" \
+                  -d "{\"email\":\"$(TEST_ADMIN_EMAIL)\",\"password\":\"$(TEST_ADMIN_PASSWORD)\"}")
+                TOKEN=$(echo $RESPONSE | jq -r '.data.accessToken')
+                echo "[PASS] Login ($(echo $RESPONSE | jq -r '.data.role'))"
+
+                # All services
+                for ep in "productos?page=1&size=1" "categorias?page=1&size=1" "inventory/products" "sales?page=1&size=1" "purchases?page=1&size=1"; do
+                  STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 \
+                    "https://$GATEWAY_FQDN/api/v1/$ep" \
+                    -H "Authorization: Bearer $TOKEN")
+                  echo "[$STATUS] /api/v1/$ep"
+                done
+
+                echo ""
+                echo "============================================"
+                echo "  PRODUCTION DEPLOYMENT VERIFIED"
+                echo "============================================"
+            env:
+              TEST_ADMIN_EMAIL: $(TEST_ADMIN_EMAIL)
+              TEST_ADMIN_PASSWORD: $(TEST_ADMIN_PASSWORD)

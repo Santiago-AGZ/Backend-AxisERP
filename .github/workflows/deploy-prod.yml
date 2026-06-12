@@ -28,25 +28,25 @@ jobs:
         include:
           - service: auth-service
             port: 8081
-            dockerfile: docker/Dockerfile.auth
+            dockerfile: auth-service/Dockerfile
           - service: catalog-service
             port: 8082
-            dockerfile: docker/Dockerfile.catalog
+            dockerfile: catalog-service/Dockerfile
           - service: inventory-service
             port: 8083
-            dockerfile: docker/Dockerfile.inventory
+            dockerfile: inventory-service/Dockerfile
           - service: sales-service
             port: 8084
-            dockerfile: docker/Dockerfile.sales
+            dockerfile: sales-service/Dockerfile
           - service: purchase-service
             port: 8086
-            dockerfile: docker/Dockerfile.purchase
+            dockerfile: purchase-service/Dockerfile
           - service: report-service
             port: 8085
-            dockerfile: docker/Dockerfile.report
+            dockerfile: report-service/Dockerfile
           - service: api-gateway
             port: 8080
-            dockerfile: docker/Dockerfile.gateway
+            dockerfile: api-gateway/Dockerfile
 
     runs-on: ubuntu-latest
     environment: production
@@ -149,7 +149,8 @@ jobs:
           targetPort: ${{ (matrix.service=='auth-service' && 8081) || (matrix.service=='catalog-service' && 8082) || (matrix.service=='inventory-service' && 8083) || (matrix.service=='sales-service' && 8084) || (matrix.service=='purchase-service' && 8086) || 8085 }}
           ingress: internal
           environmentVariables: >-
-            JPA_DDL_AUTO=validate
+            jpa-ddl-auto=validate
+            server-port=${{ matrix.port }}
             APPLICATIONINSIGHTS_CONNECTION_STRING=secretref:appinsights-connstr
           secrets: >-
             jwt-secret keyvaultref://axiserp-kv/JWT-SECRET
@@ -189,13 +190,14 @@ jobs:
           targetPort: 8080
           ingress: external
           environmentVariables: >-
-            AUTH_SERVICE_URL=http://auth-service:8081
-            CATALOG_SERVICE_URL=http://catalog-service:8082
-            INVENTORY_SERVICE_URL=http://inventory-service:8083
-            SALES_SERVICE_URL=http://sales-service:8084
-            PURCHASE_SERVICE_URL=http://purchase-service:8086
-            REPORT_SERVICE_URL=http://report-service:8085
-            CORS_ALLOWED_ORIGINS=${{ vars.CORS_ALLOWED_ORIGINS }}
+            server-port=8080
+            auth-service-url=http://auth-service:8081
+            catalog-service-url=http://catalog-service:8082
+            inventory-service-url=http://inventory-service:8083
+            sales-service-url=http://sales-service:8084
+            purchase-service-url=http://purchase-service:8086
+            report-service-url=http://report-service:8085
+            cors-allowed-origins=${{ vars.CORS_ALLOWED_ORIGINS }}
 
       - name: Smoke Test
         run: |

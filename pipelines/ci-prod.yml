@@ -1,0 +1,242 @@
+# ============================================
+# AxisERP - CI Production Pipeline
+# ============================================
+# Trigger: push/PR to main
+# Stages: Compile -> Test -> Docker Build -> Push ACR -> Security Scan
+# Uses Maven cache, parallel builds, Trivy scan
+# ============================================
+
+trigger:
+  branches:
+    include:
+      - main
+      - master
+  paths:
+    exclude:
+      - '**.md'
+      - 'docs/**'
+      - 'Frontend-AxisERP/**'
+      - 'postman/**'
+      - 'pipelines/README.md'
+
+pr:
+  branches:
+    include:
+      - main
+      - master
+
+variables:
+  - name: acrServer
+    value: axiserp.azurecr.io
+  - name: acrName
+    value: axiserp
+  - name: mavenCache
+    value: $(Pipeline.Workspace)/.m2
+
+stages:
+  # ===================================================================
+  # STAGE 1: COMPILE & UNIT TEST (all services in parallel)
+  # ===================================================================
+  - stage: CompileAndTest
+    displayName: 'Compile & Unit Test'
+    dependsOn: []
+    jobs:
+      - job: BuildMatrix
+        displayName: 'Build & Test All Services'
+        pool:
+          vmImage: ubuntu-latest
+        strategy:
+          parallel: 7
+          matrix:
+            auth-service:
+              service: auth-service
+            catalog-service:
+              service: catalog-service
+            inventory-service:
+              service: inventory-service
+            sales-service:
+              service: sales-service
+            purchase-service:
+              service: purchase-service
+            report-service:
+              service: report-service
+            api-gateway:
+              service: api-gateway
+        steps:
+          - checkout: self
+            fetchDepth: 1
+
+          - task: Cache@2
+            displayName: 'Cache Maven'
+            inputs:
+              key: 'maven | "$(Agent.OS)" | **/pom.xml'
+              restoreKeys: 'maven | "$(Agent.OS)"'
+              path: $(mavenCache)
+
+          - task: JavaToolInstaller@0
+            displayName: 'Install JDK 21'
+            inputs:
+              versionSpec: '21'
+              jdkArchitectureOption: x64
+              jdkSourceOption: PreInstalled
+
+          - task: Maven@4
+            displayName: 'Maven compile + test'
+            inputs:
+              mavenPomFile: '$(service)/pom.xml'
+              goals: 'clean verify'
+              options: '-Dmaven.repo.local=$(mavenCache) -DskipTests=false -q'
+              publishJUnitResults: true
+              testResultsFiles: '**/surefire-reports/TEST-*.xml'
+              codeCoverageToolOption: JaCoCo
+
+          - task: PublishPipelineArtifact@1
+            displayName: 'Publish JAR'
+            inputs:
+              targetPath: '$(service)/target'
+              artifact: '$(service)-target'
+            condition: succeededOrFailed()
+
+  # ===================================================================
+  # STAGE 2: DOCKER BUILD & PUSH (all services in parallel)
+  # ===================================================================
+  - stage: DockerBuildPush
+    displayName: 'Docker Build & Push to ACR'
+    dependsOn: CompileAndTest
+    condition: succeeded()
+    jobs:
+      - job: DockerMatrix
+        displayName: 'Docker Build & Push'
+        pool:
+          vmImage: ubuntu-latest
+        strategy:
+          parallel: 7
+          matrix:
+            auth-service:
+              service: auth-service
+            catalog-service:
+              service: catalog-service
+            inventory-service:
+              service: inventory-service
+            sales-service:
+              service: sales-service
+            purchase-service:
+              service: purchase-service
+            report-service:
+              service: report-service
+            api-gateway:
+              service: api-gateway
+        steps:
+          - checkout: self
+            fetchDepth: 1
+
+          - task: Docker@2
+            displayName: 'Login to ACR'
+            inputs:
+              containerRegistry: 'axiserp-acr-service-connection'
+              command: login
+
+          - task: Docker@2
+            displayName: 'Build image'
+            inputs:
+              containerRegistry: 'axiserp-acr-service-connection'
+              repository: $(service)
+              command: build
+              Dockerfile: '$(service)/Dockerfile'
+              buildContext: '$(service)'
+              tags: |
+                $(Build.BuildNumber)
+                latest
+
+          - task: Docker@2
+            displayName: 'Push image to ACR'
+            inputs:
+              containerRegistry: 'axiserp-acr-service-connection'
+              repository: $(service)
+              command: push
+              tags: |
+                $(Build.BuildNumber)
+                latest
+
+  # ===================================================================
+  # STAGE 3: SECURITY SCAN (Trivy)
+  # ===================================================================
+  - stage: SecurityScan
+    displayName: 'Security Scan'
+    dependsOn: DockerBuildPush
+    condition: succeeded()
+    jobs:
+      - job: TrivyScan
+        displayName: 'Trivy Vulnerability Scan'
+        pool:
+          vmImage: ubuntu-latest
+        strategy:
+          parallel: 7
+          matrix:
+            auth-service:
+              service: auth-service
+            catalog-service:
+              service: catalog-service
+            inventory-service:
+              service: inventory-service
+            sales-service:
+              service: sales-service
+            purchase-service:
+              service: purchase-service
+            report-service:
+              service: report-service
+            api-gateway:
+              service: api-gateway
+        steps:
+          - task: Docker@2
+            displayName: 'Login to ACR'
+            inputs:
+              containerRegistry: 'axiserp-acr-service-connection'
+              command: login
+
+          - bash: |
+              docker run --rm \
+                -v /var/run/docker.sock:/var/run/docker.sock:ro \
+                aquasec/trivy:latest image \
+                --severity CRITICAL,HIGH \
+                --exit-code 0 \
+                --format table \
+                --timeout 30m \
+                $(acrServer)/$(service):$(Build.BuildNumber)
+            displayName: 'Trivy scan $(service)'
+            continueOnError: true
+
+  # ===================================================================
+  # STAGE 4: GENERATE SBOM
+  # ===================================================================
+  - stage: GenerateSBOM
+    displayName: 'Generate SBOM'
+    dependsOn: DockerBuildPush
+    condition: succeededOrFailed()
+    jobs:
+      - job: SBOM
+        displayName: 'Build info & SBOM'
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - bash: |
+              echo "# AxisERP Build $(Build.BuildNumber)" > build-summary.md
+              echo "**Branch:** $(Build.SourceBranch)" >> build-summary.md
+              echo "**Commit:** $(Build.SourceVersion)" >> build-summary.md
+              echo "**Date:** $(date -u)" >> build-summary.md
+              echo "" >> build-summary.md
+              echo "## Images" >> build-summary.md
+              for svc in auth-service catalog-service inventory-service sales-service purchase-service report-service api-gateway; do
+                echo "- \`$(acrServer)/$svc:$(Build.BuildNumber)\`" >> build-summary.md
+              done
+              echo "" >> build-summary.md
+              echo "## Pipeline" >> build-summary.md
+              echo "- **ID:** $(Build.BuildId)" >> build-summary.md
+              echo "- **URL:** $(System.CollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)" >> build-summary.md
+            displayName: 'Generate build summary'
+
+          - task: PublishPipelineArtifact@1
+            displayName: 'Publish build info'
+            inputs:
+              targetPath: build-summary.md
+              artifact: build-summary

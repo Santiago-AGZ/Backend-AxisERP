@@ -31,9 +31,9 @@ public class JwtService {
     private final long refreshTokenExpiration;
 
     public JwtService(
-            @Value("${jwt.secret}") String secret,
-            @Value("${jwt.access-token-expiration}") long accessTokenExpiration,
-            @Value("${jwt.refresh-token-expiration}") long refreshTokenExpiration) {
+            @Value("${jwt-secret}") String secret,
+            @Value("${jwt-access-expiration}") long accessTokenExpiration,
+            @Value("${jwt-refresh-expiration}") long refreshTokenExpiration) {
         this.signingKey = Keys.hmacShaKeyFor(java.util.HexFormat.of().parseHex(secret));
         this.accessTokenExpiration = accessTokenExpiration;
         this.refreshTokenExpiration = refreshTokenExpiration;

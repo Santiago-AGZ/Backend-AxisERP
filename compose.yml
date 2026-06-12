@@ -7,16 +7,19 @@ services:
     ports:
       - "8081:8081"
     environment:
-      - SPRING_DATASOURCE_URL=${AUTH_DB_URL}
-      - SPRING_DATASOURCE_USERNAME=${AUTH_DB_USERNAME}
-      - SPRING_DATASOURCE_PASSWORD=${AUTH_DB_PASSWORD}
-      - SUPABASE_URL=${SUPABASE_URL}
-      - SUPABASE_JWT_ISSUER=${SUPABASE_JWT_ISSUER}
-      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
-      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
-      - JPA_DDL_AUTO=validate
-      - JWT_SECRET=${JWT_SECRET}
-      - INTERNAL_API_KEY=${INTERNAL_API_KEY}
+      - auth-db-url=${auth-db-url}
+      - auth-db-username=${auth-db-username}
+      - auth-db-password=${auth-db-password}
+      - supabase-url=${supabase-url}
+      - supabase-jwt-issuer=${supabase-jwt-issuer}
+      - supabase-service-role-key=${supabase-service-role-key}
+      - supabase-anon-key=${supabase-anon-key}
+      - jpa-ddl-auto=validate
+      - jwt-secret=${jwt-secret}
+      - jwt-access-expiration=${jwt-access-expiration:-900000}
+      - jwt-refresh-expiration=${jwt-refresh-expiration:-604800000}
+      - internal-api-key=${internal-api-key}
+      - server-port=8081
     networks:
       - axiserp-network
 
@@ -27,15 +30,15 @@ services:
     ports:
       - "8082:8082"
     environment:
-      - SPRING_DATASOURCE_URL=${CATALOG_DB_URL}
-      - SPRING_DATASOURCE_USERNAME=${CATALOG_DB_USERNAME}
-      - SPRING_DATASOURCE_PASSWORD=${CATALOG_DB_PASSWORD}
-      - JPA_DDL_AUTO=validate
-      - SUPABASE_URL=${SUPABASE_URL}
-      - SUPABASE_JWT_ISSUER=${SUPABASE_JWT_ISSUER}
-      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
-      - INTERNAL_API_KEY=${INTERNAL_API_KEY}
-      - SALES_SERVICE_URL=http://sales-service:8084
+      - catalog-db-url=${catalog-db-url}
+      - catalog-db-username=${catalog-db-username}
+      - catalog-db-password=${catalog-db-password}
+      - jpa-ddl-auto=validate
+      - supabase-jwt-issuer=${supabase-jwt-issuer}
+      - internal-api-key=${internal-api-key}
+      - catalog-service-url=http://catalog-service:8082
+      - sales-service-url=http://sales-service:8084
+      - server-port=8082
     networks:
       - axiserp-network
 
@@ -46,15 +49,14 @@ services:
     ports:
       - "8083:8083"
     environment:
-      - SPRING_DATASOURCE_URL=${INVENTORY_DB_URL}
-      - SPRING_DATASOURCE_USERNAME=${INVENTORY_DB_USERNAME}
-      - SPRING_DATASOURCE_PASSWORD=${INVENTORY_DB_PASSWORD}
-      - JPA_DDL_AUTO=${JPA_DDL_AUTO}
-      - CATALOG_SERVICE_URL=http://catalog-service:8082
-      - SUPABASE_URL=${SUPABASE_URL}
-      - SUPABASE_JWT_ISSUER=${SUPABASE_JWT_ISSUER}
-      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
-      - INTERNAL_API_KEY=${INTERNAL_API_KEY}
+      - inventory-db-url=${inventory-db-url}
+      - inventory-db-username=${inventory-db-username}
+      - inventory-db-password=${inventory-db-password}
+      - jpa-ddl-auto=${jpa-ddl-auto:-validate}
+      - catalog-service-url=http://catalog-service:8082
+      - supabase-jwt-issuer=${supabase-jwt-issuer}
+      - internal-api-key=${internal-api-key}
+      - server-port=8083
     depends_on:
       - catalog-service
     networks:
@@ -67,16 +69,15 @@ services:
     ports:
       - "8086:8086"
     environment:
-      - SPRING_DATASOURCE_URL=${PURCHASE_DB_URL}
-      - SPRING_DATASOURCE_USERNAME=${PURCHASE_DB_USERNAME}
-      - SPRING_DATASOURCE_PASSWORD=${PURCHASE_DB_PASSWORD}
-      - JPA_DDL_AUTO=${JPA_DDL_AUTO}
-      - INVENTORY_SERVICE_URL=http://inventory-service:8083
-      - CATALOG_SERVICE_URL=http://catalog-service:8082
-      - SUPABASE_URL=${SUPABASE_URL}
-      - SUPABASE_JWT_ISSUER=${SUPABASE_JWT_ISSUER}
-      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
-      - INTERNAL_API_KEY=${INTERNAL_API_KEY}
+      - purchase-db-url=${purchase-db-url}
+      - purchase-db-username=${purchase-db-username}
+      - purchase-db-password=${purchase-db-password}
+      - jpa-ddl-auto=${jpa-ddl-auto:-validate}
+      - inventory-service-url=http://inventory-service:8083
+      - catalog-service-url=http://catalog-service:8082
+      - supabase-jwt-issuer=${supabase-jwt-issuer}
+      - internal-api-key=${internal-api-key}
+      - server-port=8086
     networks:
       - axiserp-network
 
@@ -87,16 +88,15 @@ services:
     ports:
       - "8084:8084"
     environment:
-      - SPRING_DATASOURCE_URL=${SALES_DB_URL}
-      - SPRING_DATASOURCE_USERNAME=${SALES_DB_USERNAME}
-      - SPRING_DATASOURCE_PASSWORD=${SALES_DB_PASSWORD}
-      - JPA_DDL_AUTO=validate
-      - SUPABASE_URL=${SUPABASE_URL}
-      - SUPABASE_JWT_ISSUER=${SUPABASE_JWT_ISSUER}
-      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
-      - CATALOG_SERVICE_URL=http://catalog-service:8082
-      - INVENTORY_SERVICE_URL=http://inventory-service:8083
-      - INTERNAL_API_KEY=${INTERNAL_API_KEY}
+      - sales-db-url=${sales-db-url}
+      - sales-db-username=${sales-db-username}
+      - sales-db-password=${sales-db-password}
+      - jpa-ddl-auto=validate
+      - supabase-jwt-issuer=${supabase-jwt-issuer}
+      - catalog-service-url=http://catalog-service:8082
+      - inventory-service-url=http://inventory-service:8083
+      - internal-api-key=${internal-api-key}
+      - server-port=8084
     depends_on:
       - catalog-service
       - inventory-service
@@ -110,18 +110,17 @@ services:
     ports:
       - "8085:8085"
     environment:
-      - SPRING_DATASOURCE_URL=${REPORT_DB_URL}
-      - SPRING_DATASOURCE_USERNAME=${REPORT_DB_USERNAME}
-      - SPRING_DATASOURCE_PASSWORD=${REPORT_DB_PASSWORD}
-      - JPA_DDL_AUTO=${JPA_DDL_AUTO}
-      - CATALOG_SERVICE_URL=http://catalog-service:8082
-      - SALES_SERVICE_URL=http://sales-service:8084
-      - PURCHASE_SERVICE_URL=http://purchase-service:8086
-      - INVENTORY_SERVICE_URL=http://inventory-service:8083
-      - SUPABASE_URL=${SUPABASE_URL}
-      - SUPABASE_JWT_ISSUER=${SUPABASE_JWT_ISSUER}
-      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
-      - INTERNAL_API_KEY=${INTERNAL_API_KEY}
+      - report-db-url=${report-db-url}
+      - report-db-username=${report-db-username}
+      - report-db-password=${report-db-password}
+      - jpa-ddl-auto=${jpa-ddl-auto:-update}
+      - catalog-service-url=http://catalog-service:8082
+      - sales-service-url=http://sales-service:8084
+      - purchase-service-url=http://purchase-service:8086
+      - inventory-service-url=http://inventory-service:8083
+      - supabase-jwt-issuer=${supabase-jwt-issuer}
+      - internal-api-key=${internal-api-key}
+      - server-port=8085
     depends_on:
       - sales-service
       - purchase-service
@@ -135,13 +134,14 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - AUTH_SERVICE_URL=http://auth-service:8081
-      - CATALOG_SERVICE_URL=http://catalog-service:8082
-      - INVENTORY_SERVICE_URL=http://inventory-service:8083
-      - SALES_SERVICE_URL=http://sales-service:8084
-      - PURCHASE_SERVICE_URL=http://purchase-service:8086
-      - REPORT_SERVICE_URL=http://report-service:8085
-      - CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173
+      - auth-service-url=http://auth-service:8081
+      - catalog-service-url=http://catalog-service:8082
+      - inventory-service-url=http://inventory-service:8083
+      - sales-service-url=http://sales-service:8084
+      - purchase-service-url=http://purchase-service:8086
+      - report-service-url=http://report-service:8085
+      - cors-allowed-origins=${cors-allowed-origins:-http://localhost:3000,http://localhost:5173}
+      - server-port=8080
     depends_on:
       - auth-service
       - catalog-service

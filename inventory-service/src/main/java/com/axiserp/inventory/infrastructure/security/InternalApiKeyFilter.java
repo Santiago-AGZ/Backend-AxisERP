@@ -24,7 +24,7 @@ public class InternalApiKeyFilter extends OncePerRequestFilter {
     private static final Logger log = LoggerFactory.getLogger(InternalApiKeyFilter.class);
     private static final String SYSTEM_USER_ID = "00000000-0000-0000-0000-000000000000";
 
-    @Value("${internal.api.key:}")
+    @Value("${internal-api-key:}")
     private String internalApiKey;
 
     @Override

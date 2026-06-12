@@ -29,7 +29,7 @@ public class RefreshTokenService {
 
     private final RefreshTokenRepositoryPort refreshTokenRepositoryPort;
 
-    @Value("${app.refresh-token.expiry-days:7}")
+    @Value("${app-refresh-token-expiry-days:7}")
     private int refreshTokenExpiryDays;
 
     /**

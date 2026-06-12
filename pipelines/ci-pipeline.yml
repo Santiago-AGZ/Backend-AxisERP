@@ -1,0 +1,159 @@
+# ============================================
+# AxisERP - CI Pipeline (Build + Test + Push)
+# ============================================
+# Trigger: push to main, PRs to main
+# Excludes: docs, frontend, markdown
+# ============================================
+
+trigger:
+  branches:
+    include:
+      - main
+      - master
+  paths:
+    exclude:
+      - '**.md'
+      - 'docs/**'
+      - 'Frontend-AxisERP/**'
+
+pr:
+  branches:
+    include:
+      - main
+      - master
+
+variables:
+  - name: acrServer
+    value: axiserp.azurecr.io
+  - name: acrName
+    value: axiserp
+  - name: resourceGroup
+    value: axiserp-prod
+  - name: containerEnv
+    value: AxisERP-Env
+
+stages:
+  # -------------------------------------------------------------------
+  # STAGE 1: Build, Test & Push all 7 services in parallel
+  # -------------------------------------------------------------------
+  - stage: BuildAndPush
+    displayName: 'Build, Test & Push'
+    dependsOn: []
+    jobs:
+      # --- auth-service ---
+      - template: ci-template.yml
+        parameters:
+          service: auth-service
+          port: 8081
+
+      # --- catalog-service ---
+      - template: ci-template.yml
+        parameters:
+          service: catalog-service
+          port: 8082
+
+      # --- inventory-service ---
+      - template: ci-template.yml
+        parameters:
+          service: inventory-service
+          port: 8083
+
+      # --- sales-service ---
+      - template: ci-template.yml
+        parameters:
+          service: sales-service
+          port: 8084
+
+      # --- purchase-service ---
+      - template: ci-template.yml
+        parameters:
+          service: purchase-service
+          port: 8086
+
+      # --- report-service ---
+      - template: ci-template.yml
+        parameters:
+          service: report-service
+          port: 8085
+
+      # --- api-gateway ---
+      - template: ci-template.yml
+        parameters:
+          service: api-gateway
+          port: 8080
+
+  # -------------------------------------------------------------------
+  # STAGE 2: Security Scan (Trivy)
+  # -------------------------------------------------------------------
+  - stage: SecurityScan
+    displayName: 'Security Scan'
+    dependsOn: BuildAndPush
+    jobs:
+      - job: TrivyScan
+        displayName: 'Trivy vulnerability scan'
+        pool:
+          vmImage: ubuntu-latest
+        strategy:
+          matrix:
+            auth-service:
+              serviceName: auth-service
+            catalog-service:
+              serviceName: catalog-service
+            inventory-service:
+              serviceName: inventory-service
+            sales-service:
+              serviceName: sales-service
+            purchase-service:
+              serviceName: purchase-service
+            report-service:
+              serviceName: report-service
+            api-gateway:
+              serviceName: api-gateway
+        steps:
+          - task: Docker@2
+            displayName: 'Login to ACR'
+            inputs:
+              containerRegistry: 'axiserp-acr'
+              command: login
+
+          - bash: |
+              docker run --rm \
+                -v /var/run/docker.sock:/var/run/docker.sock:ro \
+                aquasec/trivy:latest image \
+                --severity CRITICAL,HIGH \
+                --exit-code 0 \
+                --format table \
+                $(acrServer)/$(serviceName):$(Build.BuildNumber)
+            displayName: 'Trivy scan $(serviceName)'
+            continueOnError: true
+
+  # -------------------------------------------------------------------
+  # STAGE 3: Publish Artifacts
+  # -------------------------------------------------------------------
+  - stage: PublishArtifacts
+    displayName: 'Publish Artifacts'
+    dependsOn: BuildAndPush
+    condition: succeededOrFailed()
+    jobs:
+      - job: Publish
+        displayName: 'Publish build info'
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - bash: |
+              echo "## AxisERP CI Build $(Build.BuildNumber)" > build-info.txt
+              echo "**Branch:** $(Build.SourceBranch)" >> build-info.txt
+              echo "**Commit:** $(Build.SourceVersion)" >> build-info.txt
+              echo "**ACR:** $(acrServer)" >> build-info.txt
+              echo "" >> build-info.txt
+              echo "### Images pushed:" >> build-info.txt
+              for svc in auth-service catalog-service inventory-service sales-service purchase-service report-service api-gateway; do
+                echo "- $(acrServer)/$svc:$(Build.BuildNumber)" >> build-info.txt
+              done
+            displayName: 'Generate build info'
+
+          - task: PublishPipelineArtifact@1
+            displayName: 'Publish build info'
+            inputs:
+              targetPath: build-info.txt
+              artifact: build-info

@@ -111,7 +111,7 @@ Todos los siguientes eran correctos en `services/*.ts` pero incorrectos en `type
 | Sin CSRF | **MITIGATED** | JWT Bearer auth es inherentemente inmune a CSRF |
 | RBAC client-side | **MITIGATED** | Backend con `@PreAuthorize` en cada endpoint |
 
-**CSP header agregado:** `default-src 'self'; script-src 'self'; connect-src 'self' https://api-gateway-quvd.onrender.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:;`
+**CSP header agregado:** `default-src 'self'; script-src 'self'; connect-src 'self' https://api-gateway.<region>.azurecontainerapps.io; style-src 'self' 'unsafe-inline'; img-src 'self' data:;`
 
 ---
 

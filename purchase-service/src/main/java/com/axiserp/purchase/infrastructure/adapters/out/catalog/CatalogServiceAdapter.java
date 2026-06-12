@@ -26,8 +26,8 @@ public class CatalogServiceAdapter implements CatalogServicePort {
 
     public CatalogServiceAdapter(
             RestClient.Builder restClientBuilder,
-            @Value("${catalog.service.url:http://catalog-service:8082}") String catalogUrl,
-            @Value("${internal.api.key:}") String internalApiKey) {
+            @Value("${catalog-service-url:http://catalog-service:8082}") String catalogUrl,
+            @Value("${internal-api-key:}") String internalApiKey) {
         this.internalApiKey = internalApiKey;
         this.restClient = restClientBuilder
                 .baseUrl(catalogUrl)

@@ -36,7 +36,7 @@ jobs:
         run: |
           docker build \
             -t ${{ env.ACR_SERVER }}/${{ matrix.service }}:pr-${{ github.event.number }} \
-            -f docker/Dockerfile.${{ matrix.service == 'api-gateway' && 'gateway' || (matrix.service | replace('-service', '')) }} \
+            -f ${{ matrix.service }}/Dockerfile \
             .
 
       - name: Login to ACR

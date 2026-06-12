@@ -1,0 +1,418 @@
+# ============================================
+# AxisERP - CD Environment Template
+# ============================================
+# Deploys all 7 services to Azure Container Apps
+# Parameterized per environment (dev/staging/prod)
+# ============================================
+
+parameters:
+  - name: environment
+    type: string
+    values:
+      - dev
+      - staging
+      - production
+  - name: resourceGroup
+    type: string
+  - name: containerEnv
+    type: string
+  - name: minReplicas
+    type: number
+    default: 1
+  - name: maxReplicas
+    type: number
+    default: 10
+  - name: cpu
+    type: string
+    default: "0.5"
+  - name: memory
+    type: string
+    default: "1Gi"
+  - name: jpaDdlAuto
+    type: string
+    default: validate
+
+steps:
+  # ========================================
+  # Deploy auth-service (external, 8081)
+  # ========================================
+  - task: AzureCLI@2
+    displayName: 'Deploy auth-service'
+    inputs:
+      azureSubscription: 'axiserp-azure'
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: |
+        echo "[${{ parameters.environment }}] Deploying auth-service..."
+        az containerapp update \
+          --name auth-service \
+          --resource-group ${{ parameters.resourceGroup }} \
+          --image $(acrServer)/auth-service:$(imageTag) \
+          --min-replicas ${{ parameters.minReplicas }} \
+          --max-replicas ${{ parameters.maxReplicas }} \
+          --cpu ${{ parameters.cpu }} --memory ${{ parameters.memory }} \
+          --set-env-vars \
+            server-port=8081 \
+            jpa-ddl-auto=${{ parameters.jpaDdlAuto }} \
+            jwt-access-expiration=900000 \
+            jwt-refresh-expiration=604800000 \
+            supabase-url="$(SUPABASE_URL)" \
+            supabase-jwt-issuer="$(SUPABASE_JWT_ISSUER)" \
+            supabase-service-role-key=secretref:supabase-service-role-key \
+            supabase-anon-key=secretref:supabase-anon-key \
+            auth-db-url="$(AUTH_DB_URL)" \
+            auth-db-username=secretref:auth-db-username \
+            auth-db-password=secretref:auth-db-password \
+            jwt-secret=secretref:jwt-secret \
+            internal-api-key=secretref:internal-api-key \
+        || az containerapp create \
+          --name auth-service \
+          --resource-group ${{ parameters.resourceGroup }} \
+          --environment ${{ parameters.containerEnv }} \
+          --image $(acrServer)/auth-service:$(imageTag) \
+          --registry-server $(acrServer) \
+          --target-port 8081 --ingress external \
+          --min-replicas ${{ parameters.minReplicas }} \
+          --max-replicas ${{ parameters.maxReplicas }} \
+          --cpu ${{ parameters.cpu }} --memory ${{ parameters.memory }} \
+          --env-vars \
+            server-port=8081 \
+            jpa-ddl-auto=${{ parameters.jpaDdlAuto }} \
+            jwt-access-expiration=900000 \
+            jwt-refresh-expiration=604800000 \
+            supabase-url="$(SUPABASE_URL)" \
+            supabase-jwt-issuer="$(SUPABASE_JWT_ISSUER)" \
+            supabase-service-role-key=secretref:supabase-service-role-key \
+            supabase-anon-key=secretref:supabase-anon-key \
+            auth-db-url="$(AUTH_DB_URL)" \
+            auth-db-username=secretref:auth-db-username \
+            auth-db-password=secretref:auth-db-password \
+            jwt-secret=secretref:jwt-secret \
+            internal-api-key=secretref:internal-api-key
+        echo "auth-service deployed"
+
+  # ========================================
+  # Deploy catalog-service (internal, 8082)
+  # ========================================
+  - task: AzureCLI@2
+    displayName: 'Deploy catalog-service'
+    inputs:
+      azureSubscription: 'axiserp-azure'
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: |
+        echo "[${{ parameters.environment }}] Deploying catalog-service..."
+        az containerapp update \
+          --name catalog-service \
+          --resource-group ${{ parameters.resourceGroup }} \
+          --image $(acrServer)/catalog-service:$(imageTag) \
+          --min-replicas ${{ parameters.minReplicas }} \
+          --max-replicas ${{ parameters.maxReplicas }} \
+          --cpu ${{ parameters.cpu }} --memory ${{ parameters.memory }} \
+          --set-env-vars \
+            server-port=8082 \
+            jpa-ddl-auto=${{ parameters.jpaDdlAuto }} \
+            supabase-jwt-issuer="$(SUPABASE_JWT_ISSUER)" \
+            catalog-db-url="$(CATALOG_DB_URL)" \
+            catalog-db-username=secretref:catalog-db-username \
+            catalog-db-password=secretref:catalog-db-password \
+            internal-api-key=secretref:internal-api-key \
+            catalog-service-url=http://catalog-service \
+            sales-service-url=http://sales-service \
+        || az containerapp create \
+          --name catalog-service \
+          --resource-group ${{ parameters.resourceGroup }} \
+          --environment ${{ parameters.containerEnv }} \
+          --image $(acrServer)/catalog-service:$(imageTag) \
+          --registry-server $(acrServer) \
+          --target-port 8082 --ingress internal \
+          --min-replicas ${{ parameters.minReplicas }} \
+          --max-replicas ${{ parameters.maxReplicas }} \
+          --cpu ${{ parameters.cpu }} --memory ${{ parameters.memory }} \
+          --env-vars \
+            server-port=8082 \
+            jpa-ddl-auto=${{ parameters.jpaDdlAuto }} \
+            supabase-jwt-issuer="$(SUPABASE_JWT_ISSUER)" \
+            catalog-db-url="$(CATALOG_DB_URL)" \
+            catalog-db-username=secretref:catalog-db-username \
+            catalog-db-password=secretref:catalog-db-password \
+            internal-api-key=secretref:internal-api-key \
+            catalog-service-url=http://catalog-service \
+            sales-service-url=http://sales-service
+        echo "catalog-service deployed"
+
+  # ========================================
+  # Deploy inventory-service (internal, 8083)
+  # ========================================
+  - task: AzureCLI@2
+    displayName: 'Deploy inventory-service'
+    inputs:
+      azureSubscription: 'axiserp-azure'
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: |
+        echo "[${{ parameters.environment }}] Deploying inventory-service..."
+        az containerapp update \
+          --name inventory-service \
+          --resource-group ${{ parameters.resourceGroup }} \
+          --image $(acrServer)/inventory-service:$(imageTag) \
+          --min-replicas ${{ parameters.minReplicas }} \
+          --max-replicas ${{ parameters.maxReplicas }} \
+          --cpu ${{ parameters.cpu }} --memory ${{ parameters.memory }} \
+          --set-env-vars \
+            server-port=8083 \
+            jpa-ddl-auto=${{ parameters.jpaDdlAuto }} \
+            supabase-jwt-issuer="$(SUPABASE_JWT_ISSUER)" \
+            inventory-db-url="$(INVENTORY_DB_URL)" \
+            inventory-db-username=secretref:inventory-db-username \
+            inventory-db-password=secretref:inventory-db-password \
+            internal-api-key=secretref:internal-api-key \
+            catalog-service-url=http://catalog-service \
+        || az containerapp create \
+          --name inventory-service \
+          --resource-group ${{ parameters.resourceGroup }} \
+          --environment ${{ parameters.containerEnv }} \
+          --image $(acrServer)/inventory-service:$(imageTag) \
+          --registry-server $(acrServer) \
+          --target-port 8083 --ingress internal \
+          --min-replicas ${{ parameters.minReplicas }} \
+          --max-replicas ${{ parameters.maxReplicas }} \
+          --cpu ${{ parameters.cpu }} --memory ${{ parameters.memory }} \
+          --env-vars \
+            server-port=8083 \
+            jpa-ddl-auto=${{ parameters.jpaDdlAuto }} \
+            supabase-jwt-issuer="$(SUPABASE_JWT_ISSUER)" \
+            inventory-db-url="$(INVENTORY_DB_URL)" \
+            inventory-db-username=secretref:inventory-db-username \
+            inventory-db-password=secretref:inventory-db-password \
+            internal-api-key=secretref:internal-api-key \
+            catalog-service-url=http://catalog-service
+        echo "inventory-service deployed"
+
+  # ========================================
+  # Deploy sales-service (internal, 8084)
+  # ========================================
+  - task: AzureCLI@2
+    displayName: 'Deploy sales-service'
+    inputs:
+      azureSubscription: 'axiserp-azure'
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: |
+        echo "[${{ parameters.environment }}] Deploying sales-service..."
+        az containerapp update \
+          --name sales-service \
+          --resource-group ${{ parameters.resourceGroup }} \
+          --image $(acrServer)/sales-service:$(imageTag) \
+          --min-replicas ${{ parameters.minReplicas }} \
+          --max-replicas ${{ parameters.maxReplicas }} \
+          --cpu ${{ parameters.cpu }} --memory ${{ parameters.memory }} \
+          --set-env-vars \
+            server-port=8084 \
+            jpa-ddl-auto=${{ parameters.jpaDdlAuto }} \
+            supabase-jwt-issuer="$(SUPABASE_JWT_ISSUER)" \
+            sales-db-url="$(SALES_DB_URL)" \
+            sales-db-username=secretref:sales-db-username \
+            sales-db-password=secretref:sales-db-password \
+            internal-api-key=secretref:internal-api-key \
+            catalog-service-url=http://catalog-service \
+            inventory-service-url=http://inventory-service \
+        || az containerapp create \
+          --name sales-service \
+          --resource-group ${{ parameters.resourceGroup }} \
+          --environment ${{ parameters.containerEnv }} \
+          --image $(acrServer)/sales-service:$(imageTag) \
+          --registry-server $(acrServer) \
+          --target-port 8084 --ingress internal \
+          --min-replicas ${{ parameters.minReplicas }} \
+          --max-replicas ${{ parameters.maxReplicas }} \
+          --cpu ${{ parameters.cpu }} --memory ${{ parameters.memory }} \
+          --env-vars \
+            server-port=8084 \
+            jpa-ddl-auto=${{ parameters.jpaDdlAuto }} \
+            supabase-jwt-issuer="$(SUPABASE_JWT_ISSUER)" \
+            sales-db-url="$(SALES_DB_URL)" \
+            sales-db-username=secretref:sales-db-username \
+            sales-db-password=secretref:sales-db-password \
+            internal-api-key=secretref:internal-api-key \
+            catalog-service-url=http://catalog-service \
+            inventory-service-url=http://inventory-service
+        echo "sales-service deployed"
+
+  # ========================================
+  # Deploy purchase-service (internal, 8086)
+  # ========================================
+  - task: AzureCLI@2
+    displayName: 'Deploy purchase-service'
+    inputs:
+      azureSubscription: 'axiserp-azure'
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: |
+        echo "[${{ parameters.environment }}] Deploying purchase-service..."
+        az containerapp update \
+          --name purchase-service \
+          --resource-group ${{ parameters.resourceGroup }} \
+          --image $(acrServer)/purchase-service:$(imageTag) \
+          --min-replicas ${{ parameters.minReplicas }} \
+          --max-replicas ${{ parameters.maxReplicas }} \
+          --cpu ${{ parameters.cpu }} --memory ${{ parameters.memory }} \
+          --set-env-vars \
+            server-port=8086 \
+            jpa-ddl-auto=${{ parameters.jpaDdlAuto }} \
+            supabase-jwt-issuer="$(SUPABASE_JWT_ISSUER)" \
+            purchase-db-url="$(PURCHASE_DB_URL)" \
+            purchase-db-username=secretref:purchase-db-username \
+            purchase-db-password=secretref:purchase-db-password \
+            internal-api-key=secretref:internal-api-key \
+            catalog-service-url=http://catalog-service \
+            inventory-service-url=http://inventory-service \
+        || az containerapp create \
+          --name purchase-service \
+          --resource-group ${{ parameters.resourceGroup }} \
+          --environment ${{ parameters.containerEnv }} \
+          --image $(acrServer)/purchase-service:$(imageTag) \
+          --registry-server $(acrServer) \
+          --target-port 8086 --ingress internal \
+          --min-replicas ${{ parameters.minReplicas }} \
+          --max-replicas ${{ parameters.maxReplicas }} \
+          --cpu ${{ parameters.cpu }} --memory ${{ parameters.memory }} \
+          --env-vars \
+            server-port=8086 \
+            jpa-ddl-auto=${{ parameters.jpaDdlAuto }} \
+            supabase-jwt-issuer="$(SUPABASE_JWT_ISSUER)" \
+            purchase-db-url="$(PURCHASE_DB_URL)" \
+            purchase-db-username=secretref:purchase-db-username \
+            purchase-db-password=secretref:purchase-db-password \
+            internal-api-key=secretref:internal-api-key \
+            catalog-service-url=http://catalog-service \
+            inventory-service-url=http://inventory-service
+        echo "purchase-service deployed"
+
+  # ========================================
+  # Deploy report-service (internal, 8085)
+  # ========================================
+  - task: AzureCLI@2
+    displayName: 'Deploy report-service'
+    inputs:
+      azureSubscription: 'axiserp-azure'
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: |
+        echo "[${{ parameters.environment }}] Deploying report-service..."
+        az containerapp update \
+          --name report-service \
+          --resource-group ${{ parameters.resourceGroup }} \
+          --image $(acrServer)/report-service:$(imageTag) \
+          --min-replicas ${{ parameters.minReplicas }} \
+          --max-replicas ${{ parameters.maxReplicas }} \
+          --cpu ${{ parameters.cpu }} --memory ${{ parameters.memory }} \
+          --set-env-vars \
+            server-port=8085 \
+            jpa-ddl-auto=${{ parameters.jpaDdlAuto }} \
+            supabase-jwt-issuer="$(SUPABASE_JWT_ISSUER)" \
+            report-db-url="$(REPORT_DB_URL)" \
+            report-db-username=secretref:report-db-username \
+            report-db-password=secretref:report-db-password \
+            internal-api-key=secretref:internal-api-key \
+            catalog-service-url=http://catalog-service \
+            inventory-service-url=http://inventory-service \
+            sales-service-url=http://sales-service \
+            purchase-service-url=http://purchase-service \
+        || az containerapp create \
+          --name report-service \
+          --resource-group ${{ parameters.resourceGroup }} \
+          --environment ${{ parameters.containerEnv }} \
+          --image $(acrServer)/report-service:$(imageTag) \
+          --registry-server $(acrServer) \
+          --target-port 8085 --ingress internal \
+          --min-replicas ${{ parameters.minReplicas }} \
+          --max-replicas ${{ parameters.maxReplicas }} \
+          --cpu ${{ parameters.cpu }} --memory ${{ parameters.memory }} \
+          --env-vars \
+            server-port=8085 \
+            jpa-ddl-auto=${{ parameters.jpaDdlAuto }} \
+            supabase-jwt-issuer="$(SUPABASE_JWT_ISSUER)" \
+            report-db-url="$(REPORT_DB_URL)" \
+            report-db-username=secretref:report-db-username \
+            report-db-password=secretref:report-db-password \
+            internal-api-key=secretref:internal-api-key \
+            catalog-service-url=http://catalog-service \
+            inventory-service-url=http://inventory-service \
+            sales-service-url=http://sales-service \
+            purchase-service-url=http://purchase-service
+        echo "report-service deployed"
+
+  # ========================================
+  # Deploy api-gateway (external, 8080)
+  # ========================================
+  - task: AzureCLI@2
+    displayName: 'Deploy api-gateway'
+    inputs:
+      azureSubscription: 'axiserp-azure'
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: |
+        echo "[${{ parameters.environment }}] Deploying api-gateway..."
+        az containerapp update \
+          --name api-gateway \
+          --resource-group ${{ parameters.resourceGroup }} \
+          --image $(acrServer)/api-gateway:$(imageTag) \
+          --min-replicas ${{ parameters.minReplicas }} \
+          --max-replicas ${{ parameters.maxReplicas }} \
+          --cpu ${{ parameters.cpu }} --memory ${{ parameters.memory }} \
+          --set-env-vars \
+            server-port=8080 \
+            auth-service-url=http://auth-service \
+            catalog-service-url=http://catalog-service \
+            inventory-service-url=http://inventory-service \
+            sales-service-url=http://sales-service \
+            purchase-service-url=http://purchase-service \
+            report-service-url=http://report-service \
+            cors-allowed-origins="$(CORS_ALLOWED_ORIGINS)" \
+        || az containerapp create \
+          --name api-gateway \
+          --resource-group ${{ parameters.resourceGroup }} \
+          --environment ${{ parameters.containerEnv }} \
+          --image $(acrServer)/api-gateway:$(imageTag) \
+          --registry-server $(acrServer) \
+          --target-port 8080 --ingress external \
+          --min-replicas ${{ parameters.minReplicas }} \
+          --max-replicas ${{ parameters.maxReplicas }} \
+          --cpu ${{ parameters.cpu }} --memory ${{ parameters.memory }} \
+          --env-vars \
+            server-port=8080 \
+            auth-service-url=http://auth-service \
+            catalog-service-url=http://catalog-service \
+            inventory-service-url=http://inventory-service \
+            sales-service-url=http://sales-service \
+            purchase-service-url=http://purchase-service \
+            report-service-url=http://report-service \
+            cors-allowed-origins="$(CORS_ALLOWED_ORIGINS)"
+        echo "api-gateway deployed"
+
+  # ========================================
+  # Post-deploy health verification
+  # ========================================
+  - task: AzureCLI@2
+    displayName: 'Health verification'
+    inputs:
+      azureSubscription: 'axiserp-azure'
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: |
+        echo "[${{ parameters.environment }}] Waiting for deployments to stabilize..."
+        sleep 30
+
+        for svc in auth-service api-gateway; do
+          FQDN=$(az containerapp show --name $svc --resource-group ${{ parameters.resourceGroup }} --query properties.configuration.ingress.fqdn -o tsv)
+          for i in $(seq 1 5); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "https://$FQDN/actuator/health" || echo "000")
+            if [ "$STATUS" = "200" ]; then
+              echo "[OK] $svc health check passed (attempt $i)"
+              break
+            fi
+            echo "Waiting for $svc... (attempt $i, HTTP $STATUS)"
+            sleep 15
+          done
+        done

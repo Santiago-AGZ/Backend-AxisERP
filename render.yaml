@@ -1,244 +1,168 @@
+# ============================================
+# AxisERP - Azure Container Apps Configuration
+# ============================================
+# This file documents the expected env-vars/secrets per service.
+# Actual deployment is done via GitHub Actions (deploy-prod.yml)
+# using az containerapp update / azure/container-apps-deploy-action.
+# ============================================
+
 services:
-  - type: web
-    name: api-gateway
-    env: docker
-    repo: https://github.com/Santiago-AGZ/Backend-AxisERP
-    branch: master
-    dockerfilePath: ./api-gateway/Dockerfile
-    healthCheckPath: /actuator/health
+  - name: auth-service
+    port: 8081
     envVars:
-      - key: SERVER_PORT
-        value: "8080"
-      - key: AUTH_SERVICE_URL
-        fromService:
-          name: auth-service
-          type: web
-          property: hostport
-      - key: CATALOG_SERVICE_URL
-        fromService:
-          name: catalog-service
-          type: web
-          property: hostport
-      - key: INVENTORY_SERVICE_URL
-        fromService:
-          name: inventory-service
-          type: web
-          property: hostport
-      - key: SALES_SERVICE_URL
-        fromService:
-          name: sales-service
-          type: web
-          property: hostport
-      - key: PURCHASE_SERVICE_URL
-        fromService:
-          name: purchase-service
-          type: web
-          property: hostport
-      - key: REPORT_SERVICE_URL
-        fromService:
-          name: report-service
-          type: web
-          property: hostport
-      - key: SUPABASE_URL
-        sync: false
-      - key: SUPABASE_JWT_ISSUER
-        sync: false
-      - key: SUPABASE_SERVICE_ROLE_KEY
-        sync: false
-      - key: JWT_SECRET
-        sync: false
-
-  - type: web
-    name: auth-service
-    env: docker
-    repo: https://github.com/Santiago-AGZ/Backend-AxisERP
-    branch: master
-    dockerfilePath: ./auth-service/Dockerfile
-    healthCheckPath: /actuator/health
-    envVars:
-      - key: SERVER_PORT
-        value: "8081"
-      - key: AUTH_DB_URL
-        sync: false
-      - key: AUTH_DB_USERNAME
-        sync: false
-      - key: AUTH_DB_PASSWORD
-        sync: false
-      - key: SUPABASE_URL
-        sync: false
-      - key: SUPABASE_JWT_ISSUER
-        sync: false
-      - key: SUPABASE_SERVICE_ROLE_KEY
-        sync: false
-      - key: SUPABASE_ANON_KEY
-        sync: false
-      - key: JWT_SECRET
-        sync: false
-      - key: INTERNAL_API_KEY
-        sync: false
-      - key: JPA_DDL_AUTO
-        value: "validate"
-      - key: JWT_ACCESS_EXPIRATION
+      - key: auth-db-url
+        secretRef: auth-db-url
+      - key: auth-db-username
+        secretRef: auth-db-username
+      - key: auth-db-password
+        secretRef: auth-db-password
+      - key: supabase-url
+        secretRef: supabase-url
+      - key: supabase-jwt-issuer
+        secretRef: supabase-jwt-issuer
+      - key: supabase-service-role-key
+        secretRef: supabase-service-role-key
+      - key: supabase-anon-key
+        secretRef: supabase-anon-key
+      - key: jwt-secret
+        secretRef: jwt-secret
+      - key: jwt-access-expiration
         value: "900000"
-      - key: JWT_REFRESH_EXPIRATION
+      - key: jwt-refresh-expiration
         value: "604800000"
+      - key: internal-api-key
+        secretRef: internal-api-key
+      - key: jpa-ddl-auto
+        value: "validate"
+      - key: server-port
+        value: "8081"
 
-  - type: web
-    name: catalog-service
-    env: docker
-    repo: https://github.com/Santiago-AGZ/Backend-AxisERP
-    branch: master
-    dockerfilePath: ./catalog-service/Dockerfile
-    healthCheckPath: /actuator/health
+  - name: catalog-service
+    port: 8082
     envVars:
-      - key: SERVER_PORT
+      - key: catalog-db-url
+        secretRef: catalog-db-url
+      - key: catalog-db-username
+        secretRef: catalog-db-username
+      - key: catalog-db-password
+        secretRef: catalog-db-password
+      - key: supabase-jwt-issuer
+        secretRef: supabase-jwt-issuer
+      - key: internal-api-key
+        secretRef: internal-api-key
+      - key: jpa-ddl-auto
+        value: "validate"
+      - key: server-port
         value: "8082"
-      - key: CATALOG_DB_URL
-        sync: false
-      - key: CATALOG_DB_USERNAME
-        sync: false
-      - key: CATALOG_DB_PASSWORD
-        sync: false
-      - key: SUPABASE_JWT_ISSUER
-        sync: false
-      - key: INTERNAL_API_KEY
-        sync: false
-      - key: JPA_DDL_AUTO
-        value: "validate"
+      - key: catalog-service-url
+        value: "http://catalog-service:8082"
+      - key: sales-service-url
+        value: "http://sales-service:8084"
 
-  - type: web
-    name: inventory-service
-    env: docker
-    repo: https://github.com/Santiago-AGZ/Backend-AxisERP
-    branch: master
-    dockerfilePath: ./inventory-service/Dockerfile
-    healthCheckPath: /actuator/health
+  - name: inventory-service
+    port: 8083
     envVars:
-      - key: SERVER_PORT
+      - key: inventory-db-url
+        secretRef: inventory-db-url
+      - key: inventory-db-username
+        secretRef: inventory-db-username
+      - key: inventory-db-password
+        secretRef: inventory-db-password
+      - key: supabase-jwt-issuer
+        secretRef: supabase-jwt-issuer
+      - key: internal-api-key
+        secretRef: internal-api-key
+      - key: jpa-ddl-auto
+        value: "validate"
+      - key: server-port
         value: "8083"
-      - key: INVENTORY_DB_URL
-        sync: false
-      - key: INVENTORY_DB_USERNAME
-        sync: false
-      - key: INVENTORY_DB_PASSWORD
-        sync: false
-      - key: CATALOG_SERVICE_URL
-        fromService:
-          name: catalog-service
-          type: web
-          property: hostport
-      - key: SUPABASE_JWT_ISSUER
-        sync: false
-      - key: INTERNAL_API_KEY
-        sync: false
-      - key: JPA_DDL_AUTO
-        value: "validate"
+      - key: catalog-service-url
+        value: "http://catalog-service:8082"
 
-  - type: web
-    name: sales-service
-    env: docker
-    repo: https://github.com/Santiago-AGZ/Backend-AxisERP
-    branch: master
-    dockerfilePath: ./sales-service/Dockerfile
-    healthCheckPath: /actuator/health
+  - name: sales-service
+    port: 8084
     envVars:
-      - key: SERVER_PORT
+      - key: sales-db-url
+        secretRef: sales-db-url
+      - key: sales-db-username
+        secretRef: sales-db-username
+      - key: sales-db-password
+        secretRef: sales-db-password
+      - key: supabase-jwt-issuer
+        secretRef: supabase-jwt-issuer
+      - key: internal-api-key
+        secretRef: internal-api-key
+      - key: jpa-ddl-auto
+        value: "validate"
+      - key: server-port
         value: "8084"
-      - key: SALES_DB_URL
-        sync: false
-      - key: SALES_DB_USERNAME
-        sync: false
-      - key: SALES_DB_PASSWORD
-        sync: false
-      - key: CATALOG_SERVICE_URL
-        fromService:
-          name: catalog-service
-          type: web
-          property: hostport
-      - key: INVENTORY_SERVICE_URL
-        fromService:
-          name: inventory-service
-          type: web
-          property: hostport
-      - key: SUPABASE_JWT_ISSUER
-        sync: false
-      - key: INTERNAL_API_KEY
-        sync: false
-      - key: JPA_DDL_AUTO
-        value: "validate"
+      - key: catalog-service-url
+        value: "http://catalog-service:8082"
+      - key: inventory-service-url
+        value: "http://inventory-service:8083"
 
-  - type: web
-    name: purchase-service
-    env: docker
-    repo: https://github.com/Santiago-AGZ/Backend-AxisERP
-    branch: master
-    dockerfilePath: ./purchase-service/Dockerfile
-    healthCheckPath: /actuator/health
+  - name: purchase-service
+    port: 8086
     envVars:
-      - key: SERVER_PORT
+      - key: purchase-db-url
+        secretRef: purchase-db-url
+      - key: purchase-db-username
+        secretRef: purchase-db-username
+      - key: purchase-db-password
+        secretRef: purchase-db-password
+      - key: supabase-jwt-issuer
+        secretRef: supabase-jwt-issuer
+      - key: internal-api-key
+        secretRef: internal-api-key
+      - key: jpa-ddl-auto
+        value: "validate"
+      - key: server-port
         value: "8086"
-      - key: PURCHASE_DB_URL
-        sync: false
-      - key: PURCHASE_DB_USERNAME
-        sync: false
-      - key: PURCHASE_DB_PASSWORD
-        sync: false
-      - key: CATALOG_SERVICE_URL
-        fromService:
-          name: catalog-service
-          type: web
-          property: hostport
-      - key: INVENTORY_SERVICE_URL
-        fromService:
-          name: inventory-service
-          type: web
-          property: hostport
-      - key: SUPABASE_JWT_ISSUER
-        sync: false
-      - key: INTERNAL_API_KEY
-        sync: false
-      - key: JPA_DDL_AUTO
-        value: "validate"
+      - key: catalog-service-url
+        value: "http://catalog-service:8082"
+      - key: inventory-service-url
+        value: "http://inventory-service:8083"
 
-  - type: web
-    name: report-service
-    env: docker
-    repo: https://github.com/Santiago-AGZ/Backend-AxisERP
-    branch: master
-    dockerfilePath: ./report-service/Dockerfile
-    healthCheckPath: /actuator/health
+  - name: report-service
+    port: 8085
     envVars:
-      - key: SERVER_PORT
+      - key: report-db-url
+        secretRef: report-db-url
+      - key: report-db-username
+        secretRef: report-db-username
+      - key: report-db-password
+        secretRef: report-db-password
+      - key: supabase-jwt-issuer
+        secretRef: supabase-jwt-issuer
+      - key: internal-api-key
+        secretRef: internal-api-key
+      - key: jpa-ddl-auto
+        value: "update"
+      - key: server-port
         value: "8085"
-      - key: REPORT_DB_URL
-        sync: false
-      - key: REPORT_DB_USERNAME
-        sync: false
-      - key: REPORT_DB_PASSWORD
-        sync: false
-      - key: CATALOG_SERVICE_URL
-        fromService:
-          name: catalog-service
-          type: web
-          property: hostport
-      - key: INVENTORY_SERVICE_URL
-        fromService:
-          name: inventory-service
-          type: web
-          property: hostport
-      - key: SALES_SERVICE_URL
-        fromService:
-          name: sales-service
-          type: web
-          property: hostport
-      - key: PURCHASE_SERVICE_URL
-        fromService:
-          name: purchase-service
-          type: web
-          property: hostport
-      - key: SUPABASE_JWT_ISSUER
-        sync: false
-      - key: INTERNAL_API_KEY
-        sync: false
-      - key: JPA_DDL_AUTO
-        value: "validate"
+      - key: catalog-service-url
+        value: "http://catalog-service:8082"
+      - key: inventory-service-url
+        value: "http://inventory-service:8083"
+      - key: sales-service-url
+        value: "http://sales-service:8084"
+      - key: purchase-service-url
+        value: "http://purchase-service:8086"
+
+  - name: api-gateway
+    port: 8080
+    envVars:
+      - key: server-port
+        value: "8080"
+      - key: auth-service-url
+        value: "http://auth-service:8081"
+      - key: catalog-service-url
+        value: "http://catalog-service:8082"
+      - key: inventory-service-url
+        value: "http://inventory-service:8083"
+      - key: sales-service-url
+        value: "http://sales-service:8084"
+      - key: purchase-service-url
+        value: "http://purchase-service:8086"
+      - key: report-service-url
+        value: "http://report-service:8085"

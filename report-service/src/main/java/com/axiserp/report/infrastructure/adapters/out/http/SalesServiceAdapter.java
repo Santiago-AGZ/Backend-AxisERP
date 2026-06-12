@@ -21,10 +21,10 @@ public class SalesServiceAdapter implements SalesServicePort {
 
     private final RestTemplate restTemplate;
 
-    @Value("${sales.service.url}")
+    @Value("${sales-service-url}")
     private String baseUrl;
 
-    @Value("${internal.api.key}")
+    @Value("${internal-api-key}")
     private String apiKey;
 
     private HttpEntity<Void> createAuthEntity() {

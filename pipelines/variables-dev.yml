@@ -1,0 +1,29 @@
+# ============================================
+# AxisERP - Variables: Development
+# ============================================
+# Import into Azure DevOps Library as Variable Group "axiserp-dev"
+# ============================================
+
+variables:
+  - name: environment
+    value: development
+  - name: resourceGroup
+    value: axiserp-dev
+  - name: containerEnv
+    value: AxisERP-Env-Dev
+  - name: acrServer
+    value: axiserp.azurecr.io
+  - name: acrName
+    value: axiserp
+  - name: minReplicas
+    value: 1
+  - name: maxReplicas
+    value: 3
+  - name: cpu
+    value: "0.5"
+  - name: memory
+    value: "1Gi"
+  - name: jpaDdlAuto
+    value: update
+  - name: corsAllowedOrigins
+    value: "http://localhost:3000,http://localhost:5173,https://*.vercel.app"

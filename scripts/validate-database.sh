@@ -9,7 +9,7 @@ echo "VALIDANDO INTEGRIDAD DE DATOS"
 echo "========================================"
 
 # Verificar que Docker Compose está corriendo
-if ! docker-compose ps | grep -q "Up"; then
+if ! docker compose ps | grep -q "Up"; then
   echo "Error: Docker Compose services are not running"
   exit 1
 fi
@@ -18,7 +18,7 @@ fi
 run_query() {
   local db=$1
   local query=$2
-  docker-compose exec -T postgres psql -U postgres -d "$db" -c "$query"
+  docker compose exec -T postgres psql -U postgres -d "$db" -c "$query"
 }
 
 echo ""

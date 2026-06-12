@@ -2,7 +2,7 @@
 
 **Fecha:** 2026-06-11  
 **Método:** Ejecución real contra backend desplegado en Render  
-**Base URL:** `https://api-gateway-quvd.onrender.com`  
+**Base URL:** `https://api-gateway.<region>.azurecontainerapps.io`  
 **Backend verificado:** 6 microservicios + API Gateway  
 **Clasificación final:** **CERTIFICADO CON OBSERVACIONES**
 

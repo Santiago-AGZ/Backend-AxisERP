@@ -45,7 +45,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     public JwtAuthenticationFilter(
             RestClient.Builder restClientBuilder,
             @Value("${jwt.jwks-uri}") String jwksUrl,
-            @Value("${internal.api.key:}") String internalApiKey) {
+            @Value("${internal-api-key:}") String internalApiKey) {
         this.jwksUrl = jwksUrl;
         this.internalApiKey = internalApiKey;
         this.restClient = restClientBuilder.build();

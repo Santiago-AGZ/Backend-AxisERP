@@ -1,0 +1,119 @@
+# ============================================
+# AxisERP - CD Template (Reusable per service)
+# ============================================
+parameters:
+  - name: service
+    type: string
+  - name: port
+    type: number
+  - name: ingress
+    type: string
+    default: internal
+    values:
+      - internal
+      - external
+  - name: envVars
+    type: string
+    default: ''
+
+jobs:
+  - job: Deploy_${{ replace(parameters.service, '-', '_') }}
+    displayName: 'Deploy: ${{ parameters.service }}'
+    pool:
+      vmImage: ubuntu-latest
+    variables:
+      acrServer: axiserp.azurecr.io
+      resourceGroup: axiserp-prod
+      containerEnv: AxisERP-Env
+
+    steps:
+      - task: AzureCLI@2
+        displayName: 'Deploy to Azure Container Apps'
+        inputs:
+          azureSubscription: 'axiserp-azure'
+          scriptType: bash
+          scriptLocation: inlineScript
+          inlineScript: |
+            set -e
+
+            SERVICE="${{ parameters.service }}"
+            PORT="${{ parameters.port }}"
+            INGRESS="${{ parameters.ingress }}"
+            IMAGE="$(acrServer)/$SERVICE:$(Build.BuildNumber)"
+
+            echo "Deploying $SERVICE (port=$PORT, ingress=$INGRESS)"
+            echo "Image: $IMAGE"
+
+            # Check if container app exists
+            EXISTS=$(az containerapp show \
+              --name "$SERVICE" \
+              --resource-group "$(resourceGroup)" \
+              --query name -o tsv 2>/dev/null || echo "")
+
+            if [ -z "$EXISTS" ]; then
+              echo "Creating new Container App: $SERVICE"
+              az containerapp create \
+                --name "$SERVICE" \
+                --resource-group "$(resourceGroup)" \
+                --environment "$(containerEnv)" \
+                --image "$IMAGE" \
+                --registry-server "$(acrServer)" \
+                --target-port "$PORT" \
+                --ingress "$INGRESS" \
+                --cpu 0.5 \
+                --memory 1.0Gi \
+                --min-replicas 1 \
+                --max-replicas 10 \
+                --env-vars ${{ parameters.envVars }}
+            else
+              echo "Updating existing Container App: $SERVICE"
+              az containerapp update \
+                --name "$SERVICE" \
+                --resource-group "$(resourceGroup)" \
+                --image "$IMAGE" \
+                --min-replicas 1 \
+                --max-replicas 10 \
+                --set-env-vars ${{ parameters.envVars }}
+            fi
+
+            # Wait for deployment
+            echo "Waiting for deployment..."
+            sleep 30
+
+            # Get FQDN
+            FQDN=$(az containerapp show \
+              --name "$SERVICE" \
+              --resource-group "$(resourceGroup)" \
+              --query properties.configuration.ingress.fqdn -o tsv)
+
+            echo "Service FQDN: $FQDN"
+
+            # Health check (only for external ingress)
+            if [ "$INGRESS" = "external" ]; then
+              echo "Running health check..."
+              for i in $(seq 1 10); do
+                STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "https://$FQDN/actuator/health" || echo "000")
+                if [ "$STATUS" = "200" ]; then
+                  echo "Health check PASSED (HTTP $STATUS)"
+                  break
+                fi
+                echo "Attempt $i/10: HTTP $STATUS - waiting..."
+                sleep 15
+              done
+            fi
+
+            echo "Deploy complete: $SERVICE"
+
+      - task: AzureCLI@2
+        displayName: 'Verify revision health'
+        inputs:
+          azureSubscription: 'axiserp-azure'
+          scriptType: bash
+          scriptLocation: inlineScript
+          inlineScript: |
+            echo "Revision status for ${{ parameters.service }}:"
+            az containerapp revision list \
+              --name "${{ parameters.service }}" \
+              --resource-group "$(resourceGroup)" \
+              --query "[?properties.active].{name:name, running:properties.runningState, health:properties.healthState}" \
+              --output table

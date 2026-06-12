@@ -26,9 +26,9 @@ public class SupabaseAdminAdapter implements SupabaseAuthPort {
 
     public SupabaseAdminAdapter(
             RestClient.Builder restClientBuilder,
-            @Value("${supabase.url}") String supabaseUrl,
-            @Value("${supabase.service-role-key}") String serviceRoleKey,
-            @Value("${supabase.anon-key}") String anonKey) {
+            @Value("${supabase-url}") String supabaseUrl,
+            @Value("${supabase-service-role-key}") String serviceRoleKey,
+            @Value("${supabase-anon-key}") String anonKey) {
 
         String baseUrl = supabaseUrl + "/auth/v1/admin";
 

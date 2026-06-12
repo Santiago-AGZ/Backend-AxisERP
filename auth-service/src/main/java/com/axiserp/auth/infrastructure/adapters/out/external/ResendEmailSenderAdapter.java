@@ -23,13 +23,13 @@ public class ResendEmailSenderAdapter implements EmailSenderPort {
 
     private final JavaMailSender mailSender;
 
-    @Value("${app.frontend-url:http://localhost:3000}")
+    @Value("${app-frontend-url:http://localhost:3000}")
     private String frontendUrl;
 
-    @Value("${app.email.from:onboarding@resend.dev}")
+    @Value("${app-email-from:onboarding@resend.dev}")
     private String fromEmail;
 
-    @Value("${app.email.from-name:AxisERP}")
+    @Value("${app-email-from-name:AxisERP}")
     private String fromName;
 
     @Override
