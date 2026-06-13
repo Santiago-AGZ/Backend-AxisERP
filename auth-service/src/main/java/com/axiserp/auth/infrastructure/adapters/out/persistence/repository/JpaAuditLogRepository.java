@@ -16,7 +16,7 @@ import com.axiserp.auth.infrastructure.adapters.out.persistence.entity.AuditLogE
 public interface JpaAuditLogRepository extends JpaRepository<AuditLogEntity, UUID>, JpaSpecificationExecutor<AuditLogEntity> {
 
     default Page<AuditLogEntity> findByFilters(UUID userId, AuditLogEntity.AuditAction action, String entityType, int page, int size) {
-        Specification<AuditLogEntity> spec = Specification.where(null);
+        Specification<AuditLogEntity> spec = Specification.allOf();
 
         if (userId != null) {
             spec = spec.and((root, query, cb) -> cb.equal(root.get("userId"), userId));
