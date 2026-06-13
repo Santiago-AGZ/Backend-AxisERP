@@ -17,11 +17,31 @@ env:
   ACR_SERVER: axiserp.azurecr.io
 
 jobs:
+  detect:
+    runs-on: ubuntu-latest
+    outputs:
+      services: ${{ steps.filter.outputs.changes }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            auth-service: auth-service/**
+            catalog-service: catalog-service/**
+            inventory-service: inventory-service/**
+            sales-service: sales-service/**
+            purchase-service: purchase-service/**
+            report-service: report-service/**
+            api-gateway: api-gateway/**
+
   deploy:
+    needs: detect
+    if: needs.detect.outputs.services != '[]'
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [auth-service, catalog-service, inventory-service, sales-service, purchase-service, report-service, api-gateway]
+        service: ${{ fromJson(needs.detect.outputs.services) }}
     steps:
       - uses: actions/checkout@v4
 
