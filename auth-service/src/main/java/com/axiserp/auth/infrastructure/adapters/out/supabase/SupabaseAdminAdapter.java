@@ -140,7 +140,7 @@ public class SupabaseAdminAdapter implements SupabaseAuthPort {
                 "nombre", name,
                 "createdBy", createdBy.toString()
             ),
-            "email_confirm", false
+            "email_confirm", true
         );
 
         try {
