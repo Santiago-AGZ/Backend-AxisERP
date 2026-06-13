@@ -59,6 +59,14 @@ public class CreateUserUseCaseImpl implements CreateUserUseCase {
         SupabaseUser supabaseUser = supabaseAuthPort.createUser(
                 request.getEmail(), role.getName(), request.getName(), createdBy);
 
+        // Send password reset email so the user can set their password
+        try {
+            supabaseAuthPort.sendPasswordReset(request.getEmail());
+            log.info("password_reset_email_sent email={}", request.getEmail());
+        } catch (Exception e) {
+            log.warn("failed_to_send_password_reset_email email={} error={}", request.getEmail(), e.getMessage());
+        }
+
         User user = UserFactory.createNew(
                 supabaseUser.id(), request.getName(), request.getEmail(), null, role.getId(), createdBy);
 
