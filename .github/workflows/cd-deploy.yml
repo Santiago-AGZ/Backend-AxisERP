@@ -55,16 +55,18 @@ jobs:
 
       - name: Build & Push Docker image
         run: |
+          TAG=$(echo ${{ github.sha }} | cut -c1-7)
           docker build --platform linux/amd64 \
-            -t $ACR_SERVER/${{ matrix.service }}:latest \
+            -t $ACR_SERVER/${{ matrix.service }}:$TAG \
             -f ${{ matrix.service }}/Dockerfile \
             ${{ matrix.service }}
-          docker push $ACR_SERVER/${{ matrix.service }}:latest
+          docker push $ACR_SERVER/${{ matrix.service }}:$TAG
 
       - name: Update Container App
         run: |
+          TAG=$(echo ${{ github.sha }} | cut -c1-7)
           az containerapp update \
             --name ${{ matrix.service }} \
             --resource-group axiserp-prod \
-            --image $ACR_SERVER/${{ matrix.service }}:latest \
+            --image $ACR_SERVER/${{ matrix.service }}:$TAG \
             --min-replicas 1 --max-replicas 10
