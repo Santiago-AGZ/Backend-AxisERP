@@ -52,7 +52,7 @@ public class SupabaseAdminAdapter implements SupabaseAuthPort {
         try {
             publicRestClient.post()
                     .uri("/recover")
-                    .body(Map.of("email", email, "redirect_to", "https://frontend-axis-erp.vercel.app/reset-password"))
+                    .body(Map.of("email", email, "redirect_to", "https://axis-erp.vercel.app/reset-password"))
                     .retrieve()
                     .toBodilessEntity();
         } catch (HttpStatusCodeException e) {
