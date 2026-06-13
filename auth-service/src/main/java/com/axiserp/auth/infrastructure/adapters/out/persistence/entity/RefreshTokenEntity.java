@@ -67,6 +67,7 @@ public class RefreshTokenEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Builder.Default
     private TokenStatus status = TokenStatus.ACTIVE;
 
     @Column(name = "revoked_at")
