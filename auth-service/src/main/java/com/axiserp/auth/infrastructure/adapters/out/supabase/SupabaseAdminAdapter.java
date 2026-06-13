@@ -61,6 +61,28 @@ public class SupabaseAdminAdapter implements SupabaseAuthPort {
     }
 
     @Override
+    public void resetPassword(String recoveryToken, String newPassword) {
+        log.info("Resetting password via Supabase recovery token");
+        try {
+            publicRestClient.put()
+                    .uri("/user")
+                    .header("Authorization", "Bearer " + recoveryToken)
+                    .body(Map.of("password", newPassword))
+                    .retrieve()
+                    .toBodilessEntity();
+            log.info("Password reset successful via Supabase");
+        } catch (HttpStatusCodeException e) {
+            log.error("Supabase API error resetting password: status={} body={}",
+                    e.getStatusCode(), e.getResponseBodyAsString());
+            throw new RuntimeException(
+                    "Error al restablecer contraseña en Supabase: " + e.getStatusCode(), e);
+        } catch (Exception e) {
+            log.error("Supabase API call failed during password reset", e);
+            throw new RuntimeException("Error de comunicación con Supabase al restablecer contraseña", e);
+        }
+    }
+
+    @Override
     public LoginResponse login(String email, String password) {
         log.info("Logging in via Supabase: email={}", email);
         try {
