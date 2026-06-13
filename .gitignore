@@ -41,3 +41,5 @@ generate-postman.ps1
 seed-data.ps1
 update-inter-service-urls.ps1
 deploy-cloudshell.sh
+
+auth-service/effective-pom

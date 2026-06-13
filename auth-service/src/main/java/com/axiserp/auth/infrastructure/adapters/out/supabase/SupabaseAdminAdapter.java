@@ -26,20 +26,20 @@ public class SupabaseAdminAdapter implements SupabaseAuthPort {
 
     public SupabaseAdminAdapter(
             RestClient.Builder restClientBuilder,
-            @Value("${supabase.url}") String supabaseUrl,
-            @Value("${supabase.service-role-key}") String serviceRoleKey,
-            @Value("${supabase.anon-key}") String anonKey) {
+            @Value("${supabase-url}") String supabaseUrl,
+            @Value("${supabase-service-role-key}") String serviceRoleKey,
+            @Value("${supabase-anon-key}") String anonKey) {
 
         String baseUrl = supabaseUrl + "/auth/v1/admin";
 
-        this.restClient = restClientBuilder
+        this.restClient = restClientBuilder.clone()
                 .baseUrl(baseUrl)
                 .defaultHeader("apikey", serviceRoleKey)
                 .defaultHeader("Authorization", "Bearer " + serviceRoleKey)
                 .defaultHeader("Content-Type", "application/json")
                 .build();
 
-        this.publicRestClient = restClientBuilder
+        this.publicRestClient = restClientBuilder.clone()
                 .baseUrl(supabaseUrl + "/auth/v1")
                 .defaultHeader("apikey", anonKey)
                 .defaultHeader("Content-Type", "application/json")
@@ -140,7 +140,7 @@ public class SupabaseAdminAdapter implements SupabaseAuthPort {
                 "nombre", name,
                 "createdBy", createdBy.toString()
             ),
-            "email_confirm", false
+            "email_confirm", true
         );
 
         try {
