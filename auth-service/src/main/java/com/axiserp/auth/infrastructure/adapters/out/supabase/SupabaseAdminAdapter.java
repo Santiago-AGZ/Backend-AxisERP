@@ -64,13 +64,25 @@ public class SupabaseAdminAdapter implements SupabaseAuthPort {
     public void resetPassword(String recoveryToken, String newPassword) {
         log.info("Resetting password via Supabase recovery token");
         try {
-            publicRestClient.put()
-                    .uri("/user")
-                    .header("Authorization", "Bearer " + recoveryToken)
+            JsonNode verifyResponse = publicRestClient.post()
+                    .uri("/verify")
+                    .body(Map.of("token", recoveryToken, "type", "recovery"))
+                    .retrieve()
+                    .body(JsonNode.class);
+
+            if (verifyResponse == null || verifyResponse.get("user") == null) {
+                throw new RuntimeException("Token de recuperación inválido o expirado");
+            }
+
+            String userId = verifyResponse.get("user").get("id").asText();
+
+            restClient.put()
+                    .uri("/users/{id}", userId)
                     .body(Map.of("password", newPassword))
                     .retrieve()
                     .toBodilessEntity();
-            log.info("Password reset successful via Supabase");
+
+            log.info("Password reset successful via Supabase user_id={}", userId);
         } catch (HttpStatusCodeException e) {
             log.error("Supabase API error resetting password: status={} body={}",
                     e.getStatusCode(), e.getResponseBodyAsString());
