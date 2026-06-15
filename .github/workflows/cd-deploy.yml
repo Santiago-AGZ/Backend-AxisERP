@@ -46,7 +46,7 @@ jobs:
 
       - name: Deploy Container App
         run: |
-          TAG="${{ github.event.workflow_run.run_number }}"
+          TAG="${{ github.event.workflow_run.head_sha }}"
           if [ -z "$TAG" ]; then TAG="latest"; fi
           az containerapp update \
             --name ${{ matrix.service }} \
