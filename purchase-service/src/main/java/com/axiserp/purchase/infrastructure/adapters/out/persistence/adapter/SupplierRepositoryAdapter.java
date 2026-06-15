@@ -86,7 +86,7 @@ public class SupplierRepositoryAdapter implements SupplierRepositoryPort {
     }
 
     private Supplier toDomain(SupplierEntity e) {
-        return Supplier.builder()
+        Supplier supplier = Supplier.builder()
                 .id(e.getId())
                 .codigo(e.getCodigo())
                 .name(e.getName())
@@ -95,14 +95,15 @@ public class SupplierRepositoryAdapter implements SupplierRepositoryPort {
                 .email(e.getEmail())
                 .address(e.getAddress())
                 .status(SupplierStatus.valueOf(e.getStatus().name()))
-                .version(e.getVersion())
                 .createdAt(e.getCreatedAt())
                 .updatedAt(e.getUpdatedAt())
                 .build();
+        supplier.setVersion(e.getVersion());
+        return supplier;
     }
 
     private SupplierEntity toEntity(Supplier s) {
-        return SupplierEntity.builder()
+        SupplierEntity entity = SupplierEntity.builder()
                 .id(s.getId())
                 .codigo(s.getCodigo())
                 .name(s.getName())
@@ -111,9 +112,10 @@ public class SupplierRepositoryAdapter implements SupplierRepositoryPort {
                 .email(s.getEmail())
                 .address(s.getAddress())
                 .status(SupplierEntity.SupplierStatus.valueOf(s.getStatus().name()))
-                .version(s.getVersion())
                 .createdAt(s.getCreatedAt())
                 .updatedAt(s.getUpdatedAt())
                 .build();
+        entity.setVersion(s.getVersion());
+        return entity;
     }
 }

@@ -81,7 +81,7 @@ public class CustomerRepositoryAdapter implements CustomerRepositoryPort {
     }
 
     private Customer toDomain(CustomerEntity e) {
-        return Customer.builder()
+        Customer customer = Customer.builder()
                 .id(e.getId())
                 .codigo(e.getCodigo())
                 .name(e.getName())
@@ -91,14 +91,15 @@ public class CustomerRepositoryAdapter implements CustomerRepositoryPort {
                 .phone(e.getPhone())
                 .address(e.getAddress())
                 .status(CustomerStatus.valueOf(e.getStatus().name()))
-                .version(e.getVersion())
                 .createdAt(e.getCreatedAt())
                 .updatedAt(e.getUpdatedAt())
                 .build();
+        customer.setVersion(e.getVersion());
+        return customer;
     }
 
     private CustomerEntity toEntity(Customer c) {
-        return CustomerEntity.builder()
+        CustomerEntity entity = CustomerEntity.builder()
                 .id(c.getId())
                 .codigo(c.getCodigo())
                 .name(c.getName())
@@ -110,9 +111,10 @@ public class CustomerRepositoryAdapter implements CustomerRepositoryPort {
                 .phone(c.getPhone())
                 .address(c.getAddress())
                 .status(CustomerEntity.CustomerStatus.valueOf(c.getStatus().name()))
-                .version(c.getVersion())
                 .createdAt(c.getCreatedAt())
                 .updatedAt(c.getUpdatedAt())
                 .build();
+        entity.setVersion(c.getVersion());
+        return entity;
     }
 }

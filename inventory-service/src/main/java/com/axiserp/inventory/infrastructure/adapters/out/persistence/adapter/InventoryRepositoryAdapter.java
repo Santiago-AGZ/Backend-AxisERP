@@ -23,129 +23,15 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class InventoryRepositoryAdapter implements InventoryRepositoryPort {
 
-    private final JpaInventoryRepository jpaInventoryRepository;
-    private final JpaMovementRepository jpaMovementRepository;
-
-    @Override
-    public Optional<Inventory> findByProductId(UUID productId) {
-        return jpaInventoryRepository.findByProductId(productId).map(this::toDomain);
-    }
-
-    @Override
-    public Inventory save(Inventory inventory) {
-        InventoryEntity saved = jpaInventoryRepository.save(toEntity(inventory));
-        return toDomain(saved);
-    }
-
-    @Override
-    public InventoryMovement saveMovement(InventoryMovement movement) {
-        InventoryMovementEntity saved = jpaMovementRepository.save(toMovementEntity(movement));
-        return toMovementDomain(saved);
-    }
-
-    @Override
-    public Optional<InventoryMovement> findMovementById(UUID movementId) {
-        return jpaMovementRepository.findById(movementId).map(this::toMovementDomain);
-    }
-
-    @Override
-    public List<InventoryMovement> findMovementsByProductId(UUID productId) {
-        return jpaMovementRepository.findByProductIdOrderByCreatedAtDesc(productId)
-                .stream()
-                .map(this::toMovementDomain)
-                .toList();
-    }
-
-    @Override
-    public long countMovementsByProductId(UUID productId) {
-        return jpaMovementRepository.countByProductId(productId);
-    }
-
-    @Override
-    public List<Inventory> findAll(int page, int size) {
-        return jpaInventoryRepository.findAll(PageRequest.of(page, size))
-                .stream()
-                .map(this::toDomain)
-                .toList();
-    }
-
-    @Override
-    public long countAll() {
-        return jpaInventoryRepository.count();
-    }
-
-    @Override
-    public List<Inventory> findLowStock(int page, int size) {
-        return jpaInventoryRepository.findLowStock(size, page * size)
-                .stream()
-                .map(this::toDomain)
-                .toList();
-    }
-
-    @Override
-    public long countLowStock() {
-        return jpaInventoryRepository.countLowStock();
-    }
-
-    @Override
-    public List<Inventory> findByProductIds(List<UUID> productIds, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        return jpaInventoryRepository.findByProductIds(productIds, pageable)
-                .stream()
-                .map(this::toDomain)
-                .toList();
-    }
-
-    @Override
-    public long countByProductIds(List<UUID> productIds) {
-        return jpaInventoryRepository.countByProductIds(productIds);
-    }
-
-    @Override
-    public List<Inventory> findDepleted(int page, int size) {
-        return jpaInventoryRepository.findDepleted(size, page * size)
-                .stream()
-                .map(this::toDomain)
-                .toList();
-    }
-
-    @Override
-    public long countDepleted() {
-        return jpaInventoryRepository.countDepleted();
-    }
-
-    private Inventory toDomain(InventoryEntity e) {
-        return Inventory.builder()
-                .id(e.getId())
-                .productId(e.getProductId())
-                .currentStock(e.getCurrentStock())
-                .minStock(e.getMinStock())
-                .maxStock(e.getMaxStock())
-                .reservedStock(e.getReservedStock())
-                .version(e.getVersion())
-                .createdBy(e.getCreatedBy())
-                .updatedBy(e.getUpdatedBy())
-                .lastMovementAt(e.getLastMovementAt())
-                .createdAt(e.getCreatedAt())
-                .updatedAt(e.getUpdatedAt())
-                .build();
-    }
-
     private InventoryEntity toEntity(Inventory i) {
-        return InventoryEntity.builder()
-                .id(i.getId())
-                .productId(i.getProductId())
-                .currentStock(i.getCurrentStock())
-                .minStock(i.getMinStock())
-                .maxStock(i.getMaxStock() != null && i.getMaxStock() > 0 ? i.getMaxStock() : null)
-                .reservedStock(i.getReservedStock())
-                .version(i.getVersion())
-                .createdBy(i.getCreatedBy())
+        InventoryEntity entity = InventoryEntity.builder().createdBy(i.getCreatedBy())
                 .updatedBy(i.getUpdatedBy())
                 .lastMovementAt(i.getLastMovementAt())
                 .createdAt(i.getCreatedAt())
                 .updatedAt(i.getUpdatedAt())
                 .build();
+        entity.setVersion(i.getVersion());
+        return entity;
     }
 
     private InventoryMovement toMovementDomain(InventoryMovementEntity e) {

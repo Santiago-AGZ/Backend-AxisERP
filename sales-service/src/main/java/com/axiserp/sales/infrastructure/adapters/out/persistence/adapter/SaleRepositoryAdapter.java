@@ -25,73 +25,12 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SaleRepositoryAdapter implements SaleRepositoryPort {
 
-    private final JpaSaleRepository jpaSaleRepository;
-
-    @Override
-    public Optional<Sale> findById(UUID id) {
-        return jpaSaleRepository.findById(id).map(this::toDomain);
-    }
-
-    @Override
-    public Sale save(Sale sale) {
-        SaleEntity entity = toEntity(sale);
-        SaleEntity saved = jpaSaleRepository.save(entity);
-        return toDomain(saved);
-    }
-
-    @Override
-    public boolean existsPendingByCustomerId(UUID customerId) {
-        return jpaSaleRepository.existsByCustomerIdAndStatusIn(
-                customerId,
-                List.of(SaleEntity.SaleStatus.PENDIENTE, SaleEntity.SaleStatus.CONFIRMADA));
-    }
-
-    @Override
-    public List<Sale> findByCustomerId(UUID customerId, UUID createdBy) {
-        return jpaSaleRepository.findByCustomerIdOrderByCreatedAtDesc(customerId, createdBy)
-                .stream()
-                .map(this::toDomain)
-                .toList();
-    }
-
-    @Override
-    public List<Sale> findByFilters(UUID customerId, String status, UUID productId, UUID createdBy, int page, int size) {
-        PageRequest pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "updatedAt"));
-        SaleEntity.SaleStatus statusEnum = (status != null && !status.isBlank()) ? SaleEntity.SaleStatus.valueOf(status) : null;
-        return jpaSaleRepository.findByFilters(customerId, statusEnum, productId, createdBy, pageable)
-                .stream()
-                .map(this::toDomain)
-                .toList();
-    }
-
-    @Override
-    public long countByFilters(UUID customerId, String status, UUID productId, UUID createdBy) {
-        SaleEntity.SaleStatus statusEnum = (status != null && !status.isBlank()) ? SaleEntity.SaleStatus.valueOf(status) : null;
-        return jpaSaleRepository.countByFilters(customerId, statusEnum, productId, createdBy);
-    }
-
     private Sale toDomain(SaleEntity entity) {
-        List<SaleItem> items = entity.getItems() != null
-                ? entity.getItems().stream().map(this::itemToDomain).toList()
-                : List.of();
-
-        return Sale.builder()
-                .id(entity.getId())
-                .customerId(entity.getCustomerId())
-                .saleNumber(entity.getSaleNumber())
-                .status(SaleStatus.valueOf(entity.getStatus().name()))
-                .items(items)
-                .subtotal(entity.getSubtotal())
-                .discount(entity.getDiscount())
-                .tax(entity.getTax())
-                .total(entity.getTotal())
-                .notes(entity.getNotes())
-                .createdBy(entity.getCreatedBy())
-                .updatedBy(entity.getUpdatedBy())
-                .version(entity.getVersion())
-                .createdAt(entity.getCreatedAt())
+        Sale sale = Sale.builder().createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .build();
+        sale.setVersion(entity.getVersion());
+        return sale;
     }
 
     private SaleItem itemToDomain(SaleItemEntity entity) {
@@ -120,10 +59,10 @@ public class SaleRepositoryAdapter implements SaleRepositoryPort {
                 .notes(domain.getNotes())
                 .createdBy(domain.getCreatedBy())
                 .updatedBy(domain.getUpdatedBy())
-                .version(domain.getVersion())
                 .createdAt(domain.getCreatedAt())
                 .updatedAt(domain.getUpdatedAt())
                 .build();
+        entity.setVersion(domain.getVersion());
 
         if (domain.getItems() != null) {
             List<SaleItemEntity> itemEntities = new ArrayList<>();
