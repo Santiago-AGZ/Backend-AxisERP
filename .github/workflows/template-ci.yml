@@ -47,7 +47,7 @@ jobs:
       - name: Docker Build (verification)
         run: |
           docker build --no-cache \
-            -t axiserp.azurecr.io/${{ inputs.service }}:${{ github.run_number }} \
+            -t axiserp.azurecr.io/${{ inputs.service }}:${{ github.sha }} \
             -f ${{ inputs.service }}/Dockerfile \
             ${{ inputs.service }}
 
@@ -55,6 +55,6 @@ jobs:
         if: github.ref == 'refs/heads/master'
         run: |
           echo "${{ secrets.ACR_PASSWORD }}" | docker login axiserp.azurecr.io -u ${{ secrets.ACR_USERNAME }} --password-stdin
-          docker push axiserp.azurecr.io/${{ inputs.service }}:${{ github.run_number }}
-          docker tag axiserp.azurecr.io/${{ inputs.service }}:${{ github.run_number }} axiserp.azurecr.io/${{ inputs.service }}:latest
+          docker push axiserp.azurecr.io/${{ inputs.service }}:${{ github.sha }}
+          docker tag axiserp.azurecr.io/${{ inputs.service }}:${{ github.sha }} axiserp.azurecr.io/${{ inputs.service }}:latest
           docker push axiserp.azurecr.io/${{ inputs.service }}:latest
