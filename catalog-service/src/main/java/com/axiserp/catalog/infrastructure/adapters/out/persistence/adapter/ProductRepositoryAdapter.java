@@ -38,9 +38,6 @@ public class ProductRepositoryAdapter implements ProductRepositoryPort {
     @Override
     public Product save(Product product) {
         ProductEntity entity = toEntity(product);
-        jpaProductRepository.findById(product.getId()).ifPresent(existing ->
-            entity.setVersion(existing.getVersion())
-        );
         ProductEntity saved = jpaProductRepository.save(entity);
         return toDomain(saved);
     }
@@ -76,20 +73,34 @@ public class ProductRepositoryAdapter implements ProductRepositoryPort {
     }
 
     private Product toDomain(ProductEntity entity) {
-        Product product = Product.builder().createdBy(entity.getCreatedBy())
+        return Product.builder()
+                .id(entity.getId())
+                .name(entity.getName())
+                .codigo(entity.getCodigo())
+                .description(entity.getDescription())
+                .categoryId(entity.getCategoryId())
+                .purchasePrice(entity.getPurchasePrice())
+                .salePrice(entity.getSalePrice())
+                .status(ProductStatus.valueOf(entity.getStatus().name()))
+                .createdBy(entity.getCreatedBy())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .build();
-        product.setVersion(entity.getVersion());
-        return product;
     }
 
     private ProductEntity toEntity(Product domain) {
-        ProductEntity entity = ProductEntity.builder().createdBy(domain.getCreatedBy())
+        return ProductEntity.builder()
+                .id(domain.getId())
+                .name(domain.getName())
+                .codigo(domain.getCodigo())
+                .description(domain.getDescription())
+                .categoryId(domain.getCategoryId())
+                .purchasePrice(domain.getPurchasePrice())
+                .salePrice(domain.getSalePrice())
+                .status(ProductEntity.ProductStatus.valueOf(domain.getStatus().name()))
+                .createdBy(domain.getCreatedBy())
                 .createdAt(domain.getCreatedAt())
                 .updatedAt(domain.getUpdatedAt())
                 .build();
-        entity.setVersion(domain.getVersion());
-        return entity;
     }
 }
