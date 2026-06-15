@@ -46,8 +46,10 @@ jobs:
 
       - name: Deploy Container App
         run: |
+          TAG="${{ github.event.workflow_run.run_number }}"
+          if [ -z "$TAG" ]; then TAG="latest"; fi
           az containerapp update \
             --name ${{ matrix.service }} \
             --resource-group axiserp-prod \
-            --image $ACR_SERVER/${{ matrix.service }}:${{ github.run_number }} \
+            --image $ACR_SERVER/${{ matrix.service }}:${TAG} \
             --min-replicas 1 --max-replicas 10
