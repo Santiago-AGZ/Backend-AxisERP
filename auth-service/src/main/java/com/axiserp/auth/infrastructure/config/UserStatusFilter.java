@@ -1,5 +1,6 @@
 package com.axiserp.auth.infrastructure.config;
 
+import com.axiserp.auth.application.service.JwtService;
 import com.axiserp.auth.domain.exception.UserInactiveException;
 import com.axiserp.auth.domain.factory.UserFactory;
 import com.axiserp.auth.domain.model.User;
@@ -7,6 +8,8 @@ import com.axiserp.auth.infrastructure.config.dto.JitProvisionResult;
 import com.axiserp.auth.application.service.TokenBlacklistService;
 import com.axiserp.auth.ports.output.RoleRepositoryPort;
 import com.axiserp.auth.ports.output.UserRepositoryPort;
+
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -36,6 +39,7 @@ public class UserStatusFilter extends OncePerRequestFilter {
     private final UserRepositoryPort userRepository;
     private final RoleRepositoryPort roleRepository;
     private final TokenBlacklistService tokenBlacklistService;
+    private final JwtService jwtService;
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
@@ -84,21 +88,44 @@ public class UserStatusFilter extends OncePerRequestFilter {
         }
 
         if (auth.getCredentials() instanceof Jwt jwt) {
-            String email = jwt.getClaimAsString("email");
-            String name = extractName(jwt);
-            String roleName = extractRole(jwt);
-            var role = roleRepository.findByName(roleName).orElse(null);
-            UUID roleId = role != null ? role.getId() : null;
-
-            User provisioned = UserFactory.createNew(userId, name, email, null, roleId, null);
-            provisioned.setStatus(User.UserStatus.ACTIVO);
-            User saved = userRepository.save(provisioned);
-
-            log.info("jit_provision id={} email={} role={}", saved.getId(), saved.getEmail(), roleName);
-            return new JitProvisionResult(saved, true);
+            return provisionFromJwt(userId, jwt);
         }
 
-        throw new RuntimeException("No se pudo determinar la identidad del usuario");
+        if (auth.getCredentials() instanceof String token) {
+            try {
+                Claims claims = jwtService.parseToken(token);
+                Jwt jwt = Jwt.withTokenValue(token)
+                        .header("alg", "HS256")
+                        .claim("sub", claims.getSubject())
+                        .claim("email", claims.get("email", String.class))
+                        .claim("role", claims.get("role", String.class))
+                        .build();
+                return provisionFromJwt(userId, jwt);
+            } catch (Exception e) {
+                log.warn("jit_provision_parse_failed user_id={} error={}", userId, e.getMessage());
+            }
+        }
+
+        log.warn("jit_provision_fallback user_id={}", userId);
+        User fallback = UserFactory.createNew(userId, userId.toString(), null, null, null, null);
+        fallback.setStatus(User.UserStatus.ACTIVO);
+        User saved = userRepository.save(fallback);
+        return new JitProvisionResult(saved, true);
+    }
+
+    private JitProvisionResult provisionFromJwt(UUID userId, Jwt jwt) {
+        String email = jwt.getClaimAsString("email");
+        String name = extractName(jwt);
+        String roleName = extractRole(jwt);
+        var role = roleRepository.findByName(roleName).orElse(null);
+        UUID roleId = role != null ? role.getId() : null;
+
+        User provisioned = UserFactory.createNew(userId, name, email, null, roleId, null);
+        provisioned.setStatus(User.UserStatus.ACTIVO);
+        User saved = userRepository.save(provisioned);
+
+        log.info("jit_provision id={} email={} role={}", saved.getId(), saved.getEmail(), roleName);
+        return new JitProvisionResult(saved, true);
     }
 
     private String extractName(Jwt jwt) {

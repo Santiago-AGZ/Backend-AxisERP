@@ -27,6 +27,7 @@ import com.axiserp.auth.application.dto.response.LoginResponse;
 import com.axiserp.auth.application.dto.response.TokenResponse;
 import com.axiserp.auth.application.service.RefreshTokenService;
 import com.axiserp.auth.application.service.TokenBlacklistService;
+import com.axiserp.auth.domain.exception.InvalidCredentialsException;
 import com.axiserp.auth.infrastructure.adapters.in.web.response.ApiResponse;
 import com.axiserp.auth.ports.input.RefreshTokenUseCase;
 
@@ -113,8 +114,8 @@ public class TokenController {
 
             log.info("access_token_refreshed");
             return ResponseEntity.ok(ApiResponse.ok(tokenResponse, "Token renovado exitosamente"));
-        } catch (IllegalArgumentException e) {
-            log.warn("refresh_token_validation_failed error={}", e.getMessage());
+        } catch (InvalidCredentialsException e) {
+            log.warn("refresh_token_invalid error={}", e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(ApiResponse.error("INVALID_TOKEN", "El refresh token es invalido o ha expirado"));
         } catch (Exception e) {
