@@ -8,6 +8,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.axiserp.sales.application.dto.SaleResponseMapper;
 import com.axiserp.sales.application.dto.response.SaleResponse;
 import com.axiserp.sales.domain.exception.CustomerNotFoundException;
 import com.axiserp.sales.ports.input.GetCustomerHistoryUseCase;
@@ -32,7 +33,7 @@ public class GetCustomerHistoryUseCaseImpl implements GetCustomerHistoryUseCase 
         UUID createdBy = resolveCreatedByFilter();
         return saleRepositoryPort.findByCustomerId(customerId, createdBy)
                 .stream()
-                .map(GetSaleUseCaseImpl::toResponse)
+                .map(SaleResponseMapper::toResponse)
                 .toList();
     }
 

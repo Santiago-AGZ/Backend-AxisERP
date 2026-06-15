@@ -72,8 +72,8 @@ class VoidSaleUseCaseImplTest {
     }
 
     @Test
-    @DisplayName("Should void PAGADA sale and restore stock")
-    void voidSale_pagada_restoresStock() {
+    @DisplayName("Should throw SaleNotModifiableException for PAGADA")
+    void voidSale_pagada_throws() {
         Sale sale = Sale.builder()
                 .id(saleId)
                 .status(SaleStatus.PAGADA)
@@ -81,12 +81,7 @@ class VoidSaleUseCaseImplTest {
                 .build();
 
         when(saleRepositoryPort.findById(saleId)).thenReturn(Optional.of(sale));
-        when(saleRepositoryPort.save(any())).thenAnswer(inv -> inv.getArgument(0));
-
-        var response = voidSaleUseCase.voidSale(saleId);
-
-        assertEquals(SaleStatus.ANULADA.name(), response.getStatus());
-        verify(inventoryServicePort).registerReturn(any(), anyInt(), anyString(), any(), any());
+        assertThrows(SaleNotModifiableException.class, () -> voidSaleUseCase.voidSale(saleId));
     }
 
     @Test

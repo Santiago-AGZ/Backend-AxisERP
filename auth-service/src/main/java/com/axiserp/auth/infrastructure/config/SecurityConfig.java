@@ -68,7 +68,6 @@ public class SecurityConfig {
                                 "/actuator/info",
                                 "/api/v1/auth/login",
                                 "/api/v1/auth/refresh",
-                                "/api/v1/auth/register",
                                 "/api/v1/auth/password-reset/**",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**"
@@ -78,6 +77,7 @@ public class SecurityConfig {
                         .jwt(jwt -> jwt
                                 .jwtAuthenticationConverter(jwtAuthenticationConverter()))
                         .authenticationEntryPoint(this::handleUnauthorized))
+                .addFilterBefore(jwtAuthenticationFilter, BearerTokenAuthenticationFilter.class)
                 .addFilterBefore(internalApiKeyFilter, BearerTokenAuthenticationFilter.class)
                 .addFilterBefore(userStatusFilter, BearerTokenAuthenticationFilter.class)
                 .addFilterBefore(firstLoginFilter, BearerTokenAuthenticationFilter.class)
@@ -113,6 +113,14 @@ public class SecurityConfig {
             Map<String, Object> appMetadata = jwt.getClaimAsMap("app_metadata");
             if (appMetadata != null && appMetadata.containsKey("role")) {
                 return (String) appMetadata.get("role");
+            }
+        } catch (Exception e) {
+            // continue to user_metadata
+        }
+        try {
+            Map<String, Object> userMetadata = jwt.getClaimAsMap("user_metadata");
+            if (userMetadata != null && userMetadata.containsKey("role")) {
+                return (String) userMetadata.get("role");
             }
         } catch (Exception e) {
             // default to USER

@@ -7,6 +7,8 @@ import java.security.PublicKey;
 import java.security.spec.ECPoint;
 import java.security.spec.ECPublicKeySpec;
 import java.util.Base64;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -41,6 +43,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private volatile PublicKey cachedPublicKey;
     private volatile String cachedKeyId;
+    private volatile Instant cachedKeyTimestamp;
 
     public JwtAuthenticationFilter(
             RestClient.Builder restClientBuilder,
@@ -98,7 +101,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 role = String.valueOf(appMeta.get("role"));
             }
             if (role == null || role.isBlank()) {
+                var userMeta = claims.get("user_metadata", Map.class);
+                if (userMeta != null && userMeta.containsKey("role")) {
+                    role = String.valueOf(userMeta.get("role"));
+                }
+            }
+            if (role == null || role.isBlank()) {
                 role = claims.get("role", String.class);
+                if ("authenticated".equals(role) || "anon".equals(role)) {
+                    role = null;
+                }
             }
             if (role == null || role.isBlank()) {
                 role = "VENDEDOR";
@@ -120,7 +132,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private PublicKey getPublicKey(String kid, String alg) {
-        if (kid != null && kid.equals(cachedKeyId) && cachedPublicKey != null) {
+        if (kid != null && kid.equals(cachedKeyId) && cachedPublicKey != null
+                && cachedKeyTimestamp != null
+                && Duration.between(cachedKeyTimestamp, Instant.now()).toMinutes() < 15) {
             return cachedPublicKey;
         }
         try {
@@ -133,6 +147,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     PublicKey pk = buildEcPublicKey(key);
                     cachedPublicKey = pk;
                     cachedKeyId = (String) key.get("kid");
+                    cachedKeyTimestamp = Instant.now();
                     return pk;
                 }
             }

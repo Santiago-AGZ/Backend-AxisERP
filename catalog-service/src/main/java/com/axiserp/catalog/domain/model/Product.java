@@ -25,7 +25,9 @@ public class Product {
     private UUID categoryId;
     private BigDecimal purchasePrice;
     private BigDecimal salePrice;
+    private BigDecimal profitMargin;
     private ProductStatus status;
+    private Long version;
     private UUID createdBy;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

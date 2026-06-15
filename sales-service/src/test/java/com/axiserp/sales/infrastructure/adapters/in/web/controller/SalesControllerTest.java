@@ -45,6 +45,7 @@ import com.axiserp.sales.ports.input.PaySaleUseCase;
 import com.axiserp.sales.ports.input.ReactivateCustomerUseCase;
 import com.axiserp.sales.ports.input.UpdateCustomerUseCase;
 import com.axiserp.sales.ports.input.VoidSaleUseCase;
+import com.axiserp.sales.ports.input.ListAuditLogsUseCase;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @ExtendWith(MockitoExtension.class)
@@ -59,6 +60,7 @@ class SaleControllerTest {
     @Mock private ConfirmSaleUseCase confirmSaleUseCase;
     @Mock private PaySaleUseCase paySaleUseCase;
     @Mock private VoidSaleUseCase voidSaleUseCase;
+    @Mock private ListAuditLogsUseCase listAuditLogsUseCase;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private UUID saleId;
@@ -67,7 +69,7 @@ class SaleControllerTest {
     void setUp() {
         mockMvc = MockMvcBuilders
                 .standaloneSetup(new SaleController(createSaleUseCase, getSaleUseCase,
-                        listSalesUseCase, confirmSaleUseCase, paySaleUseCase, voidSaleUseCase))
+                        listSalesUseCase, confirmSaleUseCase, paySaleUseCase, voidSaleUseCase, listAuditLogsUseCase))
                 .build();
 
         saleId = UUID.randomUUID();
@@ -87,7 +89,7 @@ class SaleControllerTest {
     @Test
     @DisplayName("GET /api/v1/sales - should return 200")
     void listSales_success() throws Exception {
-        when(listSalesUseCase.list(any(), any(), any(), anyInt(), anyInt()))
+        when(listSalesUseCase.list(any(), any(), any(), any(), anyInt(), anyInt()))
                 .thenReturn(PaginatedResponse.<SaleResponse>builder()
                         .content(List.of())
                         .totalRecords(0)

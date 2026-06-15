@@ -122,4 +122,57 @@ class CreateProductUseCaseImplTest {
 
         assertThrows(IllegalArgumentException.class, () -> createProductUseCase.create(request, adminId));
     }
+
+    @Test
+    @DisplayName("[R4] Should throw DuplicateCodigoException when codigo belongs to deactivated product")
+    void create_duplicateCodigo_deactivatedProduct() {
+        CreateProductRequest request = new CreateProductRequest(
+                "Test Product", "DELETED-CODE", null, categoryId,
+                new BigDecimal("10.00"), new BigDecimal("20.00"));
+
+        when(productRepositoryPort.existsByCodigo("DELETED-CODE")).thenReturn(true);
+
+        assertThrows(DuplicateCodigoException.class, () -> createProductUseCase.create(request, adminId));
+        verify(productRepositoryPort, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("[R7] Should throw IllegalStateException when category is inactive")
+    void create_inactiveCategory_throws() {
+        CreateProductRequest request = new CreateProductRequest(
+                "Test Product", "TEST004", null, categoryId,
+                new BigDecimal("10.00"), new BigDecimal("20.00"));
+
+        Category inactiveCategory = Category.builder()
+                .id(categoryId)
+                .name("Inactive Category")
+                .status(Category.CategoryStatus.INACTIVA)
+                .build();
+
+        when(productRepositoryPort.existsByCodigo("TEST004")).thenReturn(false);
+        when(categoryRepositoryPort.findById(categoryId)).thenReturn(Optional.of(inactiveCategory));
+
+        assertThrows(IllegalStateException.class, () -> createProductUseCase.create(request, adminId));
+        verify(productRepositoryPort, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("[R7] Should throw IllegalStateException when category is deleted")
+    void create_deletedCategory_throws() {
+        CreateProductRequest request = new CreateProductRequest(
+                "Test Product", "TEST005", null, categoryId,
+                new BigDecimal("10.00"), new BigDecimal("20.00"));
+
+        Category deletedCategory = Category.builder()
+                .id(categoryId)
+                .name("Deleted Category")
+                .status(Category.CategoryStatus.ELIMINADA)
+                .build();
+
+        when(productRepositoryPort.existsByCodigo("TEST005")).thenReturn(false);
+        when(categoryRepositoryPort.findById(categoryId)).thenReturn(Optional.of(deletedCategory));
+
+        assertThrows(IllegalStateException.class, () -> createProductUseCase.create(request, adminId));
+        verify(productRepositoryPort, never()).save(any());
+    }
 }

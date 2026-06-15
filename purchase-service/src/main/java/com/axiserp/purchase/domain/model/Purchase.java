@@ -27,6 +27,7 @@ public class Purchase {
     private BigDecimal tax;
     private BigDecimal total;
     private String notes;
+    private Long version;
     private UUID createdBy;
     private UUID updatedBy;
     private LocalDateTime createdAt;

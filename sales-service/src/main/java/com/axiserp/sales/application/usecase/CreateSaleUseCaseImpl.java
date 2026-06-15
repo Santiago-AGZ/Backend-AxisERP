@@ -13,9 +13,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.axiserp.sales.application.dto.SaleResponseMapper;
 import com.axiserp.sales.application.dto.request.CreateSaleRequest;
 import com.axiserp.sales.application.dto.request.SaleItemRequest;
-import com.axiserp.sales.application.dto.response.SaleItemResponse;
 import com.axiserp.sales.application.dto.response.SaleResponse;
 import com.axiserp.sales.application.service.AuditService;
 import com.axiserp.sales.domain.exception.CustomerInactiveException;
@@ -117,13 +117,19 @@ public class CreateSaleUseCaseImpl implements CreateSaleUseCase {
             throw new IllegalArgumentException("El descuento no puede superar el 100%");
         }
 
-        // RN-014: Discounts >30% require ADMIN role
-        BigDecimal maxAutoDiscount = subtotal.multiply(new BigDecimal("0.30")).setScale(2, RoundingMode.HALF_UP);
-        if (saleDiscount.compareTo(maxAutoDiscount) > 0 && !isAdmin) {
-            log.warn("discount_not_authorized discount={} maxAllowed={} userId={}", saleDiscount, maxAutoDiscount, createdBy);
+        // RN-014: Max discount is 30% of subtotal (hard limit for ALL roles)
+        if (saleDiscount.compareTo(new BigDecimal("30")) > 0) {
+            log.warn("discount_exceeds_max discount={} userId={}", saleDiscount, createdBy);
             throw new SaleAccessDeniedException(
-                    "Descuentos superiores al 30% requieren autorizacion del rol ADMIN. "
-                    + "Descuento solicitado: " + saleDiscount + "%. Maximo automatico: " + maxAutoDiscount);
+                    "El descuento maximo permitido es del 30% del subtotal de la venta. "
+                    + "Descuento solicitado: " + saleDiscount + "%.");
+        }
+
+        // RN-013: Any discount > 0% requires ADMIN role authorization
+        if (saleDiscount.compareTo(BigDecimal.ZERO) > 0 && !isAdmin) {
+            log.warn("discount_not_authorized discount={} userId={}", saleDiscount, createdBy);
+            throw new SaleAccessDeniedException(
+                    "Cualquier descuento requiere autorizacion del rol ADMIN.");
         }
 
         BigDecimal discountAmount = subtotal.multiply(saleDiscount)
@@ -167,37 +173,6 @@ public class CreateSaleUseCaseImpl implements CreateSaleUseCase {
                 String.format("saleNumber=%s customerId=%s total=%s", saved.getSaleNumber(), saved.getCustomerId(), saved.getTotal()));
         log.info("sale_created id={} saleNumber={} customerId={} total={}", saved.getId(), saved.getSaleNumber(), saved.getCustomerId(), saved.getTotal());
 
-        return toResponse(saved);
-    }
-
-    private SaleResponse toResponse(Sale sale) {
-        List<SaleItemResponse> itemResponses = sale.getItems() != null
-                ? sale.getItems().stream().map(item -> SaleItemResponse.builder()
-                        .id(item.getId())
-                        .productId(item.getProductId())
-                        .productName(item.getProductName())
-                        .quantity(item.getQuantity())
-                        .unitPrice(item.getUnitPrice())
-                        .discount(item.getDiscount())
-                        .subtotal(item.getSubtotal())
-                        .build()).toList()
-                : List.of();
-
-        return SaleResponse.builder()
-                .id(sale.getId())
-                .customerId(sale.getCustomerId())
-                .saleNumber(sale.getSaleNumber())
-                .status(sale.getStatus().name())
-                .items(itemResponses)
-                .subtotal(sale.getSubtotal())
-                .discount(sale.getDiscount())
-                .tax(sale.getTax())
-                .total(sale.getTotal())
-                .notes(sale.getNotes())
-                .createdBy(sale.getCreatedBy())
-                .version(sale.getVersion())
-                .createdAt(sale.getCreatedAt())
-                .updatedAt(sale.getUpdatedAt())
-                .build();
+        return SaleResponseMapper.toResponse(saved);
     }
 }

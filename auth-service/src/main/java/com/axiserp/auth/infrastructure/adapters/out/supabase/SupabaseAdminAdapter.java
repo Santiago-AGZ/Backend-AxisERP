@@ -23,13 +23,16 @@ public class SupabaseAdminAdapter implements SupabaseAuthPort {
 
     private final RestClient restClient;
     private final RestClient publicRestClient;
+    private final String frontendUrl;
 
     public SupabaseAdminAdapter(
             RestClient.Builder restClientBuilder,
             @Value("${supabase-url}") String supabaseUrl,
             @Value("${supabase-service-role-key}") String serviceRoleKey,
-            @Value("${supabase-anon-key}") String anonKey) {
+            @Value("${supabase-anon-key}") String anonKey,
+            @Value("${app-frontend-url}") String frontendUrl) {
 
+        this.frontendUrl = frontendUrl;
         String baseUrl = supabaseUrl + "/auth/v1/admin";
 
         this.restClient = restClientBuilder.clone()
@@ -52,7 +55,7 @@ public class SupabaseAdminAdapter implements SupabaseAuthPort {
         try {
             publicRestClient.post()
                     .uri("/recover")
-                    .body(Map.of("email", email, "redirect_to", "https://axis-erp.vercel.app/reset-password"))
+                    .body(Map.of("email", email, "redirect_to", frontendUrl + "/reset-password"))
                     .retrieve()
                     .toBodilessEntity();
         } catch (HttpStatusCodeException e) {
@@ -62,34 +65,66 @@ public class SupabaseAdminAdapter implements SupabaseAuthPort {
 
     @Override
     public void resetPassword(String recoveryToken, String newPassword) {
-        log.info("Resetting password via Supabase recovery token");
+        log.info("Resetting password via Supabase");
+
+        if (recoveryToken.contains(".")) {
+            resetWithJwt(recoveryToken, newPassword);
+        } else {
+            resetWithTokenHash(recoveryToken, newPassword);
+        }
+    }
+
+    private void resetWithJwt(String jwt, String newPassword) {
+        log.info("Using JWT-based password reset");
         try {
-            JsonNode verifyResponse = publicRestClient.post()
-                    .uri("/verify")
-                    .body(Map.of("token", recoveryToken, "type", "recovery"))
-                    .retrieve()
-                    .body(JsonNode.class);
-
-            if (verifyResponse == null || verifyResponse.get("user") == null) {
-                throw new RuntimeException("Token de recuperación inválido o expirado");
-            }
-
-            String userId = verifyResponse.get("user").get("id").asText();
-
-            restClient.put()
-                    .uri("/users/{id}", userId)
+            publicRestClient.put()
+                    .uri("/user")
+                    .header("Authorization", "Bearer " + jwt)
                     .body(Map.of("password", newPassword))
                     .retrieve()
                     .toBodilessEntity();
-
-            log.info("Password reset successful via Supabase user_id={}", userId);
+            log.info("Password reset successful via JWT");
         } catch (HttpStatusCodeException e) {
-            log.error("Supabase API error resetting password: status={} body={}",
+            log.error("Supabase API error resetting password with JWT: status={} body={}",
                     e.getStatusCode(), e.getResponseBodyAsString());
             throw new RuntimeException(
                     "Error al restablecer contraseña en Supabase: " + e.getStatusCode(), e);
         } catch (Exception e) {
-            log.error("Supabase API call failed during password reset", e);
+            log.error("Supabase API call failed during JWT password reset", e);
+            throw new RuntimeException("Error de comunicación con Supabase al restablecer contraseña", e);
+        }
+    }
+
+    private void resetWithTokenHash(String tokenHash, String newPassword) {
+        log.info("Using PKCE token_hash-based password reset");
+        try {
+            JsonNode verifyResponse = publicRestClient.post()
+                    .uri("/verify")
+                    .body(Map.of("token_hash", tokenHash, "type", "recovery"))
+                    .retrieve()
+                    .body(JsonNode.class);
+
+            if (verifyResponse == null || verifyResponse.get("access_token") == null) {
+                throw new RuntimeException("Token de recuperación inválido o expirado");
+            }
+
+            String accessToken = verifyResponse.get("access_token").asText();
+
+            publicRestClient.put()
+                    .uri("/user")
+                    .header("Authorization", "Bearer " + accessToken)
+                    .body(Map.of("password", newPassword))
+                    .retrieve()
+                    .toBodilessEntity();
+
+            log.info("Password reset successful via PKCE token_hash");
+        } catch (HttpStatusCodeException e) {
+            log.error("Supabase API error resetting password with token_hash: status={} body={}",
+                    e.getStatusCode(), e.getResponseBodyAsString());
+            throw new RuntimeException(
+                    "Error al restablecer contraseña en Supabase: " + e.getStatusCode(), e);
+        } catch (Exception e) {
+            log.error("Supabase API call failed during token_hash password reset", e);
             throw new RuntimeException("Error de comunicación con Supabase al restablecer contraseña", e);
         }
     }

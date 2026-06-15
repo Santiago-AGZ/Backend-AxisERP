@@ -78,7 +78,7 @@ class DeactivateProductUseCaseImplTest {
                 .categoryId(categoryId)
                 .purchasePrice(new BigDecimal("10.00"))
                 .salePrice(new BigDecimal("20.00"))
-                .status(Product.ProductStatus.ELIMINADO)
+                .status(Product.ProductStatus.INACTIVO)
                 .createdAt(existing.getCreatedAt())
                 .updatedAt(LocalDateTime.now())
                 .build();
@@ -91,8 +91,8 @@ class DeactivateProductUseCaseImplTest {
         ProductResponse response = deactivateProductUseCase.deactivate(productId, userId);
 
         assertNotNull(response);
-        assertEquals("ELIMINADO", response.getStatus());
-        verify(productRepositoryPort).save(argThat(p -> p.getStatus() == Product.ProductStatus.ELIMINADO));
+        assertEquals("INACTIVO", response.getStatus());
+        verify(productRepositoryPort).save(argThat(p -> p.getStatus() == Product.ProductStatus.INACTIVO));
     }
 
     @Test

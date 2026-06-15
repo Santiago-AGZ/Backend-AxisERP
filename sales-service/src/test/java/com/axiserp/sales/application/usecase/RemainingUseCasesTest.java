@@ -78,14 +78,14 @@ class ListSalesUseCaseImplTest {
     @Test
     @DisplayName("Should list sales with filters")
     void list_withFilters_success() {
-        when(saleRepositoryPort.findByFilters(any(), any(), any(), any(), anyInt(), anyInt()))
+        when(saleRepositoryPort.findByFilters(any(), any(), any(), any(), any(), anyInt(), anyInt()))
                 .thenReturn(List.of(
                         Sale.builder().status(SaleStatus.BORRADOR).items(List.of()).build(),
                         Sale.builder().status(SaleStatus.CONFIRMADA).items(List.of()).build()));
-        when(saleRepositoryPort.countByFilters(any(), any(), any(), any()))
+        when(saleRepositoryPort.countByFilters(any(), any(), any(), any(), any()))
                 .thenReturn(2L);
 
-        var response = listSalesUseCase.list(null, null, null, 0, 10);
+        var response = listSalesUseCase.list(null, null, null, null, 0, 10);
         assertEquals(2, response.getContent().size());
         assertEquals(2, response.getTotalRecords());
     }
@@ -93,12 +93,12 @@ class ListSalesUseCaseImplTest {
     @Test
     @DisplayName("Should return empty list when no sales")
     void list_noResults() {
-        when(saleRepositoryPort.findByFilters(any(), any(), any(), any(), anyInt(), anyInt()))
+        when(saleRepositoryPort.findByFilters(any(), any(), any(), any(), any(), anyInt(), anyInt()))
                 .thenReturn(List.of());
-        when(saleRepositoryPort.countByFilters(any(), any(), any(), any()))
+        when(saleRepositoryPort.countByFilters(any(), any(), any(), any(), any()))
                 .thenReturn(0L);
 
-        var response = listSalesUseCase.list(null, null, null, 0, 10);
+        var response = listSalesUseCase.list(null, null, null, null, 0, 10);
         assertTrue(response.getContent().isEmpty());
         assertEquals(0, response.getTotalRecords());
     }

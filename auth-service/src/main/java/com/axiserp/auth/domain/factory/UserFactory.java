@@ -7,6 +7,7 @@ import java.util.UUID;
 import com.axiserp.auth.domain.model.User;
 import com.axiserp.auth.domain.model.User.UserStatus;
 
+@Deprecated
 public class UserFactory {
 
     private UserFactory() {
@@ -98,7 +99,7 @@ public class UserFactory {
                 .lastLoginAt(existing.getLastLoginAt())
                 .createdAt(existing.getCreatedAt())
                 .updatedAt(LocalDateTime.now(ZoneOffset.UTC))
-                .deletedAt(LocalDateTime.now(ZoneOffset.UTC))
+                .deletedAt(existing.getDeletedAt())
                 .build();
     }
 

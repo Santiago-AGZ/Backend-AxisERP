@@ -1,0 +1,1095 @@
+DB AUDIT - 2026-06-14 04:35:51
+
+======================================== DB: auth ========================================
+
+--- 1. TABLES ---
+audit_log|public
+password_history|public
+password_reset_tokens|public
+profiles|public
+refresh_tokens|public
+roles|public
+token_blacklist|public
+
+--- 2. FULL SCHEMA ---
+audit_log|id|uuid|uuid|NO|
+audit_log|timestamp|timestamp with time zone|timestamptz|NO|
+audit_log|user_id|uuid|uuid|YES|
+audit_log|user_name|character varying|varchar|YES|255
+audit_log|action|character varying|varchar|NO|30
+audit_log|entity_type|character varying|varchar|NO|100
+audit_log|entity_id|uuid|uuid|YES|
+audit_log|detail|text|text|YES|
+audit_log|ip_address|character varying|varchar|YES|45
+audit_log|user_agent|text|text|YES|
+password_history|id|uuid|uuid|NO|
+password_history|created_at|timestamp without time zone|timestamp|NO|
+password_history|password_hash|character varying|varchar|NO|255
+password_history|user_id|uuid|uuid|NO|
+password_reset_tokens|id|uuid|uuid|NO|
+password_reset_tokens|created_at|timestamp without time zone|timestamp|NO|
+password_reset_tokens|expires_at|timestamp without time zone|timestamp|NO|
+password_reset_tokens|ip_address|character varying|varchar|YES|255
+password_reset_tokens|token|character varying|varchar|NO|255
+password_reset_tokens|used|boolean|bool|NO|
+password_reset_tokens|used_at|timestamp without time zone|timestamp|YES|
+password_reset_tokens|user_id|uuid|uuid|NO|
+profiles|id|uuid|uuid|NO|
+profiles|name|character varying|varchar|NO|255
+profiles|email|USER-DEFINED|citext|NO|
+profiles|role_id|uuid|uuid|NO|
+profiles|status|character varying|varchar|NO|20
+profiles|created_by|uuid|uuid|YES|
+profiles|last_login_at|timestamp with time zone|timestamptz|YES|
+profiles|created_at|timestamp with time zone|timestamptz|NO|
+profiles|updated_at|timestamp with time zone|timestamptz|NO|
+profiles|deleted_at|timestamp without time zone|timestamp|YES|
+profiles|locked_until|timestamp without time zone|timestamp|YES|
+profiles|password_hash|character varying|varchar|YES|255
+profiles|updated_by|uuid|uuid|YES|
+profiles|failed_login_attempts|integer|int4|NO|
+refresh_tokens|id|uuid|uuid|NO|
+refresh_tokens|created_at|timestamp without time zone|timestamp|NO|
+refresh_tokens|expires_at|timestamp without time zone|timestamp|NO|
+refresh_tokens|ip_address|character varying|varchar|YES|45
+refresh_tokens|revoked_at|timestamp without time zone|timestamp|YES|
+refresh_tokens|status|character varying|varchar|NO|255
+refresh_tokens|token|character varying|varchar|NO|255
+refresh_tokens|user_agent|text|text|YES|
+refresh_tokens|user_id|uuid|uuid|NO|
+roles|id|uuid|uuid|NO|
+roles|description|character varying|varchar|NO|255
+roles|created_at|timestamp with time zone|timestamptz|NO|
+roles|updated_at|timestamp with time zone|timestamptz|NO|
+roles|deleted_at|timestamp with time zone|timestamptz|YES|
+roles|name|character varying|varchar|NO|100
+roles|created_by|uuid|uuid|YES|
+token_blacklist|id|uuid|uuid|NO|
+token_blacklist|blacklisted_at|timestamp without time zone|timestamp|NO|
+token_blacklist|expires_at|timestamp without time zone|timestamp|NO|
+token_blacklist|reason|character varying|varchar|NO|100
+token_blacklist|token|character varying|varchar|NO|512
+token_blacklist|token_type|character varying|varchar|NO|20
+token_blacklist|user_id|uuid|uuid|YES|
+token_blacklist|created_at|timestamp without time zone|timestamp|NO|
+token_blacklist|revoked_at|timestamp without time zone|timestamp|NO|
+token_blacklist|token_jti|character varying|varchar|NO|255
+
+--- 3. CONSTRAINTS ---
+audit_log|CHECK|audit_log_entity_type_not_null||audit_log|entity_type
+audit_log|CHECK|audit_log_timestamp_not_null||audit_log|timestamp
+audit_log|CHECK|audit_log_id_not_null||audit_log|id
+audit_log|CHECK|audit_log_action_not_null||audit_log|action
+audit_log|FOREIGN KEY|audit_log_user_id_fkey|user_id|profiles|id
+audit_log|PRIMARY KEY|audit_log_pkey|id|audit_log|id
+password_history|CHECK|password_history_user_id_not_null||password_history|user_id
+password_history|CHECK|password_history_id_not_null||password_history|id
+password_history|CHECK|password_history_created_at_not_null||password_history|created_at
+password_history|CHECK|password_history_password_hash_not_null||password_history|password_hash
+password_history|PRIMARY KEY|password_history_pkey|id|password_history|id
+password_reset_tokens|CHECK|password_reset_tokens_created_at_not_null||password_reset_tokens|created_at
+password_reset_tokens|CHECK|password_reset_tokens_id_not_null||password_reset_tokens|id
+password_reset_tokens|CHECK|password_reset_tokens_user_id_not_null||password_reset_tokens|user_id
+password_reset_tokens|CHECK|password_reset_tokens_used_not_null||password_reset_tokens|used
+password_reset_tokens|CHECK|password_reset_tokens_token_not_null||password_reset_tokens|token
+password_reset_tokens|CHECK|password_reset_tokens_expires_at_not_null||password_reset_tokens|expires_at
+password_reset_tokens|PRIMARY KEY|password_reset_tokens_pkey|id|password_reset_tokens|id
+password_reset_tokens|UNIQUE|uk71lqwbwtklmljk3qlsugr1mig|token|password_reset_tokens|token
+profiles|CHECK|profiles_role_id_not_null||profiles|role_id
+profiles|CHECK|profiles_updated_at_not_null||profiles|updated_at
+profiles|CHECK|profiles_failed_login_attempts_not_null||profiles|failed_login_attempts
+profiles|CHECK|profiles_status_not_null||profiles|status
+profiles|CHECK|profiles_email_not_null||profiles|email
+profiles|CHECK|profiles_created_at_not_null||profiles|created_at
+profiles|CHECK|profiles_name_not_null||profiles|name
+profiles|CHECK|profiles_id_not_null||profiles|id
+profiles|FOREIGN KEY|profiles_role_id_fkey|role_id|roles|id
+profiles|FOREIGN KEY|profiles_created_by_fkey|created_by|profiles|id
+profiles|PRIMARY KEY|profiles_pkey|id|profiles|id
+profiles|UNIQUE|profiles_email_key|email|profiles|email
+refresh_tokens|CHECK|refresh_tokens_status_check||refresh_tokens|status
+refresh_tokens|CHECK|refresh_tokens_status_not_null||refresh_tokens|status
+refresh_tokens|CHECK|refresh_tokens_token_not_null||refresh_tokens|token
+refresh_tokens|CHECK|refresh_tokens_id_not_null||refresh_tokens|id
+refresh_tokens|CHECK|refresh_tokens_created_at_not_null||refresh_tokens|created_at
+refresh_tokens|CHECK|refresh_tokens_expires_at_not_null||refresh_tokens|expires_at
+refresh_tokens|CHECK|refresh_tokens_user_id_not_null||refresh_tokens|user_id
+refresh_tokens|PRIMARY KEY|refresh_tokens_pkey|id|refresh_tokens|id
+refresh_tokens|UNIQUE|idx_token|token|refresh_tokens|token
+refresh_tokens|UNIQUE|ukghpmfn23vmxfu3spu3lfg4r2d|token|refresh_tokens|token
+roles|CHECK|roles_name_not_null||roles|name
+roles|CHECK|roles_updated_at_not_null||roles|updated_at
+roles|CHECK|roles_created_at_not_null||roles|created_at
+roles|CHECK|chk_roles_allowed_name||roles|deleted_at
+roles|CHECK|chk_roles_allowed_name||roles|name
+roles|CHECK|roles_id_not_null||roles|id
+roles|CHECK|roles_description_not_null||roles|description
+roles|PRIMARY KEY|roles_pkey|id|roles|id
+token_blacklist|CHECK|token_blacklist_token_type_not_null||token_blacklist|token_type
+token_blacklist|CHECK|token_blacklist_revoked_at_not_null||token_blacklist|revoked_at
+token_blacklist|CHECK|token_blacklist_token_jti_not_null||token_blacklist|token_jti
+token_blacklist|CHECK|token_blacklist_created_at_not_null||token_blacklist|created_at
+token_blacklist|CHECK|token_blacklist_id_not_null||token_blacklist|id
+token_blacklist|CHECK|token_blacklist_blacklisted_at_not_null||token_blacklist|blacklisted_at
+token_blacklist|CHECK|token_blacklist_expires_at_not_null||token_blacklist|expires_at
+token_blacklist|CHECK|token_blacklist_reason_not_null||token_blacklist|reason
+token_blacklist|CHECK|token_blacklist_token_not_null||token_blacklist|token
+token_blacklist|PRIMARY KEY|token_blacklist_pkey|id|token_blacklist|id
+token_blacklist|UNIQUE|ukbff28eugoihk2swcdiybdej20|token|token_blacklist|token
+token_blacklist|UNIQUE|idx_token_jti|token_jti|token_blacklist|token_jti
+
+--- 4. INDEXES ---
+audit_log|idx_audit_log_user_id|CREATE INDEX idx_audit_log_user_id ON public.audit_log USING btree (user_id)
+audit_log|idx_audit_log_entity_type|CREATE INDEX idx_audit_log_entity_type ON public.audit_log USING btree (entity_type)
+audit_log|idx_audit_log_user_action|CREATE INDEX idx_audit_log_user_action ON public.audit_log USING btree (user_id, action, "timestamp" DESC)
+audit_log|audit_log_pkey|CREATE UNIQUE INDEX audit_log_pkey ON public.audit_log USING btree (id)
+audit_log|idx_audit_log_action|CREATE INDEX idx_audit_log_action ON public.audit_log USING btree (action)
+audit_log|idx_audit_log_timestamp|CREATE INDEX idx_audit_log_timestamp ON public.audit_log USING btree ("timestamp" DESC)
+password_history|password_history_pkey|CREATE UNIQUE INDEX password_history_pkey ON public.password_history USING btree (id)
+password_reset_tokens|uk71lqwbwtklmljk3qlsugr1mig|CREATE UNIQUE INDEX uk71lqwbwtklmljk3qlsugr1mig ON public.password_reset_tokens USING btree (token)
+password_reset_tokens|password_reset_tokens_pkey|CREATE UNIQUE INDEX password_reset_tokens_pkey ON public.password_reset_tokens USING btree (id)
+profiles|idx_profiles_status|CREATE INDEX idx_profiles_status ON public.profiles USING btree (status)
+profiles|idx_profiles_email|CREATE INDEX idx_profiles_email ON public.profiles USING btree (email)
+profiles|profiles_email_key|CREATE UNIQUE INDEX profiles_email_key ON public.profiles USING btree (email)
+profiles|idx_profiles_last_login|CREATE INDEX idx_profiles_last_login ON public.profiles USING btree (last_login_at DESC) WHERE (last_login_at IS NOT NULL)
+profiles|idx_profiles_role|CREATE INDEX idx_profiles_role ON public.profiles USING btree (role_id)
+profiles|profiles_pkey|CREATE UNIQUE INDEX profiles_pkey ON public.profiles USING btree (id)
+refresh_tokens|idx_user_id|CREATE INDEX idx_user_id ON public.refresh_tokens USING btree (user_id)
+refresh_tokens|idx_expires_at|CREATE INDEX idx_expires_at ON public.refresh_tokens USING btree (expires_at)
+refresh_tokens|refresh_tokens_pkey|CREATE UNIQUE INDEX refresh_tokens_pkey ON public.refresh_tokens USING btree (id)
+refresh_tokens|ukghpmfn23vmxfu3spu3lfg4r2d|CREATE UNIQUE INDEX ukghpmfn23vmxfu3spu3lfg4r2d ON public.refresh_tokens USING btree (token)
+refresh_tokens|idx_token|CREATE UNIQUE INDEX idx_token ON public.refresh_tokens USING btree (token)
+roles|uq_roles_name|CREATE UNIQUE INDEX uq_roles_name ON public.roles USING btree (name) WHERE (deleted_at IS NULL)
+roles|roles_pkey|CREATE UNIQUE INDEX roles_pkey ON public.roles USING btree (id)
+token_blacklist|idx_token_jti|CREATE UNIQUE INDEX idx_token_jti ON public.token_blacklist USING btree (token_jti)
+token_blacklist|ukbff28eugoihk2swcdiybdej20|CREATE UNIQUE INDEX ukbff28eugoihk2swcdiybdej20 ON public.token_blacklist USING btree (token)
+token_blacklist|token_blacklist_pkey|CREATE UNIQUE INDEX token_blacklist_pkey ON public.token_blacklist USING btree (id)
+
+--- 5. ROW COUNTS ---
+audit_log|273
+password_history|0
+password_reset_tokens|2
+profiles|15
+refresh_tokens|19
+roles|8
+token_blacklist|0
+
+--- 6. ORPHAN CHECKS ---
+ERROR:  relation "sales" does not exist
+L═NEA 1: SELECT 'sales_no_customer' AS chk, COUNT(*) FROM sales s LEF...
+                                                         ^
+ERROR:  relation "products" does not exist
+L═NEA 1: ...LECT 'products_no_category' AS chk, COUNT(*) FROM products p...
+                                                             ^
+ERROR:  relation "inventory_movements" does not exist
+L═NEA 1: ... 'inv_movements_no_product' AS chk, COUNT(*) FROM inventory_...
+                                                             ^
+ERROR:  relation "purchase_orders" does not exist
+L═NEA 1: ...LECT 'purchase_no_supplier' AS chk, COUNT(*) FROM purchase_o...
+                                                             ^
+ERROR:  relation "order_items" does not exist
+L═NEA 1: ...LECT 'order_items_no_order' AS chk, COUNT(*) FROM order_item...
+                                                             ^
+ERROR:  relation "order_items" does not exist
+L═NEA 1: ...CT 'order_items_no_product' AS chk, COUNT(*) FROM order_item...
+                                                             ^
+ERROR:  relation "sale_items" does not exist
+L═NEA 1: SELECT 'sale_items_no_sale' AS chk, COUNT(*) FROM sale_items...
+                                                          ^
+ERROR:  relation "sale_items" does not exist
+L═NEA 1: ...ECT 'sale_items_no_product' AS chk, COUNT(*) FROM sale_items...
+                                                             ^
+
+--- 7. SALES STATUS ---
+ERROR:  relation "sales" does not exist
+L═NEA 1: SELECT status, COUNT(*) FROM sales GROUP BY status ORDER BY ...
+                                     ^
+
+--- 8. AUDIT LOG ---
+LOGIN|206
+PASSWORD_RESET_REQUEST|40
+CREATE|11
+UPDATE|6
+REACTIVATE|5
+DEACTIVATE|4
+DELETE|1
+
+--- 9. SALE_NUMBER TYPE ---
+
+======================================== DB: catalog ========================================
+
+--- 1. TABLES ---
+catalog_audit_log|public
+categories|public
+product_barcodes|public
+products|public
+vw_category_product_summary|public
+vw_product_catalog|public
+vw_products_with_barcodes|public
+
+--- 2. FULL SCHEMA ---
+catalog_audit_log|id|uuid|uuid|NO|
+catalog_audit_log|action|character varying|varchar|NO|30
+catalog_audit_log|detail|text|text|YES|
+catalog_audit_log|entity_id|uuid|uuid|YES|
+catalog_audit_log|entity_type|character varying|varchar|NO|100
+catalog_audit_log|ip_address|character varying|varchar|YES|45
+catalog_audit_log|timestamp|timestamp without time zone|timestamp|NO|
+catalog_audit_log|user_agent|text|text|YES|
+catalog_audit_log|user_id|uuid|uuid|YES|
+categories|id|uuid|uuid|NO|
+categories|name|character varying|varchar|NO|100
+categories|description|character varying|varchar|YES|500
+categories|parent_id|uuid|uuid|YES|
+categories|status|character varying|varchar|NO|20
+categories|created_at|timestamp without time zone|timestamp|NO|
+categories|updated_at|timestamp without time zone|timestamp|NO|
+categories|created_by|uuid|uuid|YES|
+categories|updated_by|uuid|uuid|YES|
+product_barcodes|id|uuid|uuid|NO|
+product_barcodes|product_id|uuid|uuid|NO|
+product_barcodes|barcode_value|character varying|varchar|NO|50
+product_barcodes|barcode_type|character varying|varchar|NO|20
+product_barcodes|is_primary|boolean|bool|NO|
+product_barcodes|created_at|timestamp without time zone|timestamp|NO|
+product_barcodes|deleted_at|timestamp without time zone|timestamp|YES|
+product_barcodes|created_by|uuid|uuid|YES|
+product_barcodes|updated_by|uuid|uuid|YES|
+product_barcodes|deleted_by|uuid|uuid|YES|
+product_barcodes|updated_at|timestamp without time zone|timestamp|YES|
+product_barcodes|barcode|character varying|varchar|NO|100
+products|id|uuid|uuid|NO|
+products|name|character varying|varchar|NO|255
+products|codigo|character varying|varchar|NO|100
+products|description|text|text|YES|
+products|category_id|uuid|uuid|NO|
+products|purchase_price|numeric|numeric|NO|
+products|sale_price|numeric|numeric|NO|
+products|status|character varying|varchar|NO|20
+products|created_by|uuid|uuid|YES|
+products|created_at|timestamp without time zone|timestamp|NO|
+products|updated_at|timestamp without time zone|timestamp|NO|
+products|updated_by|uuid|uuid|YES|
+products|profit_margin|numeric|numeric|YES|
+vw_category_product_summary|id|uuid|uuid|YES|
+vw_category_product_summary|name|character varying|varchar|YES|100
+vw_category_product_summary|description|character varying|varchar|YES|500
+vw_category_product_summary|parent_id|uuid|uuid|YES|
+vw_category_product_summary|active_products|bigint|int8|YES|
+vw_category_product_summary|inactive_products|bigint|int8|YES|
+vw_category_product_summary|total_products|bigint|int8|YES|
+vw_product_catalog|id|uuid|uuid|YES|
+vw_product_catalog|name|character varying|varchar|YES|255
+vw_product_catalog|codigo|character varying|varchar|YES|100
+vw_product_catalog|description|text|text|YES|
+vw_product_catalog|category_name|character varying|varchar|YES|100
+vw_product_catalog|category_id|uuid|uuid|YES|
+vw_product_catalog|purchase_price|numeric|numeric|YES|
+vw_product_catalog|sale_price|numeric|numeric|YES|
+vw_product_catalog|status|character varying|varchar|YES|20
+vw_product_catalog|created_at|timestamp without time zone|timestamp|YES|
+vw_product_catalog|updated_at|timestamp without time zone|timestamp|YES|
+vw_products_with_barcodes|product_id|uuid|uuid|YES|
+vw_products_with_barcodes|product_name|character varying|varchar|YES|255
+vw_products_with_barcodes|codigo|character varying|varchar|YES|100
+vw_products_with_barcodes|barcode_type|character varying|varchar|YES|20
+vw_products_with_barcodes|barcode_value|character varying|varchar|YES|50
+vw_products_with_barcodes|is_primary|boolean|bool|YES|
+
+--- 3. CONSTRAINTS ---
+catalog_audit_log|CHECK|catalog_audit_log_timestamp_not_null||catalog_audit_log|timestamp
+catalog_audit_log|CHECK|catalog_audit_log_id_not_null||catalog_audit_log|id
+catalog_audit_log|CHECK|catalog_audit_log_action_not_null||catalog_audit_log|action
+catalog_audit_log|CHECK|catalog_audit_log_entity_type_not_null||catalog_audit_log|entity_type
+catalog_audit_log|PRIMARY KEY|catalog_audit_log_pkey|id|catalog_audit_log|id
+categories|CHECK|chk_name_length||products|name
+categories|CHECK|categories_name_not_null||categories|name
+categories|CHECK|categories_id_not_null||categories|id
+categories|CHECK|chk_name_length||categories|name
+categories|CHECK|categories_updated_at_not_null||categories|updated_at
+categories|CHECK|categories_created_at_not_null||categories|created_at
+categories|CHECK|categories_status_not_null||categories|status
+categories|FOREIGN KEY|categories_parent_id_fkey|parent_id|categories|id
+categories|PRIMARY KEY|categories_pkey|id|categories|id
+categories|UNIQUE|categories_name_key|name|categories|name
+product_barcodes|CHECK|product_barcodes_barcode_not_null||product_barcodes|barcode
+product_barcodes|CHECK|chk_barcode_value||product_barcodes|barcode_value
+product_barcodes|CHECK|product_barcodes_id_not_null||product_barcodes|id
+product_barcodes|CHECK|product_barcodes_product_id_not_null||product_barcodes|product_id
+product_barcodes|CHECK|product_barcodes_barcode_value_not_null||product_barcodes|barcode_value
+product_barcodes|CHECK|product_barcodes_barcode_type_not_null||product_barcodes|barcode_type
+product_barcodes|CHECK|product_barcodes_is_primary_not_null||product_barcodes|is_primary
+product_barcodes|CHECK|product_barcodes_created_at_not_null||product_barcodes|created_at
+product_barcodes|FOREIGN KEY|product_barcodes_product_id_fkey|product_id|products|id
+product_barcodes|PRIMARY KEY|product_barcodes_pkey|id|product_barcodes|id
+product_barcodes|UNIQUE|uk5csknf3cdh1xibyixb32vkmc9|barcode|product_barcodes|barcode
+product_barcodes|UNIQUE|uq_product_barcode|product_id|product_barcodes|barcode_value
+product_barcodes|UNIQUE|uq_product_barcode|product_id|product_barcodes|product_id
+product_barcodes|UNIQUE|uq_product_barcode|barcode_value|product_barcodes|barcode_value
+product_barcodes|UNIQUE|uq_product_barcode|barcode_value|product_barcodes|product_id
+products|CHECK|products_status_not_null||products|status
+products|CHECK|products_created_at_not_null||products|created_at
+products|CHECK|products_updated_at_not_null||products|updated_at
+products|CHECK|chk_purchase_price_positive||products|purchase_price
+products|CHECK|products_id_not_null||products|id
+products|CHECK|products_name_not_null||products|name
+products|CHECK|products_codigo_not_null||products|codigo
+products|CHECK|products_category_id_not_null||products|category_id
+products|CHECK|products_purchase_price_not_null||products|purchase_price
+products|CHECK|products_sale_price_not_null||products|sale_price
+products|CHECK|chk_sale_price_gte_purchase||products|sale_price
+products|CHECK|chk_sale_price_gte_purchase||products|purchase_price
+products|CHECK|chk_sale_price_positive||products|sale_price
+products|CHECK|chk_name_length||products|name
+products|CHECK|chk_name_length||categories|name
+products|CHECK|chk_codigo_length||products|codigo
+products|FOREIGN KEY|products_category_id_fkey|category_id|categories|id
+products|PRIMARY KEY|products_pkey|id|products|id
+products|UNIQUE|products_codigo_key|codigo|products|codigo
+
+--- 4. INDEXES ---
+catalog_audit_log|catalog_audit_log_pkey|CREATE UNIQUE INDEX catalog_audit_log_pkey ON public.catalog_audit_log USING btree (id)
+categories|categories_name_key|CREATE UNIQUE INDEX categories_name_key ON public.categories USING btree (name)
+categories|categories_pkey|CREATE UNIQUE INDEX categories_pkey ON public.categories USING btree (id)
+categories|idx_categories_name|CREATE INDEX idx_categories_name ON public.categories USING btree (name)
+categories|idx_categories_parent|CREATE INDEX idx_categories_parent ON public.categories USING btree (parent_id) WHERE (parent_id IS NOT NULL)
+product_barcodes|uq_product_barcode|CREATE UNIQUE INDEX uq_product_barcode ON public.product_barcodes USING btree (product_id, barcode_value)
+product_barcodes|uk5csknf3cdh1xibyixb32vkmc9|CREATE UNIQUE INDEX uk5csknf3cdh1xibyixb32vkmc9 ON public.product_barcodes USING btree (barcode)
+product_barcodes|idx_product_barcodes_value|CREATE INDEX idx_product_barcodes_value ON public.product_barcodes USING btree (barcode_value)
+product_barcodes|product_barcodes_pkey|CREATE UNIQUE INDEX product_barcodes_pkey ON public.product_barcodes USING btree (id)
+products|idx_products_codigo|CREATE INDEX idx_products_codigo ON public.products USING btree (codigo)
+products|idx_products_category|CREATE INDEX idx_products_category ON public.products USING btree (category_id)
+products|idx_products_status|CREATE INDEX idx_products_status ON public.products USING btree (status)
+products|idx_products_active|CREATE INDEX idx_products_active ON public.products USING btree (category_id, sale_price) WHERE ((status)::text = 'ACTIVO'::text)
+products|idx_products_sale_price|CREATE INDEX idx_products_sale_price ON public.products USING btree (sale_price)
+products|products_codigo_key|CREATE UNIQUE INDEX products_codigo_key ON public.products USING btree (codigo)
+products|products_pkey|CREATE UNIQUE INDEX products_pkey ON public.products USING btree (id)
+products|idx_products_name|CREATE INDEX idx_products_name ON public.products USING gin (to_tsvector('spanish'::regconfig, (name)::text))
+
+--- 5. ROW COUNTS ---
+catalog_audit_log|69
+categories|30
+product_barcodes|0
+products|24
+
+--- 6. ORPHAN CHECKS ---
+ERROR:  relation "sales" does not exist
+L═NEA 1: SELECT 'sales_no_customer' AS chk, COUNT(*) FROM sales s LEF...
+                                                         ^
+products_no_category|0
+ERROR:  relation "inventory_movements" does not exist
+L═NEA 1: ... 'inv_movements_no_product' AS chk, COUNT(*) FROM inventory_...
+                                                             ^
+ERROR:  relation "purchase_orders" does not exist
+L═NEA 1: ...LECT 'purchase_no_supplier' AS chk, COUNT(*) FROM purchase_o...
+                                                             ^
+ERROR:  relation "order_items" does not exist
+L═NEA 1: ...LECT 'order_items_no_order' AS chk, COUNT(*) FROM order_item...
+                                                             ^
+ERROR:  relation "order_items" does not exist
+L═NEA 1: ...CT 'order_items_no_product' AS chk, COUNT(*) FROM order_item...
+                                                             ^
+ERROR:  relation "sale_items" does not exist
+L═NEA 1: SELECT 'sale_items_no_sale' AS chk, COUNT(*) FROM sale_items...
+                                                          ^
+ERROR:  relation "sale_items" does not exist
+L═NEA 1: ...ECT 'sale_items_no_product' AS chk, COUNT(*) FROM sale_items...
+                                                             ^
+
+--- 7. SALES STATUS ---
+ERROR:  relation "sales" does not exist
+L═NEA 1: SELECT status, COUNT(*) FROM sales GROUP BY status ORDER BY ...
+                                     ^
+
+--- 8. AUDIT LOG ---
+ERROR:  relation "audit_log" does not exist
+L═NEA 1: SELECT action, COUNT(*) FROM audit_log GROUP BY action ORDER...
+                                     ^
+
+--- 9. SALE_NUMBER TYPE ---
+
+======================================== DB: inventory ========================================
+
+--- 1. TABLES ---
+adjustment_requests|public
+audit_log|public
+inventory|public
+inventory_movements|public
+
+--- 2. FULL SCHEMA ---
+adjustment_requests|id|uuid|uuid|NO|
+adjustment_requests|approved_by|uuid|uuid|YES|
+adjustment_requests|created_at|timestamp without time zone|timestamp|NO|
+adjustment_requests|movement_type|character varying|varchar|NO|30
+adjustment_requests|notes|character varying|varchar|YES|255
+adjustment_requests|product_id|uuid|uuid|NO|
+adjustment_requests|quantity|integer|int4|NO|
+adjustment_requests|reason|character varying|varchar|NO|255
+adjustment_requests|rejection_reason|character varying|varchar|YES|255
+adjustment_requests|requested_by|uuid|uuid|NO|
+adjustment_requests|resolved_at|timestamp without time zone|timestamp|YES|
+adjustment_requests|status|character varying|varchar|NO|20
+adjustment_requests|updated_at|timestamp without time zone|timestamp|NO|
+audit_log|id|uuid|uuid|NO|
+audit_log|action|character varying|varchar|NO|30
+audit_log|detail|text|text|YES|
+audit_log|entity_id|uuid|uuid|YES|
+audit_log|entity_type|character varying|varchar|NO|50
+audit_log|timestamp|timestamp without time zone|timestamp|NO|
+audit_log|user_id|uuid|uuid|YES|
+audit_log|ip_address|character varying|varchar|YES|45
+audit_log|user_agent|character varying|varchar|YES|255
+inventory|id|uuid|uuid|NO|
+inventory|product_id|uuid|uuid|NO|
+inventory|current_stock|integer|int4|NO|
+inventory|min_stock|integer|int4|NO|
+inventory|version|bigint|int8|NO|
+inventory|last_movement_at|timestamp with time zone|timestamptz|YES|
+inventory|created_at|timestamp with time zone|timestamptz|NO|
+inventory|updated_at|timestamp with time zone|timestamptz|NO|
+inventory|max_stock|integer|int4|YES|
+inventory|reserved_stock|integer|int4|NO|
+inventory|created_by|uuid|uuid|YES|
+inventory|updated_by|uuid|uuid|YES|
+inventory_movements|id|uuid|uuid|NO|
+inventory_movements|product_id|uuid|uuid|NO|
+inventory_movements|movement_type|character varying|varchar|NO|30
+inventory_movements|quantity|integer|int4|NO|
+inventory_movements|previous_stock|integer|int4|NO|
+inventory_movements|new_stock|integer|int4|NO|
+inventory_movements|user_id|uuid|uuid|YES|
+inventory_movements|reference_type|character varying|varchar|YES|50
+inventory_movements|reference_id|uuid|uuid|YES|
+inventory_movements|notes|character varying|varchar|YES|255
+inventory_movements|created_at|timestamp with time zone|timestamptz|NO|
+inventory_movements|justification|character varying|varchar|YES|255
+inventory_movements|inventory_id|uuid|uuid|YES|
+
+--- 3. CONSTRAINTS ---
+adjustment_requests|CHECK|adjustment_requests_movement_type_not_null||adjustment_requests|movement_type
+adjustment_requests|CHECK|adjustment_requests_product_id_not_null||adjustment_requests|product_id
+adjustment_requests|CHECK|adjustment_requests_quantity_not_null||adjustment_requests|quantity
+adjustment_requests|CHECK|adjustment_requests_requested_by_not_null||adjustment_requests|requested_by
+adjustment_requests|CHECK|adjustment_requests_status_not_null||adjustment_requests|status
+adjustment_requests|CHECK|adjustment_requests_updated_at_not_null||adjustment_requests|updated_at
+adjustment_requests|CHECK|adjustment_requests_status_check||adjustment_requests|status
+adjustment_requests|CHECK|adjustment_requests_reason_not_null||adjustment_requests|reason
+adjustment_requests|CHECK|adjustment_requests_id_not_null||adjustment_requests|id
+adjustment_requests|CHECK|adjustment_requests_created_at_not_null||adjustment_requests|created_at
+adjustment_requests|PRIMARY KEY|adjustment_requests_pkey|id|adjustment_requests|id
+audit_log|CHECK|audit_log_id_not_null||audit_log|id
+audit_log|CHECK|audit_log_entity_type_not_null||audit_log|entity_type
+audit_log|CHECK|audit_log_timestamp_not_null||audit_log|timestamp
+audit_log|CHECK|audit_log_action_not_null||audit_log|action
+audit_log|CHECK|audit_log_action_check||audit_log|action
+audit_log|PRIMARY KEY|audit_log_pkey|id|audit_log|id
+inventory|CHECK|inventory_updated_at_not_null||inventory|updated_at
+inventory|CHECK|chk_reserved_not_exceed_stock||inventory|current_stock
+inventory|CHECK|chk_max_stock_non_negative||inventory|max_stock
+inventory|CHECK|chk_reserved_stock_non_negative||inventory|reserved_stock
+inventory|CHECK|chk_min_not_greater_than_max||inventory|max_stock
+inventory|CHECK|chk_min_not_greater_than_max||inventory|min_stock
+inventory|CHECK|inventory_reserved_stock_not_null||inventory|reserved_stock
+inventory|CHECK|chk_reserved_not_exceed_stock||inventory|reserved_stock
+inventory|CHECK|inventory_version_not_null||inventory|version
+inventory|CHECK|chk_max_gt_min||inventory|max_stock
+inventory|CHECK|chk_max_gt_min||inventory|min_stock
+inventory|CHECK|chk_current_stock_non_negative||inventory|current_stock
+inventory|CHECK|chk_min_stock_non_negative||inventory|min_stock
+inventory|CHECK|inventory_id_not_null||inventory|id
+inventory|CHECK|inventory_product_id_not_null||inventory|product_id
+inventory|CHECK|inventory_current_stock_not_null||inventory|current_stock
+inventory|CHECK|inventory_min_stock_not_null||inventory|min_stock
+inventory|CHECK|inventory_created_at_not_null||inventory|created_at
+inventory|PRIMARY KEY|inventory_pkey|id|inventory|id
+inventory|UNIQUE|inventory_product_id_key|product_id|inventory|product_id
+inventory_movements|CHECK|inventory_movements_id_not_null||inventory_movements|id
+inventory_movements|CHECK|inventory_movements_product_id_not_null||inventory_movements|product_id
+inventory_movements|CHECK|inventory_movements_quantity_not_null||inventory_movements|quantity
+inventory_movements|CHECK|inventory_movements_previous_stock_not_null||inventory_movements|previous_stock
+inventory_movements|CHECK|chk_quantity_positive||inventory_movements|quantity
+inventory_movements|CHECK|inventory_movements_created_at_not_null||inventory_movements|created_at
+inventory_movements|CHECK|inventory_movements_movement_type_not_null||inventory_movements|movement_type
+inventory_movements|CHECK|inventory_movements_new_stock_not_null||inventory_movements|new_stock
+inventory_movements|CHECK|chk_new_stock_non_negative||inventory_movements|new_stock
+inventory_movements|PRIMARY KEY|inventory_movements_pkey|id|inventory_movements|id
+
+--- 4. INDEXES ---
+adjustment_requests|adjustment_requests_pkey|CREATE UNIQUE INDEX adjustment_requests_pkey ON public.adjustment_requests USING btree (id)
+audit_log|idx_audit_log_entity|CREATE INDEX idx_audit_log_entity ON public.audit_log USING btree (entity_type, entity_id)
+audit_log|idx_audit_log_user|CREATE INDEX idx_audit_log_user ON public.audit_log USING btree (user_id)
+audit_log|idx_audit_log_timestamp|CREATE INDEX idx_audit_log_timestamp ON public.audit_log USING btree ("timestamp" DESC)
+audit_log|idx_audit_log_action|CREATE INDEX idx_audit_log_action ON public.audit_log USING btree (action)
+audit_log|audit_log_pkey|CREATE UNIQUE INDEX audit_log_pkey ON public.audit_log USING btree (id)
+inventory|inventory_pkey|CREATE UNIQUE INDEX inventory_pkey ON public.inventory USING btree (id)
+inventory|idx_inventory_product|CREATE INDEX idx_inventory_product ON public.inventory USING btree (product_id)
+inventory|idx_inventory_low_stock|CREATE INDEX idx_inventory_low_stock ON public.inventory USING btree (product_id, current_stock, min_stock) WHERE (current_stock <= min_stock)
+inventory|idx_inventory_out_of_stock|CREATE INDEX idx_inventory_out_of_stock ON public.inventory USING btree (product_id) WHERE (current_stock = 0)
+inventory|inventory_product_id_key|CREATE UNIQUE INDEX inventory_product_id_key ON public.inventory USING btree (product_id)
+inventory_movements|idx_movements_product_date|CREATE INDEX idx_movements_product_date ON public.inventory_movements USING btree (product_id, created_at DESC, movement_type)
+inventory_movements|inventory_movements_pkey|CREATE UNIQUE INDEX inventory_movements_pkey ON public.inventory_movements USING btree (id)
+inventory_movements|idx_movements_product|CREATE INDEX idx_movements_product ON public.inventory_movements USING btree (product_id, created_at DESC)
+inventory_movements|idx_movements_created_at|CREATE INDEX idx_movements_created_at ON public.inventory_movements USING btree (created_at DESC)
+inventory_movements|idx_movements_user|CREATE INDEX idx_movements_user ON public.inventory_movements USING btree (user_id)
+inventory_movements|idx_movements_reference|CREATE INDEX idx_movements_reference ON public.inventory_movements USING btree (reference_type, reference_id)
+inventory_movements|idx_movements_type|CREATE INDEX idx_movements_type ON public.inventory_movements USING btree (movement_type)
+
+--- 5. ROW COUNTS ---
+adjustment_requests|0
+audit_log|70
+inventory|18
+inventory_movements|66
+
+--- 6. ORPHAN CHECKS ---
+ERROR:  relation "sales" does not exist
+L═NEA 1: SELECT 'sales_no_customer' AS chk, COUNT(*) FROM sales s LEF...
+                                                         ^
+ERROR:  relation "products" does not exist
+L═NEA 1: ...LECT 'products_no_category' AS chk, COUNT(*) FROM products p...
+                                                             ^
+inv_movements_no_product|0
+ERROR:  relation "purchase_orders" does not exist
+L═NEA 1: ...LECT 'purchase_no_supplier' AS chk, COUNT(*) FROM purchase_o...
+                                                             ^
+ERROR:  relation "order_items" does not exist
+L═NEA 1: ...LECT 'order_items_no_order' AS chk, COUNT(*) FROM order_item...
+                                                             ^
+ERROR:  relation "order_items" does not exist
+L═NEA 1: ...CT 'order_items_no_product' AS chk, COUNT(*) FROM order_item...
+                                                             ^
+ERROR:  relation "sale_items" does not exist
+L═NEA 1: SELECT 'sale_items_no_sale' AS chk, COUNT(*) FROM sale_items...
+                                                          ^
+ERROR:  relation "sale_items" does not exist
+L═NEA 1: ...ECT 'sale_items_no_product' AS chk, COUNT(*) FROM sale_items...
+                                                             ^
+
+--- 7. SALES STATUS ---
+ERROR:  relation "sales" does not exist
+L═NEA 1: SELECT status, COUNT(*) FROM sales GROUP BY status ORDER BY ...
+                                     ^
+
+--- 8. AUDIT LOG ---
+STOCK_EXIT|27
+STOCK_ENTRY|21
+CREATE|18
+REVERSAL|4
+
+--- 9. SALE_NUMBER TYPE ---
+
+======================================== DB: sales ========================================
+
+--- 1. TABLES ---
+audit_log|public
+customers|public
+invoices|public
+payment_methods|public
+sale_items|public
+sales|public
+
+--- 2. FULL SCHEMA ---
+audit_log|id|uuid|uuid|NO|
+audit_log|action|character varying|varchar|NO|50
+audit_log|detail|text|text|YES|
+audit_log|entity_id|uuid|uuid|YES|
+audit_log|entity_type|character varying|varchar|NO|50
+audit_log|timestamp|timestamp without time zone|timestamp|NO|
+audit_log|user_id|uuid|uuid|YES|
+audit_log|details|text|text|YES|
+audit_log|user_name|character varying|varchar|YES|100
+audit_log|ip_address|character varying|varchar|YES|45
+audit_log|user_agent|text|text|YES|
+customers|id|uuid|uuid|NO|
+customers|name|character varying|varchar|NO|255
+customers|document_type|character varying|varchar|NO|20
+customers|document_number|character varying|varchar|NO|50
+customers|email|character varying|varchar|YES|255
+customers|phone|character varying|varchar|YES|50
+customers|address|character varying|varchar|YES|500
+customers|status|character varying|varchar|NO|20
+customers|created_at|timestamp without time zone|timestamp|NO|
+customers|updated_at|timestamp without time zone|timestamp|NO|
+customers|codigo|character varying|varchar|NO|20
+invoices|id|uuid|uuid|NO|
+invoices|sale_id|uuid|uuid|NO|
+invoices|invoice_number|bigint|int8|NO|
+invoices|customer_snapshot|text|text|NO|
+invoices|items_snapshot|text|text|NO|
+invoices|subtotal|numeric|numeric|NO|
+invoices|discount|numeric|numeric|NO|
+invoices|tax|numeric|numeric|NO|
+invoices|total|numeric|numeric|NO|
+invoices|issued_at|timestamp without time zone|timestamp|NO|
+payment_methods|id|uuid|uuid|NO|
+payment_methods|name|character varying|varchar|NO|100
+payment_methods|description|character varying|varchar|YES|255
+payment_methods|is_active|boolean|bool|NO|
+payment_methods|created_at|timestamp with time zone|timestamptz|NO|
+sale_items|id|uuid|uuid|NO|
+sale_items|sale_id|uuid|uuid|NO|
+sale_items|product_id|uuid|uuid|NO|
+sale_items|product_name|character varying|varchar|NO|255
+sale_items|quantity|integer|int4|NO|
+sale_items|unit_price|numeric|numeric|NO|
+sale_items|discount|numeric|numeric|NO|
+sale_items|subtotal|numeric|numeric|NO|
+sales|id|uuid|uuid|NO|
+sales|customer_id|uuid|uuid|NO|
+sales|sale_number|character varying|varchar|NO|50
+sales|status|character varying|varchar|NO|20
+sales|subtotal|numeric|numeric|NO|
+sales|discount|numeric|numeric|NO|
+sales|tax|numeric|numeric|NO|
+sales|total|numeric|numeric|NO|
+sales|notes|character varying|varchar|YES|1000
+sales|created_by|uuid|uuid|YES|
+sales|updated_by|uuid|uuid|YES|
+sales|version|bigint|int8|NO|
+sales|created_at|timestamp without time zone|timestamp|NO|
+sales|updated_at|timestamp without time zone|timestamp|NO|
+
+--- 3. CONSTRAINTS ---
+audit_log|CHECK|audit_log_timestamp_not_null||audit_log|timestamp
+audit_log|CHECK|audit_log_entity_type_not_null||audit_log|entity_type
+audit_log|CHECK|audit_log_action_not_null||audit_log|action
+audit_log|CHECK|audit_log_id_not_null||audit_log|id
+audit_log|PRIMARY KEY|audit_log_pkey|id|audit_log|id
+customers|CHECK|customers_name_not_null||customers|name
+customers|CHECK|customers_document_type_not_null||customers|document_type
+customers|CHECK|customers_status_not_null||customers|status
+customers|CHECK|customers_codigo_not_null||customers|codigo
+customers|CHECK|customers_document_number_not_null||customers|document_number
+customers|CHECK|customers_updated_at_not_null||customers|updated_at
+customers|CHECK|customers_created_at_not_null||customers|created_at
+customers|CHECK|customers_status_check||customers|status
+customers|CHECK|customers_id_not_null||customers|id
+customers|PRIMARY KEY|customers_pkey|id|customers|id
+customers|UNIQUE|uk68n0nw8ecycfykqtly33d6d2o|codigo|customers|codigo
+customers|UNIQUE|customers_email_key|email|customers|email
+customers|UNIQUE|customers_document_number_key|document_number|customers|document_number
+invoices|CHECK|invoices_issued_at_not_null||invoices|issued_at
+invoices|CHECK|invoices_total_not_null||invoices|total
+invoices|CHECK|invoices_tax_not_null||invoices|tax
+invoices|CHECK|invoices_discount_not_null||invoices|discount
+invoices|CHECK|invoices_subtotal_not_null||invoices|subtotal
+invoices|CHECK|invoices_invoice_number_not_null||invoices|invoice_number
+invoices|CHECK|invoices_sale_id_not_null||invoices|sale_id
+invoices|CHECK|invoices_items_snapshot_not_null||invoices|items_snapshot
+invoices|CHECK|invoices_customer_snapshot_not_null||invoices|customer_snapshot
+invoices|CHECK|invoices_id_not_null||invoices|id
+invoices|FOREIGN KEY|invoices_sale_id_fkey|sale_id|sales|id
+invoices|PRIMARY KEY|invoices_pkey|id|invoices|id
+invoices|UNIQUE|invoices_invoice_number_key|invoice_number|invoices|invoice_number
+invoices|UNIQUE|invoices_sale_id_key|sale_id|invoices|sale_id
+payment_methods|CHECK|payment_methods_id_not_null||payment_methods|id
+payment_methods|CHECK|payment_methods_name_not_null||payment_methods|name
+payment_methods|CHECK|payment_methods_is_active_not_null||payment_methods|is_active
+payment_methods|CHECK|payment_methods_created_at_not_null||payment_methods|created_at
+payment_methods|PRIMARY KEY|payment_methods_pkey|id|payment_methods|id
+payment_methods|UNIQUE|payment_methods_name_key|name|payment_methods|name
+sale_items|CHECK|sale_items_subtotal_check||sale_items|subtotal
+sale_items|CHECK|sale_items_quantity_check||sale_items|quantity
+sale_items|CHECK|sale_items_unit_price_check||sale_items|unit_price
+sale_items|CHECK|sale_items_discount_check||sale_items|discount
+sale_items|CHECK|sale_items_id_not_null||sale_items|id
+sale_items|CHECK|sale_items_sale_id_not_null||sale_items|sale_id
+sale_items|CHECK|sale_items_product_id_not_null||sale_items|product_id
+sale_items|CHECK|sale_items_product_name_not_null||sale_items|product_name
+sale_items|CHECK|sale_items_quantity_not_null||sale_items|quantity
+sale_items|CHECK|sale_items_unit_price_not_null||sale_items|unit_price
+sale_items|CHECK|sale_items_discount_not_null||sale_items|discount
+sale_items|CHECK|sale_items_subtotal_not_null||sale_items|subtotal
+sale_items|FOREIGN KEY|sale_items_sale_id_fkey|sale_id|sales|id
+sale_items|PRIMARY KEY|sale_items_pkey|id|sale_items|id
+sales|CHECK|sales_discount_check||sales|discount
+sales|CHECK|sales_total_check||sales|total
+sales|CHECK|sales_tax_check||sales|tax
+sales|CHECK|sales_updated_at_not_null||sales|updated_at
+sales|CHECK|sales_created_at_not_null||sales|created_at
+sales|CHECK|sales_version_not_null||sales|version
+sales|CHECK|sales_total_not_null||sales|total
+sales|CHECK|sales_tax_not_null||sales|tax
+sales|CHECK|sales_discount_not_null||sales|discount
+sales|CHECK|sales_subtotal_not_null||sales|subtotal
+sales|CHECK|sales_status_not_null||sales|status
+sales|CHECK|sales_sale_number_not_null||sales|sale_number
+sales|CHECK|sales_customer_id_not_null||sales|customer_id
+sales|CHECK|sales_id_not_null||sales|id
+sales|CHECK|sales_status_check||sales|status
+sales|CHECK|sales_subtotal_check||sales|subtotal
+sales|FOREIGN KEY|sales_customer_id_fkey|customer_id|customers|id
+sales|PRIMARY KEY|sales_pkey|id|sales|id
+sales|UNIQUE|sales_sale_number_key|sale_number|sales|sale_number
+
+--- 4. INDEXES ---
+audit_log|audit_log_pkey|CREATE UNIQUE INDEX audit_log_pkey ON public.audit_log USING btree (id)
+customers|customers_pkey|CREATE UNIQUE INDEX customers_pkey ON public.customers USING btree (id)
+customers|customers_document_number_key|CREATE UNIQUE INDEX customers_document_number_key ON public.customers USING btree (document_number)
+customers|customers_email_key|CREATE UNIQUE INDEX customers_email_key ON public.customers USING btree (email)
+customers|idx_customers_email|CREATE INDEX idx_customers_email ON public.customers USING btree (email)
+customers|idx_customers_document|CREATE INDEX idx_customers_document ON public.customers USING btree (document_number)
+customers|idx_customers_status|CREATE INDEX idx_customers_status ON public.customers USING btree (status)
+customers|uk68n0nw8ecycfykqtly33d6d2o|CREATE UNIQUE INDEX uk68n0nw8ecycfykqtly33d6d2o ON public.customers USING btree (codigo)
+invoices|idx_invoices_number|CREATE INDEX idx_invoices_number ON public.invoices USING btree (invoice_number)
+invoices|invoices_pkey|CREATE UNIQUE INDEX invoices_pkey ON public.invoices USING btree (id)
+invoices|invoices_sale_id_key|CREATE UNIQUE INDEX invoices_sale_id_key ON public.invoices USING btree (sale_id)
+invoices|invoices_invoice_number_key|CREATE UNIQUE INDEX invoices_invoice_number_key ON public.invoices USING btree (invoice_number)
+invoices|idx_invoices_issued_at|CREATE INDEX idx_invoices_issued_at ON public.invoices USING btree (issued_at)
+invoices|idx_invoices_sale_id|CREATE INDEX idx_invoices_sale_id ON public.invoices USING btree (sale_id)
+payment_methods|payment_methods_name_key|CREATE UNIQUE INDEX payment_methods_name_key ON public.payment_methods USING btree (name)
+payment_methods|payment_methods_pkey|CREATE UNIQUE INDEX payment_methods_pkey ON public.payment_methods USING btree (id)
+sale_items|idx_sale_items_no_dup|CREATE UNIQUE INDEX idx_sale_items_no_dup ON public.sale_items USING btree (sale_id, product_id)
+sale_items|idx_sale_items_sale_id|CREATE INDEX idx_sale_items_sale_id ON public.sale_items USING btree (sale_id)
+sale_items|idx_sale_items_product_id|CREATE INDEX idx_sale_items_product_id ON public.sale_items USING btree (product_id)
+sale_items|sale_items_pkey|CREATE UNIQUE INDEX sale_items_pkey ON public.sale_items USING btree (id)
+sales|sales_sale_number_key|CREATE UNIQUE INDEX sales_sale_number_key ON public.sales USING btree (sale_number)
+sales|idx_sales_status|CREATE INDEX idx_sales_status ON public.sales USING btree (status)
+sales|idx_sales_customer_id|CREATE INDEX idx_sales_customer_id ON public.sales USING btree (customer_id)
+sales|idx_sales_number|CREATE INDEX idx_sales_number ON public.sales USING btree (sale_number)
+sales|idx_sales_created_at|CREATE INDEX idx_sales_created_at ON public.sales USING btree (created_at)
+sales|sales_pkey|CREATE UNIQUE INDEX sales_pkey ON public.sales USING btree (id)
+
+--- 5. ROW COUNTS ---
+audit_log|37
+customers|8
+invoices|13
+payment_methods|0
+sale_items|32
+sales|27
+
+--- 6. ORPHAN CHECKS ---
+sales_no_customer|0
+ERROR:  relation "products" does not exist
+L═NEA 1: ...LECT 'products_no_category' AS chk, COUNT(*) FROM products p...
+                                                             ^
+ERROR:  relation "inventory_movements" does not exist
+L═NEA 1: ... 'inv_movements_no_product' AS chk, COUNT(*) FROM inventory_...
+                                                             ^
+ERROR:  relation "purchase_orders" does not exist
+L═NEA 1: ...LECT 'purchase_no_supplier' AS chk, COUNT(*) FROM purchase_o...
+                                                             ^
+ERROR:  relation "order_items" does not exist
+L═NEA 1: ...LECT 'order_items_no_order' AS chk, COUNT(*) FROM order_item...
+                                                             ^
+ERROR:  relation "order_items" does not exist
+L═NEA 1: ...CT 'order_items_no_product' AS chk, COUNT(*) FROM order_item...
+                                                             ^
+sale_items_no_sale|0
+ERROR:  relation "products" does not exist
+L═NEA 1: ...ct' AS chk, COUNT(*) FROM sale_items si LEFT JOIN products p...
+                                                             ^
+
+--- 7. SALES STATUS ---
+BORRADOR|14
+PAGADA|6
+ANULADA|4
+CONFIRMADA|3
+
+--- 8. AUDIT LOG ---
+SALE_CREATED|21
+SALE_CONFIRMED|12
+SALE_VOIDED|4
+
+--- 9. SALE_NUMBER TYPE ---
+sale_number|character varying|varchar
+
+======================================== DB: purchase ========================================
+
+--- 1. TABLES ---
+audit_log|public
+payment_methods|public
+payments|public
+purchase_items|public
+purchases|public
+suppliers|public
+
+--- 2. FULL SCHEMA ---
+audit_log|id|uuid|uuid|NO|
+audit_log|action|character varying|varchar|NO|30
+audit_log|detail|text|text|YES|
+audit_log|entity_id|uuid|uuid|YES|
+audit_log|entity_type|character varying|varchar|NO|50
+audit_log|timestamp|timestamp without time zone|timestamp|NO|
+audit_log|user_id|uuid|uuid|YES|
+audit_log|ip_address|character varying|varchar|YES|45
+audit_log|user_agent|character varying|varchar|YES|255
+payment_methods|id|uuid|uuid|NO|
+payment_methods|name|character varying|varchar|NO|100
+payment_methods|description|character varying|varchar|YES|255
+payment_methods|is_active|boolean|bool|NO|
+payment_methods|created_at|timestamp with time zone|timestamptz|NO|
+payments|id|uuid|uuid|NO|
+payments|amount|numeric|numeric|NO|
+payments|created_at|timestamp without time zone|timestamp|NO|
+payments|created_by|uuid|uuid|YES|
+payments|payment_method_id|uuid|uuid|YES|
+payments|purchase_id|uuid|uuid|NO|
+purchase_items|id|uuid|uuid|NO|
+purchase_items|purchase_id|uuid|uuid|NO|
+purchase_items|product_id|uuid|uuid|NO|
+purchase_items|product_name|character varying|varchar|NO|255
+purchase_items|quantity|integer|int4|NO|
+purchase_items|received_quantity|integer|int4|NO|
+purchase_items|unit_price|numeric|numeric|NO|
+purchase_items|subtotal|numeric|numeric|NO|
+purchases|id|uuid|uuid|NO|
+purchases|supplier_id|uuid|uuid|NO|
+purchases|purchase_number|character varying|varchar|NO|255
+purchases|status|character varying|varchar|NO|255
+purchases|subtotal|numeric|numeric|NO|
+purchases|tax|numeric|numeric|NO|
+purchases|total|numeric|numeric|NO|
+purchases|notes|character varying|varchar|YES|255
+purchases|created_by|uuid|uuid|YES|
+purchases|updated_by|uuid|uuid|YES|
+purchases|created_at|timestamp without time zone|timestamp|NO|
+purchases|updated_at|timestamp without time zone|timestamp|NO|
+purchases|version|bigint|int8|YES|
+suppliers|id|uuid|uuid|NO|
+suppliers|name|character varying|varchar|NO|255
+suppliers|nit|character varying|varchar|NO|255
+suppliers|phone|character varying|varchar|YES|255
+suppliers|email|character varying|varchar|YES|255
+suppliers|address|character varying|varchar|YES|255
+suppliers|status|character varying|varchar|NO|255
+suppliers|created_at|timestamp without time zone|timestamp|NO|
+suppliers|updated_at|timestamp without time zone|timestamp|NO|
+suppliers|codigo|character varying|varchar|NO|20
+
+--- 3. CONSTRAINTS ---
+audit_log|CHECK|audit_log_action_not_null||audit_log|action
+audit_log|CHECK|audit_log_entity_type_not_null||audit_log|entity_type
+audit_log|CHECK|audit_log_timestamp_not_null||audit_log|timestamp
+audit_log|CHECK|audit_log_id_not_null||audit_log|id
+audit_log|PRIMARY KEY|audit_log_pkey|id|audit_log|id
+payment_methods|CHECK|payment_methods_id_not_null||payment_methods|id
+payment_methods|CHECK|payment_methods_name_not_null||payment_methods|name
+payment_methods|CHECK|payment_methods_is_active_not_null||payment_methods|is_active
+payment_methods|CHECK|payment_methods_created_at_not_null||payment_methods|created_at
+payment_methods|PRIMARY KEY|payment_methods_pkey|id|payment_methods|id
+payment_methods|UNIQUE|payment_methods_name_key|name|payment_methods|name
+payments|CHECK|payments_purchase_id_not_null||payments|purchase_id
+payments|CHECK|payments_id_not_null||payments|id
+payments|CHECK|payments_amount_not_null||payments|amount
+payments|CHECK|payments_created_at_not_null||payments|created_at
+payments|PRIMARY KEY|payments_pkey|id|payments|id
+purchase_items|CHECK|purchase_items_unit_price_check||purchase_items|unit_price
+purchase_items|CHECK|purchase_items_quantity_check||purchase_items|quantity
+purchase_items|CHECK|purchase_items_received_quantity_check||purchase_items|received_quantity
+purchase_items|CHECK|purchase_items_id_not_null||purchase_items|id
+purchase_items|CHECK|purchase_items_purchase_id_not_null||purchase_items|purchase_id
+purchase_items|CHECK|purchase_items_product_id_not_null||purchase_items|product_id
+purchase_items|CHECK|purchase_items_product_name_not_null||purchase_items|product_name
+purchase_items|CHECK|purchase_items_quantity_not_null||purchase_items|quantity
+purchase_items|CHECK|purchase_items_received_quantity_not_null||purchase_items|received_quantity
+purchase_items|CHECK|purchase_items_subtotal_not_null||purchase_items|subtotal
+purchase_items|CHECK|purchase_items_subtotal_check||purchase_items|subtotal
+purchase_items|CHECK|purchase_items_unit_price_not_null||purchase_items|unit_price
+purchase_items|FOREIGN KEY|purchase_items_purchase_id_fkey|purchase_id|purchases|id
+purchase_items|PRIMARY KEY|purchase_items_pkey|id|purchase_items|id
+purchases|CHECK|purchases_updated_at_not_null||purchases|updated_at
+purchases|CHECK|purchases_total_check||purchases|total
+purchases|CHECK|purchases_created_at_not_null||purchases|created_at
+purchases|CHECK|purchases_tax_check||purchases|tax
+purchases|CHECK|purchases_total_not_null||purchases|total
+purchases|CHECK|purchases_supplier_id_not_null||purchases|supplier_id
+purchases|CHECK|purchases_id_not_null||purchases|id
+purchases|CHECK|purchases_purchase_number_not_null||purchases|purchase_number
+purchases|CHECK|purchases_status_not_null||purchases|status
+purchases|CHECK|purchases_status_check||purchases|status
+purchases|CHECK|purchases_subtotal_not_null||purchases|subtotal
+purchases|CHECK|purchases_subtotal_check||purchases|subtotal
+purchases|CHECK|purchases_tax_not_null||purchases|tax
+purchases|FOREIGN KEY|purchases_supplier_id_fkey|supplier_id|suppliers|id
+purchases|PRIMARY KEY|purchases_pkey|id|purchases|id
+purchases|UNIQUE|purchases_purchase_number_key|purchase_number|purchases|purchase_number
+suppliers|CHECK|suppliers_status_not_null||suppliers|status
+suppliers|CHECK|suppliers_updated_at_not_null||suppliers|updated_at
+suppliers|CHECK|suppliers_created_at_not_null||suppliers|created_at
+suppliers|CHECK|suppliers_name_not_null||suppliers|name
+suppliers|CHECK|suppliers_id_not_null||suppliers|id
+suppliers|CHECK|suppliers_codigo_not_null||suppliers|codigo
+suppliers|CHECK|suppliers_nit_not_null||suppliers|nit
+suppliers|CHECK|suppliers_status_check||suppliers|status
+suppliers|PRIMARY KEY|suppliers_pkey|id|suppliers|id
+suppliers|UNIQUE|suppliers_nit_key|nit|suppliers|nit
+suppliers|UNIQUE|uksjs6cs20y0x0pedn8ng9m0yd3|codigo|suppliers|codigo
+
+--- 4. INDEXES ---
+audit_log|audit_log_pkey|CREATE UNIQUE INDEX audit_log_pkey ON public.audit_log USING btree (id)
+payment_methods|payment_methods_name_key|CREATE UNIQUE INDEX payment_methods_name_key ON public.payment_methods USING btree (name)
+payment_methods|payment_methods_pkey|CREATE UNIQUE INDEX payment_methods_pkey ON public.payment_methods USING btree (id)
+payments|idx_payments_purchase|CREATE INDEX idx_payments_purchase ON public.payments USING btree (purchase_id)
+payments|idx_payments_date|CREATE INDEX idx_payments_date ON public.payments USING btree (created_at DESC)
+payments|payments_pkey|CREATE UNIQUE INDEX payments_pkey ON public.payments USING btree (id)
+purchase_items|idx_purchase_items_product_id|CREATE INDEX idx_purchase_items_product_id ON public.purchase_items USING btree (product_id)
+purchase_items|idx_purchase_items_no_dup|CREATE UNIQUE INDEX idx_purchase_items_no_dup ON public.purchase_items USING btree (purchase_id, product_id)
+purchase_items|purchase_items_pkey|CREATE UNIQUE INDEX purchase_items_pkey ON public.purchase_items USING btree (id)
+purchase_items|idx_purchase_items_purchase_id|CREATE INDEX idx_purchase_items_purchase_id ON public.purchase_items USING btree (purchase_id)
+purchases|idx_purchases_status|CREATE INDEX idx_purchases_status ON public.purchases USING btree (status)
+purchases|purchases_pkey|CREATE UNIQUE INDEX purchases_pkey ON public.purchases USING btree (id)
+purchases|idx_purchases_supplier_id|CREATE INDEX idx_purchases_supplier_id ON public.purchases USING btree (supplier_id)
+purchases|purchases_purchase_number_key|CREATE UNIQUE INDEX purchases_purchase_number_key ON public.purchases USING btree (purchase_number)
+purchases|idx_purchases_number|CREATE INDEX idx_purchases_number ON public.purchases USING btree (purchase_number)
+suppliers|suppliers_nit_key|CREATE UNIQUE INDEX suppliers_nit_key ON public.suppliers USING btree (nit)
+suppliers|idx_suppliers_nit|CREATE INDEX idx_suppliers_nit ON public.suppliers USING btree (nit)
+suppliers|idx_suppliers_status|CREATE INDEX idx_suppliers_status ON public.suppliers USING btree (status)
+suppliers|uksjs6cs20y0x0pedn8ng9m0yd3|CREATE UNIQUE INDEX uksjs6cs20y0x0pedn8ng9m0yd3 ON public.suppliers USING btree (codigo)
+suppliers|suppliers_pkey|CREATE UNIQUE INDEX suppliers_pkey ON public.suppliers USING btree (id)
+
+--- 5. ROW COUNTS ---
+audit_log|9
+payment_methods|0
+payments|0
+purchase_items|11
+purchases|9
+suppliers|8
+
+--- 6. ORPHAN CHECKS ---
+ERROR:  relation "sales" does not exist
+L═NEA 1: SELECT 'sales_no_customer' AS chk, COUNT(*) FROM sales s LEF...
+                                                         ^
+ERROR:  relation "products" does not exist
+L═NEA 1: ...LECT 'products_no_category' AS chk, COUNT(*) FROM products p...
+                                                             ^
+ERROR:  relation "inventory_movements" does not exist
+L═NEA 1: ... 'inv_movements_no_product' AS chk, COUNT(*) FROM inventory_...
+                                                             ^
+ERROR:  relation "purchase_orders" does not exist
+L═NEA 1: ...LECT 'purchase_no_supplier' AS chk, COUNT(*) FROM purchase_o...
+                                                             ^
+ERROR:  relation "order_items" does not exist
+L═NEA 1: ...LECT 'order_items_no_order' AS chk, COUNT(*) FROM order_item...
+                                                             ^
+ERROR:  relation "order_items" does not exist
+L═NEA 1: ...CT 'order_items_no_product' AS chk, COUNT(*) FROM order_item...
+                                                             ^
+ERROR:  relation "sale_items" does not exist
+L═NEA 1: SELECT 'sale_items_no_sale' AS chk, COUNT(*) FROM sale_items...
+                                                          ^
+ERROR:  relation "sale_items" does not exist
+L═NEA 1: ...ECT 'sale_items_no_product' AS chk, COUNT(*) FROM sale_items...
+                                                             ^
+
+--- 7. SALES STATUS ---
+ERROR:  relation "sales" does not exist
+L═NEA 1: SELECT status, COUNT(*) FROM sales GROUP BY status ORDER BY ...
+                                     ^
+
+--- 8. AUDIT LOG ---
+CREATE|9
+
+--- 9. SALE_NUMBER TYPE ---
+
+======================================== DB: report ========================================
+
+--- 1. TABLES ---
+export_log|public
+report_cache|public
+report_templates|public
+
+--- 2. FULL SCHEMA ---
+export_log|id|uuid|uuid|NO|
+export_log|user_id|uuid|uuid|NO|
+export_log|report_type|character varying|varchar|NO|50
+export_log|format|character varying|varchar|NO|20
+export_log|record_count|integer|int4|YES|
+export_log|file_size_bytes|bigint|int8|YES|
+export_log|generated_at|timestamp with time zone|timestamptz|NO|
+export_log|filter_params|jsonb|jsonb|YES|
+report_cache|id|uuid|uuid|NO|
+report_cache|report_type|character varying|varchar|NO|50
+report_cache|cache_key|character varying|varchar|NO|255
+report_cache|data|jsonb|jsonb|NO|
+report_cache|status|character varying|varchar|NO|20
+report_cache|generated_at|timestamp with time zone|timestamptz|NO|
+report_cache|expires_at|timestamp with time zone|timestamptz|NO|
+report_cache|generated_by|uuid|uuid|YES|
+report_cache|filter_params|jsonb|jsonb|YES|
+report_cache|cache_data|character varying|varchar|YES|255
+report_templates|id|uuid|uuid|NO|
+report_templates|name|character varying|varchar|NO|100
+report_templates|report_type|character varying|varchar|NO|50
+report_templates|description|text|text|YES|
+report_templates|default_filters|jsonb|jsonb|YES|
+report_templates|columns_config|jsonb|jsonb|YES|
+report_templates|is_active|boolean|bool|NO|
+report_templates|created_at|timestamp with time zone|timestamptz|NO|
+report_templates|updated_at|timestamp with time zone|timestamptz|NO|
+
+--- 3. CONSTRAINTS ---
+export_log|CHECK|export_log_id_not_null||export_log|id
+export_log|CHECK|export_log_report_type_not_null||export_log|report_type
+export_log|CHECK|export_log_generated_at_not_null||export_log|generated_at
+export_log|CHECK|export_log_format_not_null||export_log|format
+export_log|CHECK|chk_format||export_log|format
+export_log|CHECK|export_log_user_id_not_null||export_log|user_id
+export_log|PRIMARY KEY|export_log_pkey|id|export_log|id
+report_cache|CHECK|report_cache_report_type_not_null||report_cache|report_type
+report_cache|CHECK|chk_expires_future||report_cache|generated_at
+report_cache|CHECK|report_cache_id_not_null||report_cache|id
+report_cache|CHECK|report_cache_cache_key_not_null||report_cache|cache_key
+report_cache|CHECK|report_cache_data_not_null||report_cache|data
+report_cache|CHECK|chk_expires_future||report_cache|expires_at
+report_cache|CHECK|report_cache_expires_at_not_null||report_cache|expires_at
+report_cache|CHECK|report_cache_generated_at_not_null||report_cache|generated_at
+report_cache|CHECK|report_cache_status_not_null||report_cache|status
+report_cache|PRIMARY KEY|report_cache_pkey|id|report_cache|id
+report_templates|CHECK|report_templates_report_type_not_null||report_templates|report_type
+report_templates|CHECK|report_templates_id_not_null||report_templates|id
+report_templates|CHECK|report_templates_is_active_not_null||report_templates|is_active
+report_templates|CHECK|report_templates_created_at_not_null||report_templates|created_at
+report_templates|CHECK|report_templates_updated_at_not_null||report_templates|updated_at
+report_templates|CHECK|report_templates_name_not_null||report_templates|name
+report_templates|PRIMARY KEY|report_templates_pkey|id|report_templates|id
+
+--- 4. INDEXES ---
+export_log|export_log_pkey|CREATE UNIQUE INDEX export_log_pkey ON public.export_log USING btree (id)
+report_cache|report_cache_pkey|CREATE UNIQUE INDEX report_cache_pkey ON public.report_cache USING btree (id)
+report_cache|idx_report_cache_type_key|CREATE INDEX idx_report_cache_type_key ON public.report_cache USING btree (report_type, cache_key)
+report_templates|report_templates_pkey|CREATE UNIQUE INDEX report_templates_pkey ON public.report_templates USING btree (id)
+
+--- 5. ROW COUNTS ---
+export_log|50
+report_cache|0
+report_templates|0
+
+--- 6. ORPHAN CHECKS ---
+ERROR:  relation "sales" does not exist
+L═NEA 1: SELECT 'sales_no_customer' AS chk, COUNT(*) FROM sales s LEF...
+                                                         ^
+ERROR:  relation "products" does not exist
+L═NEA 1: ...LECT 'products_no_category' AS chk, COUNT(*) FROM products p...
+                                                             ^
+ERROR:  relation "inventory_movements" does not exist
+L═NEA 1: ... 'inv_movements_no_product' AS chk, COUNT(*) FROM inventory_...
+                                                             ^
+ERROR:  relation "purchase_orders" does not exist
+L═NEA 1: ...LECT 'purchase_no_supplier' AS chk, COUNT(*) FROM purchase_o...
+                                                             ^
+ERROR:  relation "order_items" does not exist
+L═NEA 1: ...LECT 'order_items_no_order' AS chk, COUNT(*) FROM order_item...
+                                                             ^
+ERROR:  relation "order_items" does not exist
+L═NEA 1: ...CT 'order_items_no_product' AS chk, COUNT(*) FROM order_item...
+                                                             ^
+ERROR:  relation "sale_items" does not exist
+L═NEA 1: SELECT 'sale_items_no_sale' AS chk, COUNT(*) FROM sale_items...
+                                                          ^
+ERROR:  relation "sale_items" does not exist
+L═NEA 1: ...ECT 'sale_items_no_product' AS chk, COUNT(*) FROM sale_items...
+                                                             ^
+
+--- 7. SALES STATUS ---
+ERROR:  relation "sales" does not exist
+L═NEA 1: SELECT status, COUNT(*) FROM sales GROUP BY status ORDER BY ...
+                                     ^
+
+--- 8. AUDIT LOG ---
+ERROR:  relation "audit_log" does not exist
+L═NEA 1: SELECT action, COUNT(*) FROM audit_log GROUP BY action ORDER...
+                                     ^
+
+--- 9. SALE_NUMBER TYPE ---
+
+=== AUDIT COMPLETE ===

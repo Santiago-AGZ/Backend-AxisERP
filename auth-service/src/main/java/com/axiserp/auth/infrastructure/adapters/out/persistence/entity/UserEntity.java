@@ -32,6 +32,8 @@ public class UserEntity {
     @Id
     private UUID id;
 
+    // version column removed — not needed for optimistic locking
+
     @Column(nullable = false)
     private String name;
 
@@ -69,6 +71,9 @@ public class UserEntity {
     @Column(name = "failed_login_attempts", nullable = false)
     @Builder.Default
     private int failedLoginAttempts = 0;
+
+    @Column(name = "locked_until")
+    private LocalDateTime lockedUntil;
 
     @PrePersist
     protected void onCreate() {

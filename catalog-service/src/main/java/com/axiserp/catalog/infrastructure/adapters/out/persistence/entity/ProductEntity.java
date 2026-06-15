@@ -14,6 +14,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -32,6 +33,10 @@ public class ProductEntity {
     @Id
     private UUID id;
 
+    @Version
+    @Column(name = "version", nullable = false)
+    private Long version;
+
     @Column(nullable = false, length = 255)
     private String name;
 
@@ -49,6 +54,9 @@ public class ProductEntity {
 
     @Column(name = "sale_price", nullable = false, precision = 10, scale = 2)
     private BigDecimal salePrice;
+
+    @Column(name = "profit_margin", precision = 10, scale = 2)
+    private BigDecimal profitMargin;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)

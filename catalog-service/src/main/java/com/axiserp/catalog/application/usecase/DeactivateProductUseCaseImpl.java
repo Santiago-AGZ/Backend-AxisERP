@@ -49,7 +49,7 @@ public class DeactivateProductUseCaseImpl implements DeactivateProductUseCase {
             throw new IllegalStateException("No se puede desactivar el producto porque tiene ventas en estado PENDIENTE");
         }
 
-        Product deleted = ProductFactory.softDelete(existing);
+        Product deleted = ProductFactory.deactivate(existing);
         Product saved = productRepositoryPort.save(deleted);
 
         Category category = categoryRepositoryPort.findById(saved.getCategoryId())

@@ -8,7 +8,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.axiserp.sales.application.dto.response.SaleItemResponse;
+import com.axiserp.sales.application.dto.SaleResponseMapper;
 import com.axiserp.sales.application.dto.response.SaleResponse;
 import com.axiserp.sales.domain.exception.SaleAccessDeniedException;
 import com.axiserp.sales.domain.exception.SaleNotFoundException;
@@ -30,7 +30,7 @@ public class GetSaleUseCaseImpl implements GetSaleUseCase {
         Sale sale = saleRepositoryPort.findById(id)
                 .orElseThrow(() -> new SaleNotFoundException(id));
         checkOwnership(sale);
-        return toResponse(sale);
+        return SaleResponseMapper.toResponse(sale);
     }
 
     static void checkOwnership(Sale sale) {
@@ -51,34 +51,4 @@ public class GetSaleUseCaseImpl implements GetSaleUseCase {
         }
     }
 
-    static SaleResponse toResponse(Sale sale) {
-        List<SaleItemResponse> itemResponses = sale.getItems() != null
-                ? sale.getItems().stream().map(item -> SaleItemResponse.builder()
-                        .id(item.getId())
-                        .productId(item.getProductId())
-                        .productName(item.getProductName())
-                        .quantity(item.getQuantity())
-                        .unitPrice(item.getUnitPrice())
-                        .discount(item.getDiscount())
-                        .subtotal(item.getSubtotal())
-                        .build()).toList()
-                : List.of();
-
-        return SaleResponse.builder()
-                .id(sale.getId())
-                .customerId(sale.getCustomerId())
-                .saleNumber(sale.getSaleNumber())
-                .status(sale.getStatus().name())
-                .items(itemResponses)
-                .subtotal(sale.getSubtotal())
-                .discount(sale.getDiscount())
-                .tax(sale.getTax())
-                .total(sale.getTotal())
-                .notes(sale.getNotes())
-                .createdBy(sale.getCreatedBy())
-                .version(sale.getVersion())
-                .createdAt(sale.getCreatedAt())
-                .updatedAt(sale.getUpdatedAt())
-                .build();
-    }
 }

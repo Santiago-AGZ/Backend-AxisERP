@@ -75,6 +75,7 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
                 .updatedAt(entity.getUpdatedAt())
                 .deletedAt(entity.getDeletedAt())
                 .failedLoginAttempts(entity.getFailedLoginAttempts())
+                .lockedUntil(entity.getLockedUntil())
                 .build();
     }
 
@@ -93,6 +94,7 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
                 .updatedAt(domain.getUpdatedAt())
                 .deletedAt(domain.getDeletedAt())
                 .failedLoginAttempts(domain.getFailedLoginAttempts())
+                .lockedUntil(domain.getLockedUntil())
                 .build();
     }
 }

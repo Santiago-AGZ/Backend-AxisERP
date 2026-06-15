@@ -51,6 +51,10 @@ public class UserStatusFilter extends OncePerRequestFilter {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof String userId) {
+            if ("anonymousUser".equals(userId)) {
+                chain.doFilter(request, response);
+                return;
+            }
             // Validar si el token ha sido revocado
             if (auth.getCredentials() instanceof Jwt jwt) {
                 String tokenJti = jwt.getId();

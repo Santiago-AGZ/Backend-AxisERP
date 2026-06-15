@@ -105,7 +105,7 @@ class UpdateProductUseCaseImplTest {
     }
 
     @Test
-    @DisplayName("Should throw InvalidPriceException when salePrice < purchasePrice")
+    @DisplayName("[R7] Should throw InvalidPriceException when salePrice < purchasePrice")
     void update_invalidPrice() {
         Product existing = Product.builder()
                 .id(productId)

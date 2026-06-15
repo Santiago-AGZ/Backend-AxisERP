@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.axiserp.sales.application.dto.SaleResponseMapper;
 import com.axiserp.sales.application.dto.response.SaleResponse;
 import com.axiserp.sales.application.service.AuditService;
 import com.axiserp.sales.domain.exception.CustomerNotFoundException;
@@ -98,7 +99,7 @@ public class ConfirmSaleUseCaseImpl implements ConfirmSaleUseCase {
                 String.format("invoiceNumber=%d total=%s", savedInvoice.getInvoiceNumber(), saved.getTotal()));
         log.info("sale_confirmed id={} invoiceNumber={}", saved.getId(), savedInvoice.getInvoiceNumber());
 
-        return GetSaleUseCaseImpl.toResponse(saved);
+        return SaleResponseMapper.toResponse(saved);
     }
 
     private String buildCustomerSnapshot(Customer c) {

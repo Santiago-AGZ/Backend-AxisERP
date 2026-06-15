@@ -1,6 +1,10 @@
 package com.axiserp.sales.infrastructure.adapters.in.web.controller;
 
 import java.util.List;
+
+import com.axiserp.sales.application.dto.response.AuditLogResponse;
+import com.axiserp.sales.application.dto.response.PaginatedResponse;
+import com.axiserp.sales.ports.input.ListAuditLogsUseCase;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
@@ -41,6 +45,7 @@ public class SaleController {
     private final ConfirmSaleUseCase confirmSaleUseCase;
     private final PaySaleUseCase paySaleUseCase;
     private final VoidSaleUseCase voidSaleUseCase;
+    private final ListAuditLogsUseCase listAuditLogsUseCase;
 
     @PreAuthorize("hasAnyRole('ADMIN', 'VENDEDOR')")
     @PostMapping
@@ -68,10 +73,11 @@ public class SaleController {
             @RequestParam(required = false) UUID customerId,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) UUID productId,
+            @RequestParam(required = false) String search,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size) {
 
-        var result = listSalesUseCase.list(customerId, status, productId, page - 1, size);
+        var result = listSalesUseCase.list(customerId, status, productId, search, page - 1, size);
         return ResponseEntity.ok(ApiResponse.paged(
                 result.getContent(), "Ventas recuperadas exitosamente",
                 PaginationMeta.of(page, size, result.getTotalRecords())));
@@ -93,5 +99,16 @@ public class SaleController {
     @PatchMapping("/{id}/void")
     public ResponseEntity<ApiResponse<SaleResponse>> voidSale(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.ok(voidSaleUseCase.voidSale(id), "Venta anulada"));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/audit-log")
+    public ResponseEntity<ApiResponse<List<AuditLogResponse>>> listAuditLogs(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "50") int size) {
+        PaginatedResponse<AuditLogResponse> result = listAuditLogsUseCase.list(page - 1, size);
+        return ResponseEntity.ok(ApiResponse.paged(
+                result.getContent(), "Auditoría de ventas",
+                ApiResponse.PaginationMeta.of(page, size, result.getTotalRecords())));
     }
 }

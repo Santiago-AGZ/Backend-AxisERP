@@ -10,8 +10,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.axiserp.sales.application.dto.SaleResponseMapper;
 import com.axiserp.sales.application.dto.response.SaleResponse;
 import com.axiserp.sales.application.service.AuditService;
+import com.axiserp.sales.domain.exception.SaleAccessDeniedException;
 import com.axiserp.sales.domain.exception.SaleNotFoundException;
 import com.axiserp.sales.domain.exception.SaleNotModifiableException;
 import com.axiserp.sales.domain.model.Sale;
@@ -41,15 +43,15 @@ public class VoidSaleUseCaseImpl implements VoidSaleUseCase {
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
         if (!isAdmin) {
-            throw new IllegalStateException("Solo los administradores pueden anular ventas");
+            throw new SaleAccessDeniedException("Solo los administradores pueden anular ventas");
         }
 
         // 2. Load sale and verify status
         Sale sale = saleRepositoryPort.findById(saleId)
                 .orElseThrow(() -> new SaleNotFoundException(saleId));
 
-        if (sale.getStatus() != SaleStatus.CONFIRMADA && sale.getStatus() != SaleStatus.PAGADA) {
-            throw new SaleNotModifiableException("La venta solo puede anularse si esta CONFIRMADA o PAGADA. Estado actual: " + sale.getStatus());
+        if (sale.getStatus() != SaleStatus.CONFIRMADA) {
+            throw new SaleNotModifiableException("La venta solo puede anularse si esta CONFIRMADA. Estado actual: " + sale.getStatus());
         }
 
         // 3. Restore stock for each item
@@ -76,6 +78,6 @@ public class VoidSaleUseCaseImpl implements VoidSaleUseCase {
                 String.format("saleNumber=%s status=%s", saved.getSaleNumber(), saved.getStatus()));
         log.info("sale_voided id={}", saved.getId());
 
-        return GetSaleUseCaseImpl.toResponse(saved);
+        return SaleResponseMapper.toResponse(saved);
     }
 }

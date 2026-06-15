@@ -7,5 +7,5 @@ import com.axiserp.sales.application.dto.response.SaleResponse;
 
 public interface ListSalesUseCase {
 
-    PaginatedResponse<SaleResponse> list(UUID customerId, String status, UUID productId, int page, int size);
+    PaginatedResponse<SaleResponse> list(UUID customerId, String status, UUID productId, String search, int page, int size);
 }

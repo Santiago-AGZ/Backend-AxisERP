@@ -23,6 +23,7 @@ public class User {
     private UUID roleId;
     private UserStatus status;
     private int failedLoginAttempts;
+    private LocalDateTime lockedUntil;
     private UUID createdBy;
     private UUID updatedBy;
     private LocalDateTime lastLoginAt;

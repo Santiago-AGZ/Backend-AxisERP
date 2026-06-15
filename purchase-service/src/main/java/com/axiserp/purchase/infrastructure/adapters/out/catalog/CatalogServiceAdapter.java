@@ -54,6 +54,6 @@ public class CatalogServiceAdapter implements CatalogServicePort {
     @SuppressWarnings("unused")
     private boolean productExistsFallback(UUID productId, Throwable t) {
         log.warn("circuit_breaker_fallback catalogService productId={} error={}", productId, t.getMessage());
-        return true; // fail-open: si catalog esta caido, permitir la compra
+        return false;
     }
 }

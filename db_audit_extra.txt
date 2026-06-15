@@ -1,0 +1,141 @@
+EXTRA AUDIT CHECKS - 06/14/2026 04:37:39
+
+========== DB: sales ==========
+--- Sale number real type check ---
+sale_number|character varying|varchar|50
+--- Invoices without sale ---
+0
+--- customers with sales ---
+2a10f392-662b-434d-8167-9a1c5c774bf7|Cliente Validacion|10
+5e0b75b4-a951-4aab-83fe-cab90c7aa453|Test User|4
+f0b14664-0be7-4afa-8573-84c17cede13a|Cli Final|4
+2aaca1ed-a09c-4802-ab41-a49a45f54a0f|Cliente Flujo|3
+8c791871-98ef-46b4-9d46-8c8af5e0c646|Juan Perez|2
+a05af1d3-66cf-48ab-96cc-66a0256fd8f6|Carlos Ruiz|2
+8bc2983d-a3dd-4f4b-b30f-d6652ead6011|Cliente Full|1
+9cbd2bb1-8e50-4afd-981b-74022706414c|Maria Lopez|1
+--- sale_items per sale ---
+2022e0bc-81a5-4ea5-ac3d-43c2d77cf5ab|VN-05960CE4|1
+c76a7c1d-04bf-4741-a57f-f45d368e7335|VN-1085532D|1
+4b23f212-e466-4f39-9bf4-0b97886c733d|VN-4D91D2B9|1
+efbd3069-85ad-429d-9364-87e1ccdf1ec9|VN-4FE9E79D|1
+2ed3415d-dac1-4746-9f9a-119d10572688|VN-7B7939CE|1
+8808fe0a-4b15-4146-aa01-154b570428f5|VN-9B4F230A|1
+90295c26-a08a-4e92-bfdb-a09f06b745b5|VN-AB268CE8|1
+c7917458-7204-42a4-8200-5ab471ee6607|VN-C06D17B2|1
+ef549097-ace1-4bc7-9fe6-4a5923124028|VN-C21A9A98|1
+d7ae8308-bf36-45f8-81a9-c2336ccd987a|VN-C755CDFF|1
+418f98a8-de45-45a9-9c95-8a1c0984bd6c|VN-D2940C93|2
+b9cbf20f-f841-4839-b171-4be24f9afdb0|VN-D7FD26C0|1
+72571bb2-74f7-4238-82b2-ca6caf42f6d1|VN-DC0CF56E|1
+d572080b-34dc-483c-9331-de06de9f9db7|VN-E643028B|2
+509b39f4-d528-4d96-8743-4f420e2deb97|VN-FC3DD92B|1
+341b3b52-8423-4a10-a12a-159d0cc0c676|VTA-2026-1476BB6E|1
+0aab7ebc-2d95-489d-b013-c81fab59d368|VTA-2026-169B5E05|1
+ea1d04d2-8697-442b-9cc0-70f83136952f|VTA-2026-1DA57AF9|1
+f8fe537a-ea41-4fcd-8bd0-b10de278a871|VTA-2026-3617118E|1
+b3e5a7b0-37f7-4c8e-914d-f6d13ffd83f5|VTA-2026-37D5C2D1|3
+3b438ee8-5794-4cac-b07c-2a2c64775a95|VTA-2026-55056E5E|1
+dc558583-e249-4bed-9055-c9da96eab42f|VTA-2026-5EBC3DD1|1
+e4a0084d-d149-4b48-896b-c5dff31409a5|VTA-2026-7D7BEC50|1
+354bd267-645d-41bd-9b27-8cf06b1d50d9|VTA-2026-9A9FBA2F|1
+94560587-c9f1-4d27-ad40-085af928575e|VTA-2026-BE0B6E70|1
+2536708b-19c0-4f54-8f92-c374be6b5d24|VTA-2026-E3BFAB45|1
+1b1c6851-7b98-4aa1-8566-511570eadbee|VTA-2026-F32DE821|2
+
+========== DB: purchase ==========
+--- purchases with version nullable ---
+9
+--- Missing FK: payments to purchases ---
+0
+--- Missing FK: payments to payment_methods ---
+0
+--- purchases status ---
+RECIBIDA|2
+CANCELADA|7
+--- suppliers with purchases ---
+ef35efa9-a270-4de4-b9fd-ba85edff22f2|Prov Cancel|2
+5cb6a969-e3b4-4839-91d7-88de0c1d5737|Prov Flujo|1
+2c1985ac-bd56-42d4-b345-d3f15fada7da|Distribuidora Nacional SAS|1
+57183410-fa4d-477f-93c9-14814baccb59|Alimentos del Valle Ltda|1
+43873a42-df4d-4d9a-b1b2-c2cd0e3c18a8|Prov Final Upd|1
+128284fc-ec52-4895-ae0d-460568ab7f36|Prov Receive|1
+c454abc8-6967-4048-87a4-9bbea67e18b4|Proveedor Validacion|1
+67e1fe1f-6b00-4fb3-9b5e-f92c002cdc79|Prov Full|1
+
+========== DB: inventory ==========
+--- Missing FK: inventory_movements to inventory ---
+0
+--- Missing FK: inventory.product_id references nothing ---
+18
+--- adjustment_requests status ---
+--- inventory low stock ---
+fb962ab5-0c76-4e9c-99e0-823b813b43e4|0|10
+f9543cb9-8c52-413f-a3ea-e28597ddb866|5|10
+baea860d-791f-4877-8093-5e63f0388558|0|10
+e25cbc38-efc7-4f9d-aef8-6ea1154641c8|0|5
+7603a5b3-096c-47b4-903c-e1042253614c|0|10
+27b31a38-bd96-4b16-b336-02068472f6f9|8|15
+--- inventory stock counts ---
+18|5896|4|6
+
+========== DB: catalog ==========
+--- products without barcodes ---
+24
+--- categories hierarchy ---
+30|24|6
+--- orphan children categories ---
+0
+--- products per category ---
+Bebidas|3
+Limpieza|2
+Cat Actualizada|2
+Electr├│nicos|2
+Comidas|2
+Bebidas-TEST|2
+Cat Fresh Test|1
+Final-639165911531223984|1
+Bebidas-PROD1|1
+Bebidas-TEST2|1
+Cat Flujo Completo|1
+QA-E2E-31788|1
+E2E-Test-Cat|1
+Cat Final Upd|1
+Cat Activacion|1
+Cat Full Validation|1
+E2E-Cat-639165832915817856|1
+E2E-Cat-639165832824185143|0
+Cat Updated|0
+Updated Category|0
+panini doradas|0
+Gaseosas-TEST|0
+E2E-639165832673637319|0
+E2E-Cat-Fresh-062727|0
+<script>alert('xss')</script>|0
+Cat I|0
+Jugos-TEST2|0
+temporal1|0
+Super temporal|0
+Gaseosas-PROD|0
+
+========== DB: auth ==========
+--- Missing FK: refresh_tokens.user_id -> profiles.id ---
+0
+--- Missing FK: password_history.user_id -> profiles.id ---
+0
+--- Missing FK: password_reset_tokens.user_id -> profiles.id ---
+0
+--- profiles with soft delete ---
+1
+--- profile roles ---
+ADMIN|7
+VENDEDOR|5
+INVENTARIO|3
+ SUPER AUDITOR|0
+TESTER|0
+AUDITOR|0
+ROL_EDITADO|0
+NUEVO_ROL|0
+--- locked accounts ---
+0
+DONE

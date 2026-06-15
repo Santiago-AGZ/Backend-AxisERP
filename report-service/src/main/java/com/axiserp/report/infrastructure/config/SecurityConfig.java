@@ -39,7 +39,8 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exceptions -> exceptions
-                        .authenticationEntryPoint(this::handleUnauthorized))
+                        .authenticationEntryPoint(this::handleUnauthorized)
+                        .accessDeniedHandler(this::handleAccessDenied))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/actuator/health", "/actuator/info").permitAll()
                         .anyRequest().authenticated())
@@ -53,6 +54,15 @@ public class SecurityConfig {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
         var apiResponse = ApiResponse.error("UNAUTHORIZED", "Se requiere autenticacion para acceder a este recurso");
+        objectMapper.writeValue(response.getOutputStream(), apiResponse);
+    }
+
+    private void handleAccessDenied(HttpServletRequest request,
+            HttpServletResponse response, org.springframework.security.access.AccessDeniedException ex) throws IOException {
+        response.setStatus(HttpStatus.FORBIDDEN.value());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+
+        var apiResponse = ApiResponse.error("FORBIDDEN", "No tiene permisos para realizar esta operacion");
         objectMapper.writeValue(response.getOutputStream(), apiResponse);
     }
 }

@@ -19,9 +19,9 @@ public interface SaleRepositoryPort {
      * @param productId nullable UUID to filter by product
      * @param createdBy nullable UUID to filter by creator (used for VENDEDOR scope)
      */
-    List<Sale> findByFilters(UUID customerId, String status, UUID productId, UUID createdBy, int page, int size);
+    List<Sale> findByFilters(UUID customerId, String status, UUID productId, UUID createdBy, String search, int page, int size);
 
     List<Sale> findByCustomerId(UUID customerId, UUID createdBy);
 
-    long countByFilters(UUID customerId, String status, UUID productId, UUID createdBy);
+    long countByFilters(UUID customerId, String status, UUID productId, UUID createdBy, String search);
 }

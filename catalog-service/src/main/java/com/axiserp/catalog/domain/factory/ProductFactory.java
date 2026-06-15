@@ -7,6 +7,7 @@ import java.util.UUID;
 import com.axiserp.catalog.domain.model.Product;
 import com.axiserp.catalog.domain.model.Product.ProductStatus;
 
+@Deprecated
 public final class ProductFactory {
 
     private ProductFactory() {}
@@ -39,6 +40,7 @@ public final class ProductFactory {
                 .purchasePrice(purchasePrice != null ? purchasePrice : existing.getPurchasePrice())
                 .salePrice(salePrice != null ? salePrice : existing.getSalePrice())
                 .status(existing.getStatus())
+                .version(existing.getVersion())
                 .createdBy(existing.getCreatedBy())
                 .createdAt(existing.getCreatedAt())
                 .updatedAt(LocalDateTime.now())
@@ -55,6 +57,7 @@ public final class ProductFactory {
                 .purchasePrice(existing.getPurchasePrice())
                 .salePrice(existing.getSalePrice())
                 .status(ProductStatus.ACTIVO)
+                .version(existing.getVersion())
                 .createdBy(existing.getCreatedBy())
                 .createdAt(existing.getCreatedAt())
                 .updatedAt(LocalDateTime.now())
@@ -71,6 +74,7 @@ public final class ProductFactory {
                 .purchasePrice(existing.getPurchasePrice())
                 .salePrice(existing.getSalePrice())
                 .status(ProductStatus.INACTIVO)
+                .version(existing.getVersion())
                 .createdBy(existing.getCreatedBy())
                 .createdAt(existing.getCreatedAt())
                 .updatedAt(LocalDateTime.now())
@@ -87,6 +91,7 @@ public final class ProductFactory {
                 .purchasePrice(existing.getPurchasePrice())
                 .salePrice(existing.getSalePrice())
                 .status(ProductStatus.ELIMINADO)
+                .version(existing.getVersion())
                 .createdBy(existing.getCreatedBy())
                 .createdAt(existing.getCreatedAt())
                 .updatedAt(LocalDateTime.now())

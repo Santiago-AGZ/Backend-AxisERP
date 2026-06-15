@@ -1,8 +1,10 @@
 package com.axiserp.sales.infrastructure.adapters.out.persistence.adapter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import com.axiserp.sales.domain.model.AuditLog;
@@ -23,6 +25,22 @@ public class AuditLogRepositoryAdapter implements AuditLogRepositoryPort {
         AuditLogEntity entity = toEntity(auditLog);
         AuditLogEntity saved = jpaAuditLogRepository.save(entity);
         return toDomain(saved);
+    }
+
+    @Override
+    public List<AuditLog> findAll(org.springframework.data.domain.PageRequest pageRequest) {
+        return jpaAuditLogRepository.findAll(
+                org.springframework.data.domain.PageRequest.of(
+                    pageRequest.getPageNumber(), pageRequest.getPageSize(),
+                    org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "timestamp")))
+                .stream()
+                .map(this::toDomain)
+                .toList();
+    }
+
+    @Override
+    public long count() {
+        return jpaAuditLogRepository.count();
     }
 
     private AuditLog toDomain(AuditLogEntity e) {

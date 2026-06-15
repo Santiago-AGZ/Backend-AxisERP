@@ -8,6 +8,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.axiserp.sales.application.dto.SaleResponseMapper;
 import com.axiserp.sales.application.dto.response.PaginatedResponse;
 import com.axiserp.sales.application.dto.response.SaleResponse;
 import com.axiserp.sales.ports.input.ListSalesUseCase;
@@ -23,13 +24,13 @@ public class ListSalesUseCaseImpl implements ListSalesUseCase {
 
     @Override
     @Transactional(readOnly = true)
-    public PaginatedResponse<SaleResponse> list(UUID customerId, String status, UUID productId, int page, int size) {
+    public PaginatedResponse<SaleResponse> list(UUID customerId, String status, UUID productId, String search, int page, int size) {
         UUID createdBy = resolveCreatedByFilter();
-        List<SaleResponse> content = saleRepositoryPort.findByFilters(customerId, status, productId, createdBy, page, size)
+        List<SaleResponse> content = saleRepositoryPort.findByFilters(customerId, status, productId, createdBy, search, page, size)
                 .stream()
-                .map(GetSaleUseCaseImpl::toResponse)
+                .map(SaleResponseMapper::toResponse)
                 .toList();
-        long total = saleRepositoryPort.countByFilters(customerId, status, productId, createdBy);
+        long total = saleRepositoryPort.countByFilters(customerId, status, productId, createdBy, search);
         return PaginatedResponse.<SaleResponse>builder()
                 .content(content)
                 .totalRecords(total)

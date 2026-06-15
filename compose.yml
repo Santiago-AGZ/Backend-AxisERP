@@ -19,6 +19,7 @@ services:
       - jwt-access-expiration=${jwt-access-expiration:-900000}
       - jwt-refresh-expiration=${jwt-refresh-expiration:-604800000}
       - internal-api-key=${internal-api-key}
+      - app-frontend-url=http://localhost:5173
       - server-port=8081
     networks:
       - axiserp-network

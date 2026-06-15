@@ -60,9 +60,9 @@ public class CustomerController {
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'VENDEDOR')")
-    @GetMapping("/{codigo}")
-    public ResponseEntity<ApiResponse<CustomerResponse>> getCustomer(@PathVariable String codigo) {
-        CustomerResponse response = getCustomerUseCase.getByCodigo(codigo);
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<CustomerResponse>> getCustomer(@PathVariable UUID id) {
+        CustomerResponse response = getCustomerUseCase.getById(id);
         return ResponseEntity.ok(ApiResponse.ok(response, "Cliente encontrado"));
     }
 

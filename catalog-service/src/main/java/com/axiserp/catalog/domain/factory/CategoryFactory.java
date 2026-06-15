@@ -6,6 +6,7 @@ import java.util.UUID;
 import com.axiserp.catalog.domain.model.Category;
 import com.axiserp.catalog.domain.model.Category.CategoryStatus;
 
+@Deprecated
 public final class CategoryFactory {
 
     private CategoryFactory() {}

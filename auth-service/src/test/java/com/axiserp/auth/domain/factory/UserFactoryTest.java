@@ -53,14 +53,14 @@ class UserFactoryTest {
     }
 
     @Test
-    @DisplayName("Should deactivate user setting INACTIVO status and deletedAt")
+    @DisplayName("Should deactivate user setting INACTIVO status preserving deletedAt")
     void deactivate_success() {
         User existing = UserFactory.createNew(UUID.randomUUID(), "Test", "test@axiserp.com", "hashed", roleId, adminId);
 
         User deactivated = UserFactory.deactivate(existing, adminId);
 
         assertEquals(UserStatus.INACTIVO, deactivated.getStatus());
-        assertNotNull(deactivated.getDeletedAt());
+        assertNull(deactivated.getDeletedAt());
         assertEquals(existing.getId(), deactivated.getId());
         assertEquals(existing.getName(), deactivated.getName());
         assertEquals(adminId, deactivated.getUpdatedBy());

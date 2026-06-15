@@ -10,6 +10,10 @@ import java.util.List;
 @Configuration
 public class GatewayConfig {
 
+    // La seguridad NO se implementa en el gateway.
+    // Cada microservicio protege sus propios endpoints via JWT, OAuth2 Resource Server,
+    // InternalApiKeyFilter, y Spring Security Method Security.
+
     @Value("${auth-service-url:http://auth-service:8081}")
     private String authServiceUrl;
 

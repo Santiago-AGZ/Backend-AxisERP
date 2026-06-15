@@ -1,0 +1,60 @@
+services:
+  auth-service:
+    environment:
+      - auth-db-url=jdbc:postgresql://ep-wispy-voice-aqodv5c1-pooler.c-8.us-east-1.aws.neon.tech/neondb?sslmode=require
+      - auth-db-username=neondb_owner
+      - auth-db-password=npg_3B6IOxjNFvoU
+      - supabase-url=https://hbtcusxbkkefphunarwn.supabase.co
+      - supabase-jwt-issuer=https://hbtcusxbkkefphunarwn.supabase.co/auth/v1
+      - supabase-service-role-key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhidGN1c3hia2tlZnBodW5hcnduIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3ODM3NTI1NiwiZXhwIjoyMDkzOTUxMjU2fQ.-3zQoXXLzFPKhJpW7SgzA-JE37N8J-xa6xymTpl_JtY
+      - supabase-anon-key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhidGN1c3hia2tlZnBodW5hcnduIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzNzUyNTYsImV4cCI6MjA5Mzk1MTI1Nn0.FpKfLdzSlHBOtW4gpVFzxtzGAyfxWfcniWnEdwV63rw
+      - jwt-secret=a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2
+      - jwt-access-expiration=900000
+      - jwt-refresh-expiration=604800000
+      - internal-api-key=hJPSHD9pn3Yhya54LRIHrvDGlbR2UzEwlE9nuTT8wz7
+      - app-frontend-url=http://localhost:5173
+
+  catalog-service:
+    environment:
+      - catalog-db-url=jdbc:postgresql://ep-rapid-night-aq5mpoqi-pooler.c-8.us-east-1.aws.neon.tech/neondb?sslmode=require
+      - catalog-db-username=neondb_owner
+      - catalog-db-password=npg_W9Zr4nodvQih
+      - jpa-ddl-auto=validate
+      - supabase-jwt-issuer=https://hbtcusxbkkefphunarwn.supabase.co/auth/v1
+      - internal-api-key=hJPSHD9pn3Yhya54LRIHrvDGlbR2UzEwlE9nuTT8wz7
+
+  inventory-service:
+    environment:
+      - inventory-db-url=jdbc:postgresql://ep-still-resonance-apfxlmlm-pooler.c-7.us-east-1.aws.neon.tech/neondb?sslmode=require
+      - inventory-db-username=neondb_owner
+      - inventory-db-password=npg_4GmCpJk3bgqa
+      - jpa-ddl-auto=validate
+      - supabase-jwt-issuer=https://hbtcusxbkkefphunarwn.supabase.co/auth/v1
+      - internal-api-key=hJPSHD9pn3Yhya54LRIHrvDGlbR2UzEwlE9nuTT8wz7
+
+  sales-service:
+    environment:
+      - sales-db-url=jdbc:postgresql://ep-misty-waterfall-apbais5g-pooler.c-7.us-east-1.aws.neon.tech/neondb?sslmode=require
+      - sales-db-username=neondb_owner
+      - sales-db-password=npg_qtvUFx6Ol8Ve
+      - jpa-ddl-auto=validate
+      - supabase-jwt-issuer=https://hbtcusxbkkefphunarwn.supabase.co/auth/v1
+      - internal-api-key=hJPSHD9pn3Yhya54LRIHrvDGlbR2UzEwlE9nuTT8wz7
+
+  purchase-service:
+    environment:
+      - purchase-db-url=jdbc:postgresql://ep-quiet-union-aqsh56i9-pooler.c-8.us-east-1.aws.neon.tech/neondb?sslmode=require
+      - purchase-db-username=neondb_owner
+      - purchase-db-password=npg_xTB0s1gojVbU
+      - jpa-ddl-auto=validate
+      - supabase-jwt-issuer=https://hbtcusxbkkefphunarwn.supabase.co/auth/v1
+      - internal-api-key=hJPSHD9pn3Yhya54LRIHrvDGlbR2UzEwlE9nuTT8wz7
+
+  report-service:
+    environment:
+      - report-db-url=jdbc:postgresql://ep-flat-dream-aphtqln9-pooler.c-7.us-east-1.aws.neon.tech/neondb?sslmode=require
+      - report-db-username=neondb_owner
+      - report-db-password=npg_hnYTb4BIov5X
+      - jpa-ddl-auto=validate
+      - supabase-jwt-issuer=https://hbtcusxbkkefphunarwn.supabase.co/auth/v1
+      - internal-api-key=hJPSHD9pn3Yhya54LRIHrvDGlbR2UzEwlE9nuTT8wz7

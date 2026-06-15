@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.axiserp.sales.application.dto.SaleResponseMapper;
 import com.axiserp.sales.application.dto.response.SaleResponse;
 import com.axiserp.sales.domain.exception.SaleNotFoundException;
 import com.axiserp.sales.domain.exception.SaleNotModifiableException;
@@ -44,6 +45,6 @@ public class PaySaleUseCaseImpl implements PaySaleUseCase {
         Sale saved = saleRepositoryPort.save(sale);
         log.info("sale_paid id={}", saved.getId());
 
-        return GetSaleUseCaseImpl.toResponse(saved);
+        return SaleResponseMapper.toResponse(saved);
     }
 }

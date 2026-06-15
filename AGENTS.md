@@ -7,9 +7,8 @@
 AxisERP is an ERP platform built using:
 
 * Java 21
-* Spring Boot 3.5.x
+* Spring Boot 3.5.15
 * PostgreSQL (Neon)
-* RabbitMQ
 * Docker
 * Maven
 
@@ -258,34 +257,7 @@ Allowed communication mechanisms:
 
 * REST APIs
 
-### Asynchronous
 
-* RabbitMQ Domain Events
-
-Examples:
-
-* UsuarioCreado
-* UsuarioActualizado
-* PasswordCambiada
-* ProductoCreado
-* ProductoActualizado
-* ProductoEliminado
-* CompraRecibida
-* CompraAnulada
-* VentaConfirmada
-* VentaAnulada
-* StockActualizado
-* StockBajo
-* StockAgotado
-* FacturaGenerada
-
-Forbidden:
-
-* Direct database communication.
-* Shared database integration.
-* Cross-service joins.
-
----
 
 ## Business Rules Enforcement
 
@@ -335,7 +307,7 @@ All APIs must provide:
 
 * OpenAPI documentation.
 * Swagger UI in development environments.
-* Request documentation.
+* Request documentation
 * Response documentation.
 * Error documentation.
 

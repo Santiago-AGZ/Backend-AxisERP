@@ -14,35 +14,48 @@ import com.axiserp.sales.infrastructure.adapters.out.persistence.entity.SaleEnti
 
 public interface JpaSaleRepository extends JpaRepository<SaleEntity, UUID> {
 
-    @Query("""
-            SELECT DISTINCT s FROM SaleEntity s
-            LEFT JOIN s.items i
-            WHERE (:customerId IS NULL OR s.customerId = :customerId)
-              AND (:status IS NULL OR s.status = :status)
-              AND (:productId IS NULL OR i.productId = :productId)
-              AND (:createdBy IS NULL OR s.createdBy = :createdBy)
-            ORDER BY s.updatedAt DESC
-            """)
+    @Query(value = """
+            SELECT DISTINCT s.* FROM sales s
+            LEFT JOIN sale_items i ON s.id = i.sale_id
+            WHERE (CAST(:customerId AS text) IS NULL OR s.customer_id = CAST(:customerId AS uuid))
+              AND (CAST(:status AS text) IS NULL OR s.status = CAST(:status AS text))
+              AND (CAST(:productId AS text) IS NULL OR i.product_id = CAST(:productId AS uuid))
+              AND (CAST(:createdBy AS text) IS NULL OR s.created_by = CAST(:createdBy AS uuid))
+              AND (CAST(:search AS text) IS NULL OR LOWER(s.sale_number) LIKE LOWER(CONCAT('%', CAST(:search AS text), '%')))
+            """,
+            countQuery = """
+            SELECT COUNT(DISTINCT s.id) FROM sales s
+            LEFT JOIN sale_items i ON s.id = i.sale_id
+            WHERE (CAST(:customerId AS text) IS NULL OR s.customer_id = CAST(:customerId AS uuid))
+              AND (CAST(:status AS text) IS NULL OR s.status = CAST(:status AS text))
+              AND (CAST(:productId AS text) IS NULL OR i.product_id = CAST(:productId AS uuid))
+              AND (CAST(:createdBy AS text) IS NULL OR s.created_by = CAST(:createdBy AS uuid))
+              AND (CAST(:search AS text) IS NULL OR LOWER(s.sale_number) LIKE LOWER(CONCAT('%', CAST(:search AS text), '%')))
+            """,
+            nativeQuery = true)
     List<SaleEntity> findByFilters(
             @Param("customerId") UUID customerId,
-            @Param("status") SaleStatus status,
+            @Param("status") String status,
             @Param("productId") UUID productId,
             @Param("createdBy") UUID createdBy,
+            @Param("search") String search,
             Pageable pageable);
 
-    @Query("""
-            SELECT COUNT(DISTINCT s) FROM SaleEntity s
-            LEFT JOIN s.items i
-            WHERE (:customerId IS NULL OR s.customerId = :customerId)
-              AND (:status IS NULL OR s.status = :status)
-              AND (:productId IS NULL OR i.productId = :productId)
-              AND (:createdBy IS NULL OR s.createdBy = :createdBy)
-            """)
+    @Query(value = """
+            SELECT COUNT(DISTINCT s.id) FROM sales s
+            LEFT JOIN sale_items i ON s.id = i.sale_id
+            WHERE (CAST(:customerId AS text) IS NULL OR s.customer_id = CAST(:customerId AS uuid))
+              AND (CAST(:status AS text) IS NULL OR s.status = CAST(:status AS text))
+              AND (CAST(:productId AS text) IS NULL OR i.product_id = CAST(:productId AS uuid))
+              AND (CAST(:createdBy AS text) IS NULL OR s.created_by = CAST(:createdBy AS uuid))
+              AND (CAST(:search AS text) IS NULL OR LOWER(s.sale_number) LIKE LOWER(CONCAT('%', CAST(:search AS text), '%')))
+            """, nativeQuery = true)
     long countByFilters(
             @Param("customerId") UUID customerId,
-            @Param("status") SaleStatus status,
+            @Param("status") String status,
             @Param("productId") UUID productId,
-            @Param("createdBy") UUID createdBy);
+            @Param("createdBy") UUID createdBy,
+            @Param("search") String search);
 
     Optional<SaleEntity> findBySaleNumber(String saleNumber);
 
