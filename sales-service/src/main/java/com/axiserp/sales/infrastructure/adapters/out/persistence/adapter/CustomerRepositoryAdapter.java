@@ -91,6 +91,7 @@ public class CustomerRepositoryAdapter implements CustomerRepositoryPort {
                 .phone(e.getPhone())
                 .address(e.getAddress())
                 .status(CustomerStatus.valueOf(e.getStatus().name()))
+                .version(e.getVersion())
                 .createdAt(e.getCreatedAt())
                 .updatedAt(e.getUpdatedAt())
                 .build();
@@ -109,6 +110,7 @@ public class CustomerRepositoryAdapter implements CustomerRepositoryPort {
                 .phone(c.getPhone())
                 .address(c.getAddress())
                 .status(CustomerEntity.CustomerStatus.valueOf(c.getStatus().name()))
+                .version(c.getVersion())
                 .createdAt(c.getCreatedAt())
                 .updatedAt(c.getUpdatedAt())
                 .build();

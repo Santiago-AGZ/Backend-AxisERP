@@ -1,191 +1,202 @@
-# AxisERP
+# Pipeline CI/CD de AxisERP
 
-> Evidencia R.A.2 | Desarrollo de Software III | Practicas DevOps
+## Que es un Pipeline
+
+Un pipeline es una secuencia automatizada de pasos donde la salida de una etapa se convierte en la entrada de la siguiente. Su objetivo es automatizar tareas, reducir errores humanos y garantizar que el software pueda construirse, probarse y desplegarse de manera consistente.
+
+En un proyecto sin pipelines, cada vez que un desarrollador hace un cambio debe compilar manualmente, ejecutar pruebas, construir una imagen y subirla al servidor. Con pipelines, todo esto ocurre automaticamente al subir codigo al repositorio.
+
+En AxisERP los pipelines se implementan mediante GitHub Actions y cubren compilacion, pruebas unitarias, construccion de imagenes Docker, publicacion en Azure Container Registry y despliegue en Azure Container Apps.
 
 ---
 
-## Datos del Proyecto
+## Objetivo de los Pipelines de AxisERP
 
-| Item | Descripcion |
+Los pipelines automatizan las siguientes tareas:
+
+- Compilacion de cada microservicio con Maven y JDK 21
+- Ejecucion de pruebas unitarias
+- Publicacion de reportes de prueba como artefactos
+- Construccion de imagenes Docker sin cache
+- Publicacion de imagenes en Azure Container Registry
+- Despliegue automatico en Azure Container Apps
+- Escaneo de seguridad con CodeQL y Trivy
+
+---
+
+## Arquitectura Actual de Pipelines
+
+```
+Desarrollador
+     |
+     v
+Push a GitHub (rama master o pull request)
+     |
+     v
+CI del microservicio modificado
+     |
+     +-- Compilacion Maven
+     +-- Pruebas unitarias
+     +-- Publicacion de resultados
+     +-- Build Docker (sin cache)
+     +-- Push a Azure Container Registry (solo en master)
+     |
+     v
+CD (se ejecuta solo si CI fue exitoso)
+     |
+     +-- Autenticacion Azure (OIDC)
+     +-- Despliegue en Azure Container Apps
+```
+
+---
+
+## Workflows Existentes
+
+Se encuentran 10 archivos de workflow en el directorio `.github/workflows/`:
+
+| Workflow | Proposito |
 |---|---|
-| **Nombre** | AxisERP |
-| **Asignatura** | Desarrollo de Software III |
-| **RA** | R.A.2 - Practicas DevOps |
-| **Alcance** | Plataforma ERP empresarial con 7 microservicios Spring Boot |
-| **Objetivo** | Implementar un sistema CI/CD automatizado con pipelines independientes por microservicio |
-| **Arquitectura** | Microservicios + DDD + Hexagonal + Clean Architecture |
-| **Integrantes** | (completar) |
+| `template-ci.yml` | Plantilla reutilizable con las etapas comunes de CI |
+| `ci-auth.yml` | CI del microservicio de autenticacion |
+| `ci-catalog.yml` | CI del microservicio de catalogo |
+| `ci-gateway.yml` | CI del API Gateway |
+| `ci-inventory.yml` | CI del microservicio de inventario |
+| `ci-sales.yml` | CI del microservicio de ventas |
+| `ci-purchase.yml` | CI del microservicio de compras |
+| `ci-report.yml` | CI del microservicio de reportes |
+| `cd-deploy.yml` | Despliegue automatico en Azure |
+| `security-scan.yml` | Escaneo de seguridad (CodeQL + Trivy) |
 
 ---
 
-## 1. Que es un Pipeline?
+## Flujo CI (Integracion Continua)
 
-Un Pipeline en programacion es una secuencia de pasos o procesos conectados entre si, donde la salida de un paso se convierte en la entrada del siguiente. Su objetivo es automatizar tareas, organizar flujos de trabajo y reducir errores manuales.
+Cada microservicio tiene su propio workflow de CI. Cuando un desarrollador sube cambios a un microservicio, se ejecuta el workflow correspondiente.
 
-**Ejemplo:** Cuando un programador sube cambios al repositorio:
-1. Se descarga el codigo
-2. Se compila el proyecto
-3. Se ejecutan pruebas automaticas
-4. Se construye una imagen Docker
-5. Se publica en el registro de contenedores
-6. Se despliega en la nube
+Por ejemplo, si se modifica `catalog-service/`, se ejecuta `ci-catalog.yml`.
 
----
+Cada workflow CI invoca a `template-ci.yml`, que contiene las siguientes etapas:
 
-## 2. Para que sirve un Pipeline?
+### 1. Descarga del codigo
 
-- Automatizar procesos repetitivos
-- Ejecutar pruebas automaticas
-- Integrar y desplegar aplicaciones (CI/CD)
-- Mejorar la eficiencia y calidad del software
-- Reducir errores humanos
-- Desplegar solo lo que cambio (no todo el sistema)
+Se obtiene la version mas reciente del repositorio mediante `actions/checkout@v4`.
 
----
+### 2. Configuracion de JDK 21
 
-## 3. Pasos para Crear los Pipelines de AxisERP
+Se instala Java 21 con distribucion Temurin y se habilita cache de Maven para acelerar compilaciones futuras.
 
-### 3.1 Definir el objetivo
+### 3. Compilacion
 
-Automatizar la construccion, prueba, empaquetado en Docker y publicacion en Azure Container Registry de los 7 microservicios de AxisERP, asegurando que solo el servicio modificado se reconstruya.
+Se ejecuta `mvn compile` para verificar que el proyecto compile correctamente.
 
-### 3.2 Identificar las Etapas
+### 4. Pruebas
 
-Cada pipeline CI de AxisERP ejecuta 5 etapas:
+Se ejecuta `mvn test` para correr las pruebas unitarias del microservicio.
 
-| Etapa | Descripcion | Herramienta |
-|---|---|---|
-| **Descargar codigo** | Clonar repositorio | `actions/checkout@v4` |
-| **Compilar** | Maven compile | JDK 21 + Maven |
-| **Ejecutar pruebas** | JUnit test | Maven |
-| **Empaquetar Docker** | Construir imagen multi-stage | Docker |
-| **Publicar en ACR** | Push a Azure Container Registry | Docker + `az acr` |
+### 5. Publicacion de resultados
 
-### 3.3 Establecer el flujo de ejecucion
+Los reportes generados por Maven Surefire se almacenan como artefactos de GitHub Actions con una retencion de 14 dias. Esto permite revisar el detalle de fallos sin necesidad de ejecutar las pruebas localmente.
 
-```
-┌──────────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐
-│  CODIGO      │───►│  COMPILAR    │───►│  EMPAQUETAR  │───►│  PUBLICAR    │
-│  FUENTE      │    │  + PROBAR    │    │  (DOCKER)    │    │  (ACR)       │
-└──────────────┘    └──────────────┘    └──────────────┘    └──────────────┘
-```
+### 6. Empaquetado
 
-### 3.4 Automatizar cada Etapa
+Se ejecuta `mvn package -DskipTests` para generar el archivo JAR del microservicio.
 
-Cada microservicio tiene su propio pipeline CI que solo se dispara cuando cambian sus archivos:
+### 7. Construccion de imagen Docker
 
-```yaml
-name: CI - Catalog Service
+Se construye la imagen Docker utilizando `docker build --no-cache`. La bandera `--no-cache` evita que Docker reuse capas de compilacion anteriores, garantizando que la imagen refleje exactamente el codigo actual.
 
-on:
-  push:
-    branches: [master]
-    paths: [catalog-service/**]   # Solo si cambia catalog
-  workflow_dispatch:               # Tambien manual
+### 8. Publicacion en Azure Container Registry
 
-jobs:
-  ci:
-    uses: ./.github/workflows/template-ci.yml   # Template reutilizable
-    with:
-      service: catalog-service
-      port: 8082
-    secrets: inherit
-```
+Si el cambio se realiza en la rama `master`, la imagen se publica en Azure Container Registry con dos etiquetas:
 
-El **template-ci.yml** contiene los pasos comunes compartidos por los 7 pipelines.
+- `axiserp.azurecr.io/<servicio>:<run_number>` (etiqueta unica por ejecucion)
+- `axiserp.azurecr.io/<servicio>:latest` (etiqueta de ultima version)
 
-### 3.5 Monitorear Resultados
-
-Cada ejecucion del pipeline muestra en GitHub Actions:
-- Estado de cada etapa (pendiente, en progreso, exitoso, fallido)
-- Logs detallados de compilacion y pruebas
-- Tiempo total de ejecucion
-- Historial de ejecuciones pasadas
+En pull requests no se publican imagenes en el registro. La construccion Docker se ejecuta solo como validacion.
 
 ---
 
-## 4. Ejemplo Practico: Cambio en Catalog Service
+## Flujo CD (Despliegue Continuo)
 
-```
-1. Dev modifica catalog-service/ProductoService.java
-2. git add, git commit, git push a master
-3. GitHub Actions detecta cambio en catalog-service/**
-4. CI - Catalog Service se dispara automaticamente
-5. Etapa 1: Descarga el codigo (checkout)
-6. Etapa 2: Compila con Maven (mvn compile)
-7. Etapa 3: Ejecuta pruebas (mvn test)
-8. Etapa 4: Construye imagen Docker (docker build)
-9. Etapa 5: Publica en ACR (docker push)
-10. Imagen disponible en: axiserp.azurecr.io/catalog-service:latest
-```
+El workflow `cd-deploy.yml` se encarga del despliegue. A diferencia de los workflows CI que se activan directamente por push o pull request, el CD se activa mediante el evento `workflow_run`.
 
----
+### Condiciones de ejecucion
 
-## 5. Herramientas Utilizadas
+- Se activa cuando cualquiera de los 7 workflows CI completa su ejecucion en la rama `master`.
+- Solo procede si la ejecucion del CI fue exitosa (`conclusion == 'success'`).
+- Tambien puede ejecutarse manualmente mediante `workflow_dispatch`.
 
-| Categoria | Herramienta |
-|---|---|
-| **Lenguaje** | Java 21 |
-| **Framework** | Spring Boot 3.5.x |
-| **Base de datos** | PostgreSQL (Neon Serverless, 7 DBs) |
-| **Autenticacion** | Supabase Auth (JWT ES256) |
-| **Contenedores** | Docker (multi-stage builds) |
-| **Registry** | Azure Container Registry (`axiserp.azurecr.io`) |
-| **Orquestacion** | Azure Container Apps (7 servicios) |
-| **CI/CD** | **GitHub Actions** (8 workflows) |
-| **API Gateway** | Spring Cloud Gateway |
-| **Control de versiones** | Git (GitHub) |
+### Etapas del despliegue
+
+1. **Autenticacion en Azure**: Se utiliza `azure/login@v2` con credenciales OIDC almacenadas en `secrets.AZURE_CREDENTIALS`.
+2. **Autenticacion en ACR**: Se ejecuta `az acr login` para autenticarse en el registro de contenedores.
+3. **Actualizacion del Container App**: Se ejecuta `az containerapp update` para cada microservicio configurado en la matriz (auth-service, catalog-service, inventory-service, sales-service, purchase-service, report-service, api-gateway).
+
+El despliegue actualiza el Container App con la imagen etiquetada con el numero de ejecucion de GitHub Actions.
 
 ---
 
-## 6. Pipelines del Proyecto
+## Pipeline de Seguridad
 
-| Pipeline | Archivo | Se dispara con | Que hace |
-|---|---|---|---|
-| CI - Auth | `ci-auth.yml` | `auth-service/**` | Build + Test + Docker + Push ACR |
-| CI - Catalog | `ci-catalog.yml` | `catalog-service/**` | Build + Test + Docker + Push ACR |
-| CI - Inventory | `ci-inventory.yml` | `inventory-service/**` | Build + Test + Docker + Push ACR |
-| CI - Sales | `ci-sales.yml` | `sales-service/**` | Build + Test + Docker + Push ACR |
-| CI - Purchase | `ci-purchase.yml` | `purchase-service/**` | Build + Test + Docker + Push ACR |
-| CI - Report | `ci-report.yml` | `report-service/**` | Build + Test + Docker + Push ACR |
-| CI - Gateway | `ci-gateway.yml` | `api-gateway/**` | Build + Test + Docker + Push ACR |
-| CD - Deploy | `cd-deploy.yml` | Push a master | Despliega los 7 servicios a Azure |
+El workflow `security-scan.yml` ejecuta dos tipos de analisis de seguridad de forma independiente:
 
----
+### CodeQL Analysis
 
-## 7. Arquitectura de Microservicios
+- Analisis estatico de codigo para Java/Kotlin.
+- Compila todos los microservicios y ejecuta las consultas de seguridad de CodeQL.
+- Se ejecuta en cada push a master, en cada pull request y semanalmente.
 
-```
-┌──────────────────────────────────────────────────────────────┐
-│                  AZURE CONTAINER APPS                        │
-│                                                              │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐      │
-│  │ GATEWAY  │  │   AUTH   │  │ CATALOG  │  │INVENTORY │      │
-│  │  :8080   │  │  :8081   │  │  :8082   │  │  :8083   │      │
-│  │ EXTERNAL │  │ INTERNAL │  │ INTERNAL │  │ INTERNAL │      │
-│  └──────────┘  └──────────┘  └──────────┘  └──────────┘      │
-│                                                              │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐                    │
-│  │  SALES   │  │ PURCHASE │  │  REPORT  │                    │
-│  │  :8084   │  │  :8086   │  │  :8085   │                    │
-│  │ INTERNAL │  │ INTERNAL │  │ INTERNAL │                    │
-│  └──────────┘  └──────────┘  └──────────┘                    │
-└──────────────────────────────────────────────────────────────┘
-```
+### Trivy Scan
+
+- Escaneo de vulnerabilidades en el sistema de archivos del repositorio.
+- Reporta unicamente vulnerabilidades de severidad HIGH y CRITICAL.
+- Si encuentra vulnerabilidades, el pipeline falla (`exit-code: 1`).
+- Los resultados se suben como archivo SARIF para su visualizacion en la seccion Security de GitHub.
 
 ---
 
-## 8. Ventajas de Utilizar Pipelines
+## Ejemplo Practico
 
-- **Automatizacion**: cada push a master dispara CI automaticamente
-- **Menos errores humanos**: las pruebas se ejecutan antes de publicar
-- **Despliegue selectivo**: solo se reconstruye el servicio que cambio
-- **Mayor velocidad**: pipelines en paralelo, sin dependencias innecesarias
-- **Trazabilidad**: cada build tiene un tag unico en ACR
-- **Escalabilidad**: cada servicio es independiente
+**Escenario**: Un desarrollador modifica el microservicio `catalog-service` para agregar un nuevo endpoint.
+
+**Paso a paso**:
+
+1. El desarrollador crea una rama, realiza los cambios y abre un Pull Request hacia `master`.
+2. Al abrir el PR, se activa `ci-catalog.yml`.
+3. `ci-catalog.yml` invoca a `template-ci.yml` con `service: catalog-service`.
+4. El template ejecuta:
+   - `mvn compile` para verificar que compila.
+   - `mvn test` para ejecutar las pruebas.
+   - Se publican los resultados como artefactos.
+   - `mvn package` para generar el JAR.
+   - `docker build --no-cache` para verificar que la imagen se construye.
+   - El paso de Push a ACR se salta porque no esta en la rama `master`.
+5. Si el PR es aprobado y se fusiona a `master`, se ejecuta nuevamente `ci-catalog.yml`.
+6. Al estar en `master`, el template ahora ejecuta el Push a ACR, publicando la imagen con dos etiquetas (numero de ejecucion y latest).
+7. Al finalizar el CI exitosamente, se activa `cd-deploy.yml` mediante `workflow_run`.
+8. `cd-deploy.yml` verifica que la ejecucion del CI fue exitosa.
+9. Se autentica en Azure y en ACR.
+10. Ejecuta `az containerapp update` para desplegar la nueva imagen de `catalog-service` en Azure Container Apps.
+
+Los demas microservicios no se compilan, no se prueban ni se despliegan. Solo se procesa el servicio modificado.
 
 ---
 
-## 9. Conclusion
+## Ventajas del Pipeline Actual
 
-AxisERP implementa un sistema de pipelines CI/CD basado en GitHub Actions donde cada microservicio tiene su propio pipeline independiente. Esto permite construir, probar y publicar solo los servicios que cambiaron, reduciendo tiempos de espera y riesgos. El sistema sigue las mejores practicas de DevOps: automatizacion, integracion continua, despliegue continuo y monitoreo de resultados.
+- **Automatizacion completa del backend**: Todo el proceso, desde el codigo hasta la produccion, ocurre sin intervencion manual.
+- **Despliegues controlados**: El CD solo se ejecuta si el CI fue exitoso. Un fallo en las pruebas detiene el despliegue.
+- **Trazabilidad de cambios**: Cada ejecucion queda registrada en GitHub Actions con sus resultados, logs y artefactos.
+- **Escalabilidad para nuevos servicios**: Agregar un nuevo microservicio requiere crear un CI de 12 lineas que invoque al template.
+- **Separacion entre CI y CD**: La integracion continua y el despliegue continuo son workflows independientes con responsabilidades diferentes.
+- **Despliegue por servicio modificado**: Solo se reconstruye y despliega el microservicio que cambio, reduciendo tiempos de ejecucion.
+- **Seguridad basica**: CodeQL analiza el codigo fuente y Trivy escanea vulnerabilidades en dependencias.
+- **Cache de Maven**: Las dependencias se cachean entre ejecuciones para acelerar compilaciones sucesivas.
+
+---
+
+## Conclusión
+
+Los pipelines de AxisERP implementan un flujo de integracion continua y despliegue continuo para 7 microservicios Spring Boot. La arquitectura utiliza un workflow reutilizable para evitar duplicacion de codigo, separa claramente la responsabilidad de CI y CD, e incluye un pipeline independiente de seguridad.
+
+El diseno actual permite que el equipo de desarrollo se concentre en escribir codigo mientras los pipelines se encargan de validar, construir y desplegar cada cambio de forma automatica y consistente.

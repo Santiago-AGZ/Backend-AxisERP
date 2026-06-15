@@ -25,6 +25,7 @@ public class Customer {
     private String phone;
     private String address;
     private CustomerStatus status;
+    private Long version;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 

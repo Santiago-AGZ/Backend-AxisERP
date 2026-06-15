@@ -12,5 +12,4 @@ jobs:
     uses: ./.github/workflows/template-ci.yml
     with:
       service: purchase-service
-      port: 8086
     secrets: inherit

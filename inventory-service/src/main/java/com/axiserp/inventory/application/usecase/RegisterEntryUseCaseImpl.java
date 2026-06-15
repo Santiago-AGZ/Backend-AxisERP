@@ -36,7 +36,17 @@ public class RegisterEntryUseCaseImpl implements RegisterEntryUseCase {
         }
 
         Inventory inventory = inventoryRepositoryPort.findByProductId(productId)
-                .orElseThrow(() -> new InventoryNotFoundException(productId));
+                .orElseGet(() -> {
+                    Inventory newInv = Inventory.builder()
+                            .id(UUID.randomUUID())
+                            .productId(productId)
+                            .currentStock(0)
+                            .minStock(0)
+                            .maxStock(0)
+                            .createdBy(createdBy)
+                            .build();
+                    return inventoryRepositoryPort.save(newInv);
+                });
 
         int previousStock = inventory.getCurrentStock();
         inventory.addStock(quantity);

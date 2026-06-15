@@ -96,6 +96,13 @@ public class SupplierController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/{id}/activar")
+    public ResponseEntity<ApiResponse<SupplierResponse>> activarSupplier(@PathVariable UUID id) {
+        SupplierResponse response = reactivateSupplierUseCase.execute(id);
+        return ResponseEntity.ok(ApiResponse.ok(response, "Proveedor activado"));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/reactivate")
     public ResponseEntity<ApiResponse<SupplierResponse>> reactivateSupplier(@PathVariable UUID id) {
         SupplierResponse response = reactivateSupplierUseCase.execute(id);

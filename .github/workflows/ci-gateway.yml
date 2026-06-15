@@ -12,5 +12,4 @@ jobs:
     uses: ./.github/workflows/template-ci.yml
     with:
       service: api-gateway
-      port: 8080
     secrets: inherit

@@ -1,72 +1,53 @@
 name: CD - Deploy to Azure
 
 on:
-  push:
+  workflow_run:
+    workflows:
+      - CI - Auth Service
+      - CI - Catalog Service
+      - CI - API Gateway
+      - CI - Inventory Service
+      - CI - Sales Service
+      - CI - Purchase Service
+      - CI - Report Service
+    types:
+      - completed
     branches: [master]
-    paths:
-      - auth-service/**
-      - catalog-service/**
-      - inventory-service/**
-      - sales-service/**
-      - purchase-service/**
-      - report-service/**
-      - api-gateway/**
+
   workflow_dispatch:
 
 env:
   ACR_SERVER: axiserp.azurecr.io
 
 jobs:
-  detect:
-    runs-on: ubuntu-latest
-    outputs:
-      services: ${{ steps.filter.outputs.changes }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dorny/paths-filter@v3
-        id: filter
-        with:
-          filters: |
-            auth-service: auth-service/**
-            catalog-service: catalog-service/**
-            inventory-service: inventory-service/**
-            sales-service: sales-service/**
-            purchase-service: purchase-service/**
-            report-service: report-service/**
-            api-gateway: api-gateway/**
-
   deploy:
-    needs: detect
-    if: needs.detect.outputs.services != '[]'
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: ${{ fromJson(needs.detect.outputs.services) }}
+        service:
+          - auth-service
+          - catalog-service
+          - inventory-service
+          - sales-service
+          - purchase-service
+          - report-service
+          - api-gateway
     steps:
       - uses: actions/checkout@v4
 
       - name: Login to Azure
-        run: |
-          az login -u "${{ secrets.AZURE_USER }}" -p "${{ secrets.AZURE_PASS }}" --allow-no-subscriptions
-          az account set -s "48482985-813d-4a7c-a283-350c1d90799c"
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Login to ACR
         run: az acr login --name axiserp
 
-      - name: Build & Push Docker image
+      - name: Deploy Container App
         run: |
-          TAG=$(echo ${{ github.sha }} | cut -c1-7)
-          docker build --platform linux/amd64 \
-            -t $ACR_SERVER/${{ matrix.service }}:$TAG \
-            -f ${{ matrix.service }}/Dockerfile \
-            ${{ matrix.service }}
-          docker push $ACR_SERVER/${{ matrix.service }}:$TAG
-
-      - name: Update Container App
-        run: |
-          TAG=$(echo ${{ github.sha }} | cut -c1-7)
           az containerapp update \
             --name ${{ matrix.service }} \
             --resource-group axiserp-prod \
-            --image $ACR_SERVER/${{ matrix.service }}:$TAG \
+            --image $ACR_SERVER/${{ matrix.service }}:${{ github.run_number }} \
             --min-replicas 1 --max-replicas 10

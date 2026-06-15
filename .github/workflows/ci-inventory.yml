@@ -12,5 +12,4 @@ jobs:
     uses: ./.github/workflows/template-ci.yml
     with:
       service: inventory-service
-      port: 8083
     secrets: inherit

@@ -6,17 +6,11 @@ on:
       service:
         required: true
         type: string
-      port:
-        required: true
-        type: number
     secrets:
       ACR_USERNAME:
         required: true
       ACR_PASSWORD:
         required: true
-
-env:
-  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
 
 jobs:
   build:
@@ -34,24 +28,33 @@ jobs:
           cache: maven
 
       - name: Compile
-        run: mvn -f ${{ inputs.service }}/pom.xml compile -q
+        run: mvn -f ${{ inputs.service }}/pom.xml compile
 
       - name: Test
-        run: mvn -f ${{ inputs.service }}/pom.xml test -q
+        run: mvn -f ${{ inputs.service }}/pom.xml test
+
+      - name: Publish Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-${{ inputs.service }}-${{ github.run_id }}
+          path: ${{ inputs.service }}/target/surefire-reports/*
+          retention-days: 14
 
       - name: Package
-        run: mvn -f ${{ inputs.service }}/pom.xml package -DskipTests -q
+        run: mvn -f ${{ inputs.service }}/pom.xml package -DskipTests
 
-      - name: Docker Build
+      - name: Docker Build (verification)
         run: |
-          docker build \
+          docker build --no-cache \
             -t axiserp.azurecr.io/${{ inputs.service }}:${{ github.run_number }} \
-            -t axiserp.azurecr.io/${{ inputs.service }}:latest \
             -f ${{ inputs.service }}/Dockerfile \
             ${{ inputs.service }}
 
       - name: Push to ACR
+        if: github.ref == 'refs/heads/master'
         run: |
           echo "${{ secrets.ACR_PASSWORD }}" | docker login axiserp.azurecr.io -u ${{ secrets.ACR_USERNAME }} --password-stdin
           docker push axiserp.azurecr.io/${{ inputs.service }}:${{ github.run_number }}
+          docker tag axiserp.azurecr.io/${{ inputs.service }}:${{ github.run_number }} axiserp.azurecr.io/${{ inputs.service }}:latest
           docker push axiserp.azurecr.io/${{ inputs.service }}:latest

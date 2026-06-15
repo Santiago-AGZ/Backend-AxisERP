@@ -95,6 +95,7 @@ public class SupplierRepositoryAdapter implements SupplierRepositoryPort {
                 .email(e.getEmail())
                 .address(e.getAddress())
                 .status(SupplierStatus.valueOf(e.getStatus().name()))
+                .version(e.getVersion())
                 .createdAt(e.getCreatedAt())
                 .updatedAt(e.getUpdatedAt())
                 .build();
@@ -110,6 +111,7 @@ public class SupplierRepositoryAdapter implements SupplierRepositoryPort {
                 .email(s.getEmail())
                 .address(s.getAddress())
                 .status(SupplierEntity.SupplierStatus.valueOf(s.getStatus().name()))
+                .version(s.getVersion())
                 .createdAt(s.getCreatedAt())
                 .updatedAt(s.getUpdatedAt())
                 .build();

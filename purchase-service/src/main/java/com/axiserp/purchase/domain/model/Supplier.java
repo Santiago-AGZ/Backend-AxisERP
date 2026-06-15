@@ -26,6 +26,7 @@ public class Supplier {
     private String email;
     private String address;
     private SupplierStatus status;
+    private Long version;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 

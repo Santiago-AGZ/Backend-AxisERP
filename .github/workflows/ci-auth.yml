@@ -16,40 +16,4 @@ jobs:
     uses: ./.github/workflows/template-ci.yml
     with:
       service: auth-service
-      port: 8081
     secrets: inherit
-
-  deploy:
-    needs: ci
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    env:
-      ACR_SERVER: axiserp.azurecr.io
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Login to Azure
-        run: |
-          az login -u "${{ secrets.AZURE_USER }}" -p "${{ secrets.AZURE_PASS }}" --allow-no-subscriptions
-          az account set -s "48482985-813d-4a7c-a283-350c1d90799c"
-
-      - name: Login to ACR
-        run: az acr login --name axiserp
-
-      - name: Build & Push
-        run: |
-          TAG=$(echo ${{ github.sha }} | cut -c1-7)
-          docker build --platform linux/amd64 \
-            -t $ACR_SERVER/auth-service:$TAG \
-            -f auth-service/Dockerfile \
-            auth-service
-          docker push $ACR_SERVER/auth-service:$TAG
-
-      - name: Deploy to Azure
-        run: |
-          TAG=$(echo ${{ github.sha }} | cut -c1-7)
-          az containerapp update \
-            --name auth-service \
-            --resource-group axiserp-prod \
-            --image $ACR_SERVER/auth-service:$TAG \
-            --min-replicas 1 --max-replicas 10
