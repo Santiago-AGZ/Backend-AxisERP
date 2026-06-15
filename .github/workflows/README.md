@@ -20,7 +20,7 @@ Los pipelines automatizan las siguientes tareas:
 - Construccion de imagenes Docker sin cache
 - Publicacion de imagenes en Azure Container Registry
 - Despliegue automatico en Azure Container Apps
-- Escaneo de seguridad con CodeQL y Trivy
+- Escaneo de seguridad con CodeQL
 
 ---
 
@@ -44,8 +44,8 @@ CI del microservicio modificado
      v
 CD (se ejecuta solo si CI fue exitoso)
      |
-     +-- Autenticacion Azure (OIDC)
-     +-- Despliegue en Azure Container Apps
+      +-- Autenticacion Azure (usuario/password)
+      +-- Despliegue en Azure Container Apps
 ```
 
 ---
@@ -65,7 +65,7 @@ Se encuentran 10 archivos de workflow en el directorio `.github/workflows/`:
 | `ci-purchase.yml` | CI del microservicio de compras |
 | `ci-report.yml` | CI del microservicio de reportes |
 | `cd-deploy.yml` | Despliegue automatico en Azure |
-| `security-scan.yml` | Escaneo de seguridad (CodeQL + Trivy) |
+| `security-scan.yml` | Escaneo de seguridad (CodeQL) |
 
 ---
 
@@ -128,30 +128,24 @@ El workflow `cd-deploy.yml` se encarga del despliegue. A diferencia de los workf
 
 ### Etapas del despliegue
 
-1. **Autenticacion en Azure**: Se utiliza `azure/login@v2` con credenciales OIDC almacenadas en `secrets.AZURE_CREDENTIALS`.
+1. **Autenticacion en Azure**: Se utiliza `az login -u/-p` con las credenciales almacenadas en `secrets.AZURE_USER` y `secrets.AZURE_PASS`.
 2. **Autenticacion en ACR**: Se ejecuta `az acr login` para autenticarse en el registro de contenedores.
 3. **Actualizacion del Container App**: Se ejecuta `az containerapp update` para cada microservicio configurado en la matriz (auth-service, catalog-service, inventory-service, sales-service, purchase-service, report-service, api-gateway).
 
-El despliegue actualiza el Container App con la imagen etiquetada con el numero de ejecucion de GitHub Actions.
+El despliegue actualiza el Container App con la imagen etiquetada con el numero de ejecucion del workflow CI que origino el despliegue (o `:latest` si se ejecuta manualmente).
 
 ---
 
 ## Pipeline de Seguridad
 
-El workflow `security-scan.yml` ejecuta dos tipos de analisis de seguridad de forma independiente:
+El workflow `security-scan.yml` ejecuta analisis estatico de seguridad:
 
 ### CodeQL Analysis
 
 - Analisis estatico de codigo para Java/Kotlin.
 - Compila todos los microservicios y ejecuta las consultas de seguridad de CodeQL.
 - Se ejecuta en cada push a master, en cada pull request y semanalmente.
-
-### Trivy Scan
-
-- Escaneo de vulnerabilidades en el sistema de archivos del repositorio.
-- Reporta unicamente vulnerabilidades de severidad HIGH y CRITICAL.
-- Si encuentra vulnerabilidades, el pipeline falla (`exit-code: 1`).
-- Los resultados se suben como archivo SARIF para su visualizacion en la seccion Security de GitHub.
+- Los resultados se publican en la pestana Security del repositorio de GitHub.
 
 ---
 
@@ -190,7 +184,7 @@ Los demas microservicios no se compilan, no se prueban ni se despliegan. Solo se
 - **Escalabilidad para nuevos servicios**: Agregar un nuevo microservicio requiere crear un CI de 12 lineas que invoque al template.
 - **Separacion entre CI y CD**: La integracion continua y el despliegue continuo son workflows independientes con responsabilidades diferentes.
 - **Despliegue por servicio modificado**: Solo se reconstruye y despliega el microservicio que cambio, reduciendo tiempos de ejecucion.
-- **Seguridad basica**: CodeQL analiza el codigo fuente y Trivy escanea vulnerabilidades en dependencias.
+- **Seguridad basica**: CodeQL analiza el codigo fuente en busca de vulnerabilidades.
 - **Cache de Maven**: Las dependencias se cachean entre ejecuciones para acelerar compilaciones sucesivas.
 
 ---
