@@ -55,19 +55,17 @@ public class SaleRepositoryAdapter implements SaleRepositoryPort {
     }
 
     @Override
-    public List<Sale> findByFilters(UUID customerId, String status, UUID productId, UUID createdBy, int page, int size) {
+    public List<Sale> findByFilters(UUID customerId, String status, UUID productId, UUID createdBy, String search, int page, int size) {
         PageRequest pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "updatedAt"));
-        SaleEntity.SaleStatus statusEnum = (status != null && !status.isBlank()) ? SaleEntity.SaleStatus.valueOf(status) : null;
-        return jpaSaleRepository.findByFilters(customerId, statusEnum, productId, createdBy, pageable)
+        return jpaSaleRepository.findByFilters(customerId, status, productId, createdBy, search, pageable)
                 .stream()
                 .map(this::toDomain)
                 .toList();
     }
 
     @Override
-    public long countByFilters(UUID customerId, String status, UUID productId, UUID createdBy) {
-        SaleEntity.SaleStatus statusEnum = (status != null && !status.isBlank()) ? SaleEntity.SaleStatus.valueOf(status) : null;
-        return jpaSaleRepository.countByFilters(customerId, statusEnum, productId, createdBy);
+    public long countByFilters(UUID customerId, String status, UUID productId, UUID createdBy, String search) {
+        return jpaSaleRepository.countByFilters(customerId, status, productId, createdBy, search);
     }
 
     private Sale toDomain(SaleEntity entity) {
