@@ -53,6 +53,7 @@ public class RefreshTokenService {
         return token;
     }
 
+    @Transactional(propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
     public RefreshToken saveExternalToken(UUID userId, String token, String ipAddress, String userAgent) {
         LocalDateTime expiresAt = LocalDateTime.now(ZoneOffset.UTC).plusDays(refreshTokenExpiryDays);
         RefreshToken refreshToken = new RefreshToken(userId, token, expiresAt);
