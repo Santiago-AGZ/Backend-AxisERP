@@ -32,7 +32,7 @@ public class User {
     private LocalDateTime deletedAt;
 
     public boolean isActive() {
-        return this.status == UserStatus.ACTIVO && this.deletedAt == null;
+        return (this.status == UserStatus.ACTIVO || this.status == UserStatus.PENDIENTE) && this.deletedAt == null;
     }
 
     public enum UserStatus {
