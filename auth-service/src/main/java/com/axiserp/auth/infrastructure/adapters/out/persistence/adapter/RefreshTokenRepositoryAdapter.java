@@ -35,6 +35,7 @@ public class RefreshTokenRepositoryAdapter implements RefreshTokenRepositoryPort
             .expiresAt(refreshToken.getExpiresAt())
             .createdAt(refreshToken.getCreatedAt())
             .status(status)
+            .isNew(refreshToken.getId() == null || !jpaRepository.existsById(refreshToken.getId()))
             .build();
 
         RefreshTokenEntity saved = jpaRepository.save(entity);

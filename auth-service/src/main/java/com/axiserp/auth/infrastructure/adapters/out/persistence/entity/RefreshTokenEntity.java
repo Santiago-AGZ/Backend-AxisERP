@@ -14,11 +14,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.domain.Persistable;
 
 /**
  * Refresh token entity para renovación de acceso.
@@ -35,7 +37,7 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RefreshTokenEntity {
+public class RefreshTokenEntity implements Persistable<UUID> {
 
     public enum TokenStatus {
         ACTIVE,
@@ -73,8 +75,18 @@ public class RefreshTokenEntity {
     @Column(name = "revoked_at")
     private LocalDateTime revokedAt;
 
+    @Transient
+    @Builder.Default
+    private boolean isNew = true;
+
+    @Override
+    public boolean isNew() {
+        return isNew;
+    }
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now(ZoneOffset.UTC);
+        this.isNew = false;
     }
 }
