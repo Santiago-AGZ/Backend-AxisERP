@@ -17,6 +17,7 @@ import com.axiserp.auth.domain.model.AuditLog.AuditAction;
 import com.axiserp.auth.domain.model.User;
 import com.axiserp.auth.ports.input.UpdateUserUseCase;
 import com.axiserp.auth.ports.output.RoleRepositoryPort;
+import com.axiserp.auth.ports.output.SupabaseAuthPort;
 import com.axiserp.auth.ports.output.UserRepositoryPort;
 
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ public class UpdateUserUseCaseImpl implements UpdateUserUseCase {
     private final UserRepositoryPort userRepositoryPort;
     private final RoleRepositoryPort roleRepositoryPort;
     private final AuditService auditService;
+    private final SupabaseAuthPort supabaseAuthPort;
 
     @Override
     @Transactional
@@ -50,8 +52,23 @@ public class UpdateUserUseCaseImpl implements UpdateUserUseCase {
         var role = roleRepositoryPort.findByName(request.getRole())
                 .orElseThrow(() -> new IllegalArgumentException("Rol no válido: " + request.getRole()));
 
+        boolean emailChanged = !user.getEmail().equalsIgnoreCase(request.getEmail());
+
         User updated = UserFactory.update(user, request.getName(), request.getEmail(), role.getId(), updatedBy);
         User saved = userRepositoryPort.save(updated);
+
+        if (emailChanged) {
+            try {
+                supabaseAuthPort.updateEmail(id, request.getEmail());
+                supabaseAuthPort.sendPasswordReset(request.getEmail());
+                log.info("email_updated_y_reenviado id={} old_email={} new_email={}", 
+                        id, user.getEmail(), request.getEmail());
+            } catch (Exception e) {
+                log.error("error_actualizando_email_en_supabase id={} email={} error={}", 
+                        id, request.getEmail(), e.getMessage(), e);
+                throw new RuntimeException("Error al actualizar email en Supabase: " + e.getMessage(), e);
+            }
+        }
 
         auditService.log(AuditAction.UPDATE, "USER", saved.getId(),
                 null, null,

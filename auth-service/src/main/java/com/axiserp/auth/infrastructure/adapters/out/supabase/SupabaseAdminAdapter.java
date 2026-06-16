@@ -277,4 +277,29 @@ public class SupabaseAdminAdapter implements SupabaseAuthPort {
             throw new RuntimeException("Error de comunicación con Supabase al crear usuario", e);
         }
     }
+
+    @Override
+    public void updateEmail(UUID userId, String newEmail) {
+        log.info("Updating Supabase user email: userId={}, newEmail={}", userId, newEmail);
+
+        try {
+            restClient.put()
+                    .uri("/users/" + userId.toString())
+                    .body(Map.of("email", newEmail))
+                    .retrieve()
+                    .toBodilessEntity();
+
+            log.info("Supabase user email updated successfully: userId={}, newEmail={}", userId, newEmail);
+
+        } catch (HttpStatusCodeException e) {
+            log.error("Supabase API error updating user email: userId={} status={} body={}",
+                    userId, e.getStatusCode(), e.getResponseBodyAsString());
+            throw new RuntimeException(
+                    "Error al actualizar email en Supabase: " + e.getStatusCode() + " - " + e.getResponseBodyAsString(),
+                    e);
+        } catch (Exception e) {
+            log.error("Supabase API call failed while updating email: userId={}", userId, e);
+            throw new RuntimeException("Error de comunicación con Supabase al actualizar email", e);
+        }
+    }
 }
