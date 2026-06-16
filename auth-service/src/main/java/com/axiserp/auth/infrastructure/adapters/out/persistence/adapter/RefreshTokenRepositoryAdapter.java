@@ -28,15 +28,25 @@ public class RefreshTokenRepositoryAdapter implements RefreshTokenRepositoryPort
     public RefreshToken save(RefreshToken refreshToken) {
         TokenStatus status = refreshToken.isRevoked() ? TokenStatus.REVOKED : TokenStatus.ACTIVE;
 
-        RefreshTokenEntity entity = RefreshTokenEntity.builder()
-            .id(refreshToken.getId())
-            .userId(refreshToken.getUserId())
-            .token(refreshToken.getToken())
-            .expiresAt(refreshToken.getExpiresAt())
-            .createdAt(refreshToken.getCreatedAt())
-            .status(status)
-            .isNew(refreshToken.getId() == null || !jpaRepository.existsById(refreshToken.getId()))
-            .build();
+        RefreshTokenEntity entity;
+        
+        if (refreshToken.getId() != null) {
+            entity = jpaRepository.findById(refreshToken.getId())
+                .orElse(new RefreshTokenEntity());
+            entity.setUserId(refreshToken.getUserId());
+            entity.setToken(refreshToken.getToken());
+            entity.setExpiresAt(refreshToken.getExpiresAt());
+            entity.setStatus(status);
+            entity.setNew(false);
+        } else {
+            entity = RefreshTokenEntity.builder()
+                .userId(refreshToken.getUserId())
+                .token(refreshToken.getToken())
+                .expiresAt(refreshToken.getExpiresAt())
+                .status(status)
+                .isNew(true)
+                .build();
+        }
 
         RefreshTokenEntity saved = jpaRepository.save(entity);
         return toDomain(saved);
