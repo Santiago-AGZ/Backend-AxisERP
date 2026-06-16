@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.axiserp.auth.application.dto.request.LoginRequest;
 import com.axiserp.auth.application.dto.response.LoginResponse;
 import com.axiserp.auth.application.service.AuditService;
+import com.axiserp.auth.application.service.RefreshTokenService;
 import com.axiserp.auth.application.service.SuspiciousActivityDetector;
 import com.axiserp.auth.domain.exception.InvalidCredentialsException;
 import com.axiserp.auth.domain.factory.UserFactory;
@@ -33,6 +34,7 @@ public class AuthenticateUserService implements AuthenticateUserUseCase {
     private final RoleRepositoryPort roleRepositoryPort;
     private final SupabaseAuthPort supabaseAuthPort;
     private final AuditService auditService;
+    private final RefreshTokenService refreshTokenService;
     private final LoginRateLimitStrategy rateLimitStrategy;
     private final SuspiciousActivityDetector suspiciousActivityDetector;
     private final PasswordEncoder passwordEncoder;
@@ -75,6 +77,7 @@ public class AuthenticateUserService implements AuthenticateUserUseCase {
             userRepositoryPort.save(afterLogin);
 
             auditService.logLogin(user.getId(), user.getName(), true, ipAddress, userAgent);
+            refreshTokenService.saveExternalToken(user.getId(), supabaseResponse.refreshToken(), ipAddress, userAgent);
             log.info("login_success user_id={} email={} role={} ip={}",
                     user.getId(), user.getEmail(), roleName, ipAddress);
 
