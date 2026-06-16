@@ -64,26 +64,33 @@ public class SupabaseAdminAdapter implements SupabaseAuthPort {
     }
 
     @Override
-    public void resetPassword(String recoveryToken, String newPassword) {
+    public String resetPassword(String recoveryToken, String newPassword) {
         log.info("Resetting password via Supabase");
 
         if (recoveryToken.contains(".")) {
-            resetWithJwt(recoveryToken, newPassword);
+            return resetWithJwt(recoveryToken, newPassword);
         } else {
-            resetWithTokenHash(recoveryToken, newPassword);
+            return resetWithTokenHash(recoveryToken, newPassword);
         }
     }
 
-    private void resetWithJwt(String jwt, String newPassword) {
+    private String resetWithJwt(String jwt, String newPassword) {
         log.info("Using JWT-based password reset");
         try {
-            publicRestClient.put()
+            JsonNode response = publicRestClient.put()
                     .uri("/user")
                     .header("Authorization", "Bearer " + jwt)
                     .body(Map.of("password", newPassword))
                     .retrieve()
-                    .toBodilessEntity();
-            log.info("Password reset successful via JWT");
+                    .body(JsonNode.class);
+
+            if (response == null || response.get("email") == null) {
+                throw new RuntimeException("No se pudo obtener el email tras restablecer la contraseña");
+            }
+
+            String email = response.get("email").asText();
+            log.info("Password reset successful via JWT for: {}", email);
+            return email;
         } catch (HttpStatusCodeException e) {
             log.error("Supabase API error resetting password with JWT: status={} body={}",
                     e.getStatusCode(), e.getResponseBodyAsString());
@@ -95,7 +102,7 @@ public class SupabaseAdminAdapter implements SupabaseAuthPort {
         }
     }
 
-    private void resetWithTokenHash(String tokenHash, String newPassword) {
+    private String resetWithTokenHash(String tokenHash, String newPassword) {
         log.info("Using PKCE token_hash-based password reset");
         try {
             JsonNode verifyResponse = publicRestClient.post()
@@ -110,6 +117,11 @@ public class SupabaseAdminAdapter implements SupabaseAuthPort {
 
             String accessToken = verifyResponse.get("access_token").asText();
 
+            String email = null;
+            if (verifyResponse.has("user") && verifyResponse.get("user").has("email")) {
+                email = verifyResponse.get("user").get("email").asText();
+            }
+
             publicRestClient.put()
                     .uri("/user")
                     .header("Authorization", "Bearer " + accessToken)
@@ -117,7 +129,12 @@ public class SupabaseAdminAdapter implements SupabaseAuthPort {
                     .retrieve()
                     .toBodilessEntity();
 
-            log.info("Password reset successful via PKCE token_hash");
+            if (email == null) {
+                throw new RuntimeException("No se pudo obtener el email tras restablecer la contraseña");
+            }
+
+            log.info("Password reset successful via PKCE token_hash for: {}", email);
+            return email;
         } catch (HttpStatusCodeException e) {
             log.error("Supabase API error resetting password with token_hash: status={} body={}",
                     e.getStatusCode(), e.getResponseBodyAsString());

@@ -2,6 +2,7 @@ package com.axiserp.auth.application.usecase;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -10,6 +11,7 @@ import com.axiserp.auth.application.dto.response.LoginResponse;
 import com.axiserp.auth.application.service.AuditService;
 import com.axiserp.auth.application.service.SuspiciousActivityDetector;
 import com.axiserp.auth.domain.exception.InvalidCredentialsException;
+import com.axiserp.auth.domain.factory.UserFactory;
 import com.axiserp.auth.domain.exception.UserInactiveException;
 import com.axiserp.auth.domain.exception.UserLockedException;
 import com.axiserp.auth.domain.model.User;
@@ -33,6 +35,7 @@ public class AuthenticateUserService implements AuthenticateUserUseCase {
     private final AuditService auditService;
     private final LoginRateLimitStrategy rateLimitStrategy;
     private final SuspiciousActivityDetector suspiciousActivityDetector;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
@@ -63,6 +66,12 @@ public class AuthenticateUserService implements AuthenticateUserUseCase {
                     });
 
             User afterLogin = rateLimitStrategy.recordSuccessfulLogin(user);
+
+            if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
+                afterLogin = UserFactory.withNewPassword(afterLogin, passwordEncoder.encode(request.getPassword()));
+                log.info("local_password_hash_synced email={}", user.getEmail());
+            }
+
             userRepositoryPort.save(afterLogin);
 
             auditService.logLogin(user.getId(), user.getName(), true, ipAddress, userAgent);

@@ -4,15 +4,21 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import java.util.Optional;
+import java.util.UUID;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.axiserp.auth.domain.exception.WeakPasswordException;
+import com.axiserp.auth.domain.model.User;
 import com.axiserp.auth.ports.output.SupabaseAuthPort;
+import com.axiserp.auth.ports.output.UserRepositoryPort;
 
 @ExtendWith(MockitoExtension.class)
 class ResetPasswordUseCaseImplTest {
@@ -20,17 +26,50 @@ class ResetPasswordUseCaseImplTest {
     @Mock
     private SupabaseAuthPort supabaseAuthPort;
 
+    @Mock
+    private UserRepositoryPort userRepositoryPort;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
     @InjectMocks
     private ResetPasswordUseCaseImpl resetPasswordUseCase;
 
     @Test
-    @DisplayName("Should call Supabase with valid token and strong password")
+    @DisplayName("Should update local password hash on successful Supabase reset")
     void resetPassword_success() {
-        doNothing().when(supabaseAuthPort).resetPassword("supabase-recovery-token", "StrongP@ss1");
+        String email = "test@axiserp.com";
+        String newPassword = "StrongP@ss1";
+        String encodedPassword = "encoded-password";
+        User existingUser = User.builder()
+                .id(UUID.randomUUID())
+                .email(email)
+                .passwordHash("old-hash")
+                .build();
 
-        assertDoesNotThrow(() -> resetPasswordUseCase.resetPassword("supabase-recovery-token", "StrongP@ss1"));
+        when(supabaseAuthPort.resetPassword("supabase-recovery-token", newPassword)).thenReturn(email);
+        when(userRepositoryPort.findByEmail(email)).thenReturn(Optional.of(existingUser));
+        when(passwordEncoder.encode(newPassword)).thenReturn(encodedPassword);
 
-        verify(supabaseAuthPort).resetPassword("supabase-recovery-token", "StrongP@ss1");
+        assertDoesNotThrow(() -> resetPasswordUseCase.resetPassword("supabase-recovery-token", newPassword));
+
+        verify(supabaseAuthPort).resetPassword("supabase-recovery-token", newPassword);
+        verify(userRepositoryPort).findByEmail(email);
+        verify(passwordEncoder).encode(newPassword);
+        verify(userRepositoryPort).save(argThat(user -> encodedPassword.equals(user.getPasswordHash())));
+    }
+
+    @Test
+    @DisplayName("Should handle missing local user gracefully")
+    void resetPassword_localUserNotFound() {
+        String email = "test@axiserp.com";
+
+        when(supabaseAuthPort.resetPassword(anyString(), anyString())).thenReturn(email);
+        when(userRepositoryPort.findByEmail(email)).thenReturn(Optional.empty());
+
+        assertDoesNotThrow(() -> resetPasswordUseCase.resetPassword("token", "StrongP@ss1"));
+
+        verify(userRepositoryPort, never()).save(any());
     }
 
     @Test
@@ -38,6 +77,8 @@ class ResetPasswordUseCaseImplTest {
     void resetPassword_weakPassword() {
         assertThrows(WeakPasswordException.class,
                 () -> resetPasswordUseCase.resetPassword("token", "123"));
+
+        verifyNoInteractions(supabaseAuthPort, userRepositoryPort, passwordEncoder);
     }
 
     @Test
@@ -45,15 +86,19 @@ class ResetPasswordUseCaseImplTest {
     void resetPassword_noUppercase() {
         assertThrows(WeakPasswordException.class,
                 () -> resetPasswordUseCase.resetPassword("token", "abcdefg1@"));
+
+        verifyNoInteractions(supabaseAuthPort, userRepositoryPort, passwordEncoder);
     }
 
     @Test
     @DisplayName("Should propagate Supabase error")
     void resetPassword_supabaseError() {
-        doThrow(new RuntimeException("Supabase error"))
-                .when(supabaseAuthPort).resetPassword("token", "StrongP@ss1");
+        when(supabaseAuthPort.resetPassword("token", "StrongP@ss1"))
+                .thenThrow(new RuntimeException("Supabase error"));
 
         assertThrows(RuntimeException.class,
                 () -> resetPasswordUseCase.resetPassword("token", "StrongP@ss1"));
+
+        verifyNoInteractions(userRepositoryPort, passwordEncoder);
     }
 }
