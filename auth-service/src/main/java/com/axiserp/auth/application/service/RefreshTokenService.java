@@ -53,6 +53,19 @@ public class RefreshTokenService {
         return token;
     }
 
+    public RefreshToken saveExternalToken(UUID userId, String token, String ipAddress, String userAgent) {
+        LocalDateTime expiresAt = LocalDateTime.now(ZoneOffset.UTC).plusDays(refreshTokenExpiryDays);
+        RefreshToken refreshToken = new RefreshToken(userId, token, expiresAt);
+        refreshToken.setIpAddress(ipAddress);
+        refreshToken.setUserAgent(userAgent);
+        refreshTokenRepositoryPort.save(refreshToken);
+
+        log.info("external_refresh_token_saved user_id={} expiry_days={} ip_address={}",
+                userId, refreshTokenExpiryDays, ipAddress);
+
+        return refreshToken;
+    }
+
     /**
      * Valida un refresh token verificando que exista, no esté revocado y no esté expirado.
      *
@@ -77,6 +90,24 @@ public class RefreshTokenService {
         }
 
         log.info("refresh_token_validated user_id={}", userId);
+        return refreshToken;
+    }
+
+    public RefreshToken validateByToken(String token) {
+        RefreshToken refreshToken = refreshTokenRepositoryPort
+                .findByToken(token)
+                .orElseThrow(() -> new IllegalArgumentException("Refresh token not found"));
+
+        if (refreshToken.isRevoked()) {
+            log.warn("refresh_token_validation_failed token_revoked user_id={}", refreshToken.getUserId());
+            throw new IllegalArgumentException("Refresh token has been revoked");
+        }
+
+        if (refreshToken.isExpired()) {
+            log.warn("refresh_token_validation_failed token_expired user_id={}", refreshToken.getUserId());
+            throw new IllegalArgumentException("Refresh token has expired");
+        }
+
         return refreshToken;
     }
 

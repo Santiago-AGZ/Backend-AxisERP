@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.axiserp.auth.application.dto.response.LoginResponse;
+import com.axiserp.auth.application.service.RefreshTokenService;
 import com.axiserp.auth.domain.exception.InvalidCredentialsException;
 import com.axiserp.auth.ports.input.RefreshTokenUseCase;
 import com.axiserp.auth.ports.output.SupabaseAuthPort;
@@ -19,14 +20,20 @@ public class RefreshTokenUseCaseImpl implements RefreshTokenUseCase {
     private static final Logger log = LoggerFactory.getLogger(RefreshTokenUseCaseImpl.class);
 
     private final SupabaseAuthPort supabaseAuthPort;
+    private final RefreshTokenService refreshTokenService;
 
     @Override
     @Transactional
     public LoginResponse refresh(String refreshTokenValue, String ipAddress, String userAgent) {
         try {
+            var storedToken = refreshTokenService.validateByToken(refreshTokenValue);
+
             var supabaseResponse = supabaseAuthPort.refreshToken(refreshTokenValue);
 
-            log.info("token_refreshed ip={}", ipAddress);
+            refreshTokenService.revoke(refreshTokenValue);
+            refreshTokenService.saveExternalToken(storedToken.getUserId(), supabaseResponse.refreshToken(), ipAddress, userAgent);
+
+            log.info("token_refreshed user_id={} ip={}", storedToken.getUserId(), ipAddress);
 
             return LoginResponse.builder()
                     .accessToken(supabaseResponse.accessToken())
@@ -35,6 +42,9 @@ public class RefreshTokenUseCaseImpl implements RefreshTokenUseCase {
                     .name(null)
                     .build();
 
+        } catch (IllegalArgumentException e) {
+            log.warn("refresh_token_invalid_local ip={} reason={}", ipAddress, e.getMessage());
+            throw new InvalidCredentialsException("Token de refresco inválido o expirado");
         } catch (Exception e) {
             log.warn("refresh_token_invalid_via_supabase ip={} reason={}", ipAddress, e.getMessage());
             throw new InvalidCredentialsException("Token de refresco inválido o expirado");
