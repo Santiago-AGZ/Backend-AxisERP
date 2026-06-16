@@ -53,6 +53,7 @@ public class UpdateUserUseCaseImpl implements UpdateUserUseCase {
                 .orElseThrow(() -> new IllegalArgumentException("Rol no válido: " + request.getRole()));
 
         boolean emailChanged = !user.getEmail().equalsIgnoreCase(request.getEmail());
+        boolean roleChanged = !user.getRoleId().equals(role.getId());
 
         User updated = UserFactory.update(user, request.getName(), request.getEmail(), role.getId(), updatedBy);
         User saved = userRepositoryPort.save(updated);
@@ -67,6 +68,18 @@ public class UpdateUserUseCaseImpl implements UpdateUserUseCase {
                 log.error("error_actualizando_email_en_supabase id={} email={} error={}", 
                         id, request.getEmail(), e.getMessage(), e);
                 throw new RuntimeException("Error al actualizar email en Supabase: " + e.getMessage(), e);
+            }
+        }
+
+        if (roleChanged) {
+            try {
+                supabaseAuthPort.updateRole(id, request.getRole());
+                log.info("role_updated_en_supabase id={} old_role_id={} new_role={}", 
+                        id, user.getRoleId(), request.getRole());
+            } catch (Exception e) {
+                log.error("error_actualizando_rol_en_supabase id={} role={} error={}", 
+                        id, request.getRole(), e.getMessage(), e);
+                throw new RuntimeException("Error al actualizar rol en Supabase: " + e.getMessage(), e);
             }
         }
 

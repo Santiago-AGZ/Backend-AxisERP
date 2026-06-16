@@ -49,6 +49,11 @@ public class FirstLoginFilter extends OncePerRequestFilter {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof String userIdStr) {
+            if ("anonymousUser".equals(userIdStr)) {
+                chain.doFilter(request, response);
+                return;
+            }
+            
             if (auth.getCredentials() instanceof Jwt jwt) {
                 Instant emailConfirmed = jwt.getClaimAsInstant("email_confirmed_at");
                 if (emailConfirmed != null) {

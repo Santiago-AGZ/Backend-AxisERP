@@ -302,4 +302,29 @@ public class SupabaseAdminAdapter implements SupabaseAuthPort {
             throw new RuntimeException("Error de comunicación con Supabase al actualizar email", e);
         }
     }
+
+    @Override
+    public void updateRole(UUID userId, String newRole) {
+        log.info("Updating Supabase user role: userId={}, newRole={}", userId, newRole);
+
+        try {
+            restClient.put()
+                    .uri("/users/" + userId.toString())
+                    .body(Map.of("app_metadata", Map.of("role", newRole)))
+                    .retrieve()
+                    .toBodilessEntity();
+
+            log.info("Supabase user role updated successfully: userId={}, newRole={}", userId, newRole);
+
+        } catch (HttpStatusCodeException e) {
+            log.error("Supabase API error updating user role: userId={} status={} body={}",
+                    userId, e.getStatusCode(), e.getResponseBodyAsString());
+            throw new RuntimeException(
+                    "Error al actualizar rol en Supabase: " + e.getStatusCode() + " - " + e.getResponseBodyAsString(),
+                    e);
+        } catch (Exception e) {
+            log.error("Supabase API call failed while updating role: userId={}", userId, e);
+            throw new RuntimeException("Error de comunicación con Supabase al actualizar rol", e);
+        }
+    }
 }
